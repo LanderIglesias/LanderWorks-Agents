@@ -9,7 +9,6 @@ from unidecode import unidecode
 
 from .config import settings
 from .metrics import log_event
-from .notify import send_handoff_email
 from .rag import search
 from .store import (
     cleanup_sessions,
@@ -1780,22 +1779,24 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
                 "step": st.step,
             },
         )
-        # 2.5) Email notify (no debe romper el flujo)
-        subject = (
-            f"[Dental Agent] Nuevo lead ({st.urgencia or 'normal'}) - {st.nombre or 'Sin nombre'}"
-        )
-        body = (
-            f"Nuevo lead\n"
-            f"- Nombre: {st.nombre}\n"
-            f"- Teléfono: {st.telefono}\n"
-            f"- Motivo: {st.tratamiento}\n"
-            f"- Urgencia: {st.urgencia}\n"
-            f"- Preferencia: {st.preferencia}\n"
-            f"- Sender: {sender}\n"
-        )
-        ok_email = send_handoff_email(subject, body)
-        if not ok_email:
-            print("[EMAIL] send_handoff_email -> False (config incompleta o fallo SMTP)")
+        # --- EMAIL NOTIFY (no debe romper el flujo JAMÁS) ---
+        try:
+            subject = f"[Dental Agent] Nuevo lead ({st.urgencia or 'normal'}) - {st.nombre or 'Sin nombre'}"
+            body = (
+                f"Nuevo lead\n"
+                f"- Nombre: {st.nombre}\n"
+                f"- Teléfono: {st.telefono}\n"
+                f"- Motivo: {st.tratamiento}\n"
+                f"- Urgencia: {st.urgencia}\n"
+                f"- Preferencia: {st.preferencia}\n"
+                f"- Sender: {sender}\n"
+                f"- Lead ID: {lead_id}\n"
+            )
+            from .notify import send_handoff_email
+
+            send_handoff_email(subject, body)
+        except Exception as e:
+            print(f"[EMAIL] ERROR (ignored): {type(e).__name__}: {e}")
 
         # 3) Cerrar flujo automático y dejar en handoff
         try:
