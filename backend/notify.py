@@ -1,22 +1,57 @@
 from __future__ import annotations
 
+import json
 import smtplib
 import socket
+import urllib.request
 from email.message import EmailMessage
 
 from .config import settings
 
 
+def send_handoff_to_sheets(payload: dict) -> bool:
+    url = (settings.SHEETS_WEBHOOK_URL or "").strip()
+    secret = (settings.SHEETS_WEBHOOK_SECRET or "").strip()
+    if not url or not secret:
+        return False
+
+    payload = dict(payload)
+    payload["secret"] = secret
+
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=data,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return 200 <= resp.status < 300
+    except Exception:
+        return False
+
+
 def _smtp_connect_ipv4_first(host: str, port: int, timeout: int = 10) -> smtplib.SMTP:
-    # Intenta IPv4 primero (Render suele no tener ruta IPv6)
-    infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
-    # ordena: AF_INET primero
+    host = (host or "").strip()
+    port_i = int(port)
+    if not host:
+        raise ValueError("SMTP_HOST vacío")
+
+    infos = socket.getaddrinfo(
+        host,
+        port_i,
+        type=socket.SOCK_STREAM,
+    )
+
+    # Ordena: IPv4 primero (AF_INET), luego IPv6 (AF_INET6)
     infos.sort(key=lambda x: 0 if x[0] == socket.AF_INET else 1)
 
     last_err: Exception | None = None
-    for sockaddr in infos:
+    for _family, _socktype, _proto, _canonname, sockaddr in infos:
         try:
             s = smtplib.SMTP(timeout=timeout)
+            # sockaddr: (ip, port) en IPv4; (ip, port, flow, scope) en IPv6
             s.connect(sockaddr[0], sockaddr[1])
             return s
         except Exception as e:

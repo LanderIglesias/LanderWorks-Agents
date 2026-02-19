@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     MODEL: str = "gpt-4o-mini"
     EMBED_MODEL: str = "text-embedding-3-small"
 
+    SHEETS_WEBHOOK_URL: str = Field(default="")
+    SHEETS_WEBHOOK_SECRET: str = Field(default="")
+
     DB_PATH: str = Field(default="backend/data/leads.db")
 
     # opcional: si validas requests de Twilio

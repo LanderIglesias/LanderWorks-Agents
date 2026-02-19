@@ -1798,6 +1798,25 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
         except Exception as e:
             print(f"[EMAIL] ERROR (ignored): {type(e).__name__}: {e}")
 
+        # --- SHEETS NOTIFY (no debe romper el flujo) ---
+        try:
+            from .notify import send_handoff_to_sheets
+
+            send_handoff_to_sheets(
+                {
+                    "sender": sender,
+                    "lead_id": lead_id,
+                    "nombre": st.nombre,
+                    "telefono": st.telefono,
+                    "tratamiento": st.tratamiento,
+                    "urgencia": st.urgencia,
+                    "preferencia": st.preferencia,
+                    "summary": summary,
+                }
+            )
+        except Exception as e:
+            print(f"[SHEETS] ERROR (ignored): {type(e).__name__}: {e}")
+
         # 3) Cerrar flujo automático y dejar en handoff
         try:
             st.status = "needs_human"
