@@ -84,9 +84,6 @@ def _validate_twilio(request: Request, form: dict) -> bool:
 
 
 @app.post("/webhook/twilio")
-@app.post("/webhook/twilio/")
-@app.post("/whatsapp-twilio")
-@app.post("/whatsapp-twilio/")
 async def twilio_webhook(request: Request):
     form = dict(await request.form())
 
