@@ -28,9 +28,10 @@ def send_handoff_to_sheets(payload: dict) -> bool:
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=2) as resp:
+            raw = resp.read(5000).decode("utf-8", errors="replace")
             ok = 200 <= resp.status < 300
-            print(f"[SHEETS] POST status={resp.status} ok={ok}")
+            print(f"[SHEETS] POST status={resp.status} ok={ok} body={raw!r}")
             return ok
     except Exception as e:
         print(f"[SHEETS] ERROR: {type(e).__name__}: {e}")
@@ -89,7 +90,7 @@ def send_handoff_email(subject: str, body: str) -> bool:
 
     try:
         port = int(settings.SMTP_PORT)
-        s = _smtp_connect_ipv4_first(host, port, timeout=10)
+        s = _smtp_connect_ipv4_first(host, port, timeout=2)
         try:
             s.ehlo()
             if port == 587:

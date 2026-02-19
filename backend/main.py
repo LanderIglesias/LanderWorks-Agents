@@ -85,19 +85,22 @@ def _validate_twilio(request: Request, form: dict) -> bool:
 
 @app.post("/webhook/twilio")
 async def twilio_webhook(request: Request):
-    form = dict(await request.form())
-
-    # Si quieres validar firma aquí también, hazlo aquí:
-    if not _validate_twilio(request, form):
-        return Response("Forbidden", status_code=403)
-
+    form = await request.form()
     body = str(form.get("Body", "")).strip()
     sender = str(form.get("From", "twilio")).strip()
 
-    reply, _sources = respond(body or "Hola", sender=sender)
+    try:
+        reply, _sources = respond(body, sender=sender)
+    except Exception as e:
+        print(f"[TWILIO] ERROR respond(): {type(e).__name__}: {e}")
+        reply = "Perdona, ha habido un problema técnico. ¿Puedes repetir el mensaje?"
+
+    if not reply or not str(reply).strip():
+        reply = "Perdona, no te he leído bien. ¿Puedes repetirlo?"
 
     twiml = MessagingResponse()
-    twiml.message(reply)
+    twiml.message(str(reply))
+
     return Response(content=str(twiml), media_type="application/xml")
 
 

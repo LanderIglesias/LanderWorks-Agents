@@ -1779,8 +1779,10 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
                 "step": st.step,
             },
         )
-        # --- NOTIFY (Sheets + Email, nunca rompe el flujo) ---
+        # --- NOTIFY (Sheets + Email) en background: NUNCA bloquea el reply a Twilio ---
         try:
+            import threading
+
             from .notify import send_handoff_email, send_handoff_to_sheets
 
             payload = {
@@ -1794,11 +1796,9 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
                 "sender": sender,
             }
 
-            sheets_ok = send_handoff_to_sheets(payload)
-
             subject = f"[Dental Agent] Nuevo lead ({st.urgencia or 'normal'}) - {st.nombre or 'Sin nombre'}"
             body = (
-                f"Nuevo lead\n"
+                "Nuevo lead\n"
                 f"- Nombre: {st.nombre}\n"
                 f"- Teléfono: {st.telefono}\n"
                 f"- Motivo: {st.tratamiento}\n"
@@ -1806,9 +1806,22 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
                 f"- Preferencia: {st.preferencia}\n"
                 f"- Sender: {sender}\n"
                 f"- Lead ID: {lead_id}\n"
-                f"- Sheets OK: {sheets_ok}\n"
             )
-            _ = send_handoff_email(subject, body)
+
+            def _notify_bg() -> None:
+                try:
+                    sheets_ok = send_handoff_to_sheets(payload)
+                    print(f"[SHEETS] ok={sheets_ok}")
+                except Exception as e:
+                    print(f"[SHEETS] ERROR: {type(e).__name__}: {e}")
+
+                try:
+                    email_ok = send_handoff_email(subject, body)
+                    print(f"[EMAIL] ok={email_ok}")
+                except Exception as e:
+                    print(f"[EMAIL] ERROR: {type(e).__name__}: {e}")
+
+            threading.Thread(target=_notify_bg, daemon=True).start()
 
         except Exception as e:
             print(f"[NOTIFY] ERROR (ignored): {type(e).__name__}: {e}")
