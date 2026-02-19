@@ -31,8 +31,10 @@ def send_handoff_to_sheets(payload: dict) -> bool:
     for attempt in range(1, 4):
         try:
             with urllib.request.urlopen(req, timeout=25) as resp:
+                raw = resp.read() or b""
+                text = raw.decode("utf-8", errors="replace")
                 ok = 200 <= resp.status < 300
-                print(f"[SHEETS] attempt={attempt} status={resp.status} ok={ok}")
+                print(f"[SHEETS] attempt={attempt} status={resp.status} ok={ok} body={text[:500]}")
                 return ok
         except TimeoutError as e:
             print(f"[SHEETS] attempt={attempt} TIMEOUT: {e}")
