@@ -7,6 +7,13 @@ from .config import settings
 _client: Client | None = None
 
 
+def _as_whatsapp(addr: str) -> str:
+    a = (addr or "").strip()
+    if not a:
+        return a
+    return a if a.startswith("whatsapp:") else f"whatsapp:{a}"
+
+
 def _get_client() -> Client | None:
     global _client
 
@@ -28,7 +35,8 @@ def send_whatsapp_message(to: str, body: str) -> bool:
     Devuelve True si lo intenta y Twilio acepta la request; False si está deshabilitado o falla.
     NUNCA debe lanzar KeyError por config faltante.
     """
-    from_whatsapp = (settings.TWILIO_WHATSAPP_FROM or "").strip()
+    from_whatsapp = _as_whatsapp(settings.TWILIO_WHATSAPP_FROM or "")
+    to_whatsapp = _as_whatsapp(to)
     if not from_whatsapp:
         print("[TWILIO_SEND] disabled: missing TWILIO_WHATSAPP_FROM")
         return False
@@ -41,7 +49,7 @@ def send_whatsapp_message(to: str, body: str) -> bool:
     try:
         client.messages.create(
             from_=from_whatsapp,
-            to=to,
+            to=to_whatsapp,
             body=body,
         )
         return True
