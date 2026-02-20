@@ -513,6 +513,7 @@ def is_pure_greeting(text: str) -> bool:
     t = re.sub(r"\s+", " ", t).strip()
 
     greetings = {
+        # ES
         "hola",
         "buenas",
         "buenos dias",
@@ -524,15 +525,15 @@ def is_pure_greeting(text: str) -> bool:
         "qué tal",
         "buen dia",
         "buen día",
-        # EU
+        # EU (todo en minúsculas)
         "kaixo",
         "egun on",
         "arratsalde on",
         "gabon",
-        "Aupi",
-        "Aupa",
-        "Eguerdion",
-        "Eguerdi on",
+        "aupi",
+        "aupa",
+        "eguerdion",
+        "eguerdi on",
         "gab on",
     }
 
@@ -563,7 +564,7 @@ def is_pure_greeting(text: str) -> bool:
 
     # Dos saludos juntos tipo "hola buenas"
     parts = t.split()
-    if len(parts) <= 3 and all(p in " ".join(greetings) for p in parts):
+    if len(parts) <= 3 and all(p in greetings for p in parts):
         return True
 
     return False
