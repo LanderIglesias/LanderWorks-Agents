@@ -1022,6 +1022,11 @@ def route_message(sender_id: str, user_msg: str, st) -> RouteDecision:
     if intent == "humano":
         return RouteDecision("HUMAN_REQUEST", "human_intent_classifier")
 
+    # K) Blindaje: si parece pregunta, no puede acabar en FALLBACK.
+    # Esto evita que preguntas tipo "Qué horarios tenéis?" se conviertan en pitch de booking.
+    if is_question_like(raw):
+        return RouteDecision("FAQ", "question_like_never_fallback", faq_keys=[])
+
     return RouteDecision("FALLBACK", "default")
 
 
@@ -1130,6 +1135,27 @@ def handle_handoff_mode(sender_id: str, user_msg: str, st, _out) -> tuple[str, l
         reply = maybe_dedupe_faq_reply(st, keys, reply)
         save_state(sender_id, st)
         return _out(ux_trim(reply), srcs)
+
+    # 2.5) Respuestas cortas con "tratamiento" (ej: "Empaste") no son ruido.
+    # Si estamos en handoff y el usuario da una palabra clínica, contestamos como FAQ de precio/contexto.
+    if not is_question_like(raw):
+        try:
+            trat = clasifica_tratamiento(raw)
+        except Exception:
+            trat = None
+
+        if trat or (
+            len(raw.strip()) <= 20
+            and any(
+                k in unidecode(raw.lower())
+                for k in ["empaste", "limpieza", "caries", "endodoncia", "implante", "ortodoncia"]
+            )
+        ):
+            q = f"precio {raw}".strip()
+            reply, srcs, _conf = answer_with_canned_or_rag(q)
+            reply = clean_reply(reply)
+            save_state(sender_id, st)
+            return _out(ux_trim(reply), srcs)
 
     # 3) Gracias / despedida / neutrales => NO encolar
     if is_thanks(raw):
