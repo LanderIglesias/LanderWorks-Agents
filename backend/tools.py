@@ -760,25 +760,60 @@ def canned_faq_answer(key: str, msg: str = "") -> tuple[str, list[str]]:
     elif key == "precios":
         # Si quieres mantener “precios” como key separada (recomendado)
         mm = q
+        # Mapea a KEYS REALES del clinic_config.yaml (prices:)
         item = None
-        if "limpieza" in mm:
-            item = "limpieza"
+        if "limpieza" in mm or "profilaxis" in mm:
+            item = "limpieza_dental"
+        elif "higiene profunda" in mm or ("raspado" in mm and "period" in mm):
+            item = "higiene_profunda"
         elif "blanque" in mm:
             item = "blanqueamiento"
-        elif "invisalign" in mm or "ortodoncia invisible" in mm:
-            item = "ortodoncia_invisible"
-        elif "ortodoncia" in mm or "brackets" in mm:
-            item = "ortodoncia"
-        elif "implante" in mm:
-            item = "implantes"
-        elif "endodoncia" in mm or "conducto" in mm:
+        elif (
+            "empaste" in mm
+            or "caries" in mm
+            or "carie" in mm
+            or "obturacion" in mm
+            or "obturación" in mm
+        ):
+            item = "empaste"
+        elif "endodon" in mm or "conducto" in mm:
             item = "endodoncia"
+        elif "extraccion" in mm or "extracción" in mm or "sacar muela" in mm:
+            item = "extraccion_simple"
+        elif "implante" in mm:
+            item = "implante_unitario"
+        elif "ortodoncia" in mm and ("invisible" in mm or "invisalign" in mm):
+            item = "ortodoncia invisible"
+        elif "reconstru" in mm:
+            item = "reconstrucciones complejas"
+        elif "sellador" in mm:
+            item = "selladores preventivos"
+        elif "consulta" in mm or "valoracion" in mm or "valoración" in mm:
+            item = "consulta / valoración inicial"
+        elif "radiograf" in mm and "simple" in mm:
+            item = "radiografía simple"
+        elif "panoram" in mm or "scanner" in mm or "3d" in mm:
+            item = "panorámica dental / scanner 3d"
 
         price = get_price(item) if item else None
+
         if price and item:
-            ans = f"El precio de {item.replace('_',' ')} es {price}."
+            # Mantén el texto tal cual venga (rangos tipo "60-90 €", "desde 45 €", etc.)
+            ans = f"El precio de **{item}** es **{price}**."
+        elif item:
+            # Si está el tratamiento pero falta precio en config, pide el matiz mínimo (no “qué necesitas”)
+            if item == "empaste":
+                ans = (
+                    "Para un **empaste**, el precio depende del tamaño y de si es un empaste simple o una reconstrucción. "
+                    "¿Es pequeño (una cara) o más grande? Si me dices eso te doy un rango orientativo; si no, te lo confirma recepción."
+                )
+            else:
+                ans = (
+                    f"Para **{item}**, el precio depende del caso. "
+                    "Si me das un poco más de detalle, te doy un rango orientativo; si no, te lo confirma recepción."
+                )
         else:
-            ans = "Depende del caso. Si me dices qué necesitas, te doy un precio orientativo o te lo confirma recepción."
+            ans = "¿De qué tratamiento quieres el precio? (por ejemplo: limpieza, empaste, blanqueamiento, implante…)"
 
     elif key == "parking":
         ans = "Hay zona OTA cercana y un parking público a unos minutos andando."
