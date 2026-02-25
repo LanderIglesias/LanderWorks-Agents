@@ -32,32 +32,32 @@ def run(sender, msgs):
     [
         (
             "tel con espacios -> normaliza y avanza",
-            ["Quiero cita", "Lander", "612 345 678"],
+            ["Quiero cita", "Lander Iglesias", "612 345 678"],
             {"step_after": "treatment", "tel": "612345678"},
         ),
         (
             "tel con guiones -> normaliza y avanza",
-            ["Quiero cita", "Lander", "612-345-678"],
+            ["Quiero cita", "Lander Iglesias", "612-345-678"],
             {"step_after": "treatment", "tel": "612345678"},
         ),
         (
             "tel con prefijo +34 -> últimos 9",
-            ["Quiero cita", "Lander", "+34 612 345 678"],
+            ["Quiero cita", "Lander Iglesias", "+34 612 345 678"],
             {"step_after": "treatment", "tel": "612345678"},
         ),
         (
             "tel dentro de frase -> extrae y avanza",
-            ["Quiero cita", "Lander", "mi número es 612 345 678"],
+            ["Quiero cita", "Lander Iglesias", "mi número es 612 345 678"],
             {"step_after": "treatment", "tel": "612345678"},
         ),
         (
             "ruido en name (emoji) -> repregunta nombre",
-            ["Quiero cita", "👍", "Lander"],
+            ["Quiero cita", "👍", "Lander Iglesias"],
             {"step_after": "phone", "must_contain": ["nombre"]},
         ),
         (
             "ruido en phone (ok) -> repregunta teléfono",
-            ["Quiero cita", "Lander", "ok", "612345678"],
+            ["Quiero cita", "Lander Iglesias", "ok", "612345678"],
             {
                 "step_after": "treatment",
                 "tel": "612345678",
@@ -66,7 +66,7 @@ def run(sender, msgs):
         ),
         (
             "audio placeholder en phone -> repregunta teléfono",
-            ["Quiero cita", "Lander", "te mando un audio", "612345678"],
+            ["Quiero cita", "Lander Iglesias", "te mando un audio", "612345678"],
             {
                 "step_after": "treatment",
                 "tel": "612345678",
@@ -90,7 +90,7 @@ def run(sender, msgs):
             [
                 "Quiero cita",
                 "Hola",  # interrupción típica que antes rompía flujos
-                "Lander",
+                "Lander Iglesias",
                 "612345678",
                 "Limpieza",
                 "No es urgente",
@@ -101,7 +101,7 @@ def run(sender, msgs):
                 "tel": "612345678",
                 "urg": "baja",
                 "must_contain": [
-                    "¿cómo te llamas",  # debe seguir pidiendo nombre, no irse a cualquier lado
+                    "nombre y apellido",  # debe seguir pidiendo nombre, no irse a cualquier lado
                 ],
             },
         ),
@@ -123,7 +123,7 @@ def run(sender, msgs):
             [
                 "Quiero cita",
                 "¿Cuánto cuesta una limpieza?",
-                "Lander",
+                "Lander Iglesias",
                 "612345678",
                 "Limpieza",
                 "No es urgente",
@@ -143,7 +143,7 @@ def run(sender, msgs):
             "cancel a mitad de booking -> reset a idle",
             [
                 "Quiero cita",
-                "Lander",
+                "Lander Iglesias",
                 "mejor no",
             ],
             {
@@ -175,7 +175,7 @@ def run(sender, msgs):
             [
                 "Hola",
                 "Me duele la muela",
-                "Manuel",
+                "Manuel Iglesias",
                 "675701597",
                 "Es urgente",
                 "Por la tarde",
@@ -188,7 +188,7 @@ def run(sender, msgs):
         ),
         (
             "telefono 10 digitos -> normaliza",
-            ["Quiero cita", "Lander", "6450000000"],
+            ["Quiero cita", "Lander Iglesias", "6450000000"],
             {
                 "step_after": "treatment",  # porque el tel se acepta
                 "tel": "645000000",  # ultimos 9
@@ -264,7 +264,7 @@ def test_booking_timeout_10min_does_not_reset():
     st.last_seen = datetime.now(UTC) - timedelta(minutes=10)
     save_state(sender, st)
 
-    reply, _ = respond("Lander", sender=sender)
+    reply, _ = respond("Lander Iglesias", sender=sender)
     st2 = get_state(sender)
 
     # Debe avanzar a phone, no resetear a idle
@@ -377,7 +377,7 @@ def test_pain_strong_skips_urgency_question():
     reset_state(sender)
 
     respond("Quiero cita", sender=sender)
-    respond("Lander", sender=sender)
+    respond("Lander Iglesias", sender=sender)
     respond("612345678", sender=sender)
 
     r, _ = respond("Tengo dolor muy fuerte en una muela", sender=sender)

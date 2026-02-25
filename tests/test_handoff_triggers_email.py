@@ -19,7 +19,7 @@ def test_handoff_flow_calls_email(monkeypatch):
 
     # Completa booking -> handoff
     respond("Quiero cita", sender=sender)
-    respond("Lander", sender=sender)
+    respond("Lander Iglesias", sender=sender)
     respond("612345678", sender=sender)
     respond("Limpieza", sender=sender)
     respond("No es urgente", sender=sender)

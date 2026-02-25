@@ -1697,6 +1697,12 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
     st = get_state(sender)
     print("DEBUG HB enter:", sender, "step=", st.step, "msg=", user_msg)
 
+    def _first_name(full: str | None) -> str:
+        t = (full or "").strip()
+        if not t:
+            return ""
+        return t.split()[0].title()
+
     def _hb(
         reply: str,
         sources: list[str] | None = None,
@@ -1720,7 +1726,7 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
 
     def _pending_prompt(step: str) -> str:
         if step == "name":
-            return "Para seguir con la cita, ¿cómo te llamas?"
+            return "Para seguir con la cita, ¿me dices tu nombre y apellido?"
         if step == "phone":
             return "Para seguir con la cita, ¿me dejas un teléfono de 9 dígitos, por favor?"
         if step == "treatment":
@@ -2026,6 +2032,10 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
     # 3) Extracción automática (no pisa lo existente)
     # IMPORTANTE: en step=name NO llamamos a extract_booking_fields (puede bloquear/LLM/timeout Twilio).
     if st.step == "name":
+        # --- BLINDAJE: en step=name, smalltalk NO puede ser nombre ---
+        if is_pure_greeting(user_msg) or is_thanks(user_msg) or is_goodbye(user_msg):
+            return _hb("Para seguir con la cita, dime tu nombre y apellido, por favor.", [])
+
         extracted = {}
     else:
         extracted = extract_booking_fields(user_msg)
@@ -2107,18 +2117,18 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
     if st.step == "idle":
         if not st.nombre:
             st.step = "name"
-            return _hb("Perfecto, ¿cómo te llamas?", [])
+            return _hb("Perfecto, ¿me dices tu nombre y apellido?", [])
 
         if not st.telefono:
             st.step = "phone"
             # Si el usuario intentó dar teléfono pero es inválido, dilo claro
             if user_tried_phone_but_invalid(user_msg):
                 return _hb(
-                    f"Gracias, {st.nombre}. Ese número no me cuadra. "
+                    f"Gracias, {_first_name(st.nombre)}. Ese número no me cuadra. "
                     "Envíame un teléfono válido de 9 dígitos (por ejemplo 612345678), por favor.",
                     [],
                 )
-            return _hb(f"Gracias, {st.nombre}. ¿Me dejas un teléfono de contacto?", [])
+            return _hb(f"Gracias, {_first_name(st.nombre)}. ¿Me dejas un teléfono de contacto?", [])
 
         if not st.tratamiento:
             st.step = "treatment"
@@ -2144,6 +2154,10 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
 
     # 5) Pasos individuales
     if st.step == "name":
+        # --- BLINDAJE: en step=name, smalltalk NO puede ser nombre ---
+        if is_pure_greeting(user_msg) or is_thanks(user_msg) or is_goodbye(user_msg):
+            return _hb("Para seguir con la cita, dime tu nombre y apellido, por favor.", [])
+
         # Si el usuario responde con urgencia/preferencia/ruido, NO lo trates como nombre
         low = unidecode((user_msg or "").lower())
 
@@ -2196,7 +2210,9 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
             )
             # Reutiliza el mismo texto de cada paso
             if st.step == "phone":
-                return _hb(f"Gracias, {st.nombre}. ¿Me dejas un teléfono de contacto?", [])
+                return _hb(
+                    f"Gracias, {_first_name(st.nombre)}. ¿Me dejas un teléfono de contacto?", []
+                )
             if st.step == "treatment":
                 return _hb(
                     "¿Por qué motivo es la cita? (limpieza, implantes, dolor, revisión…)",
@@ -2229,14 +2245,18 @@ def handle_booking(sender: str, user_msg: str) -> tuple[str, list[str]]:
         name = re.sub(r"[^\w\sáéíóúüñ'-]", "", name).strip()
 
         if len(name) < 2 or any(ch.isdigit() for ch in name):
-            return _hb("Perdona, dime solo tu nombre, por favor.", [])
+            return _hb("Perdona, dime tu nombre y apellido, por favor.", [])
 
-        if len(name) > 30:
-            return _hb("Dime solo tu nombre, por favor (por ejemplo: “Laura”).", [])
+        # EXIGE al menos 2 palabras (nombre + apellido)
+        if len(name.split()) < 2:
+            return _hb("Para registrarlo bien, dime tu nombre y apellido, por favor.", [])
+
+        if len(name) > 40:
+            return _hb("Dime tu nombre y apellido, por favor (por ejemplo: “Laura García”).", [])
 
         st.nombre = name.title()
         st.step = "phone"
-        return _hb(f"Gracias, {st.nombre}. ¿Me dejas un teléfono de contacto?", [])
+        return _hb(f"Gracias, {_first_name(st.nombre)}. ¿Me dejas un teléfono de contacto?", [])
 
     if st.step == "phone":
         has_digits = bool(re.search(r"\d", user_msg or ""))

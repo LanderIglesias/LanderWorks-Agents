@@ -11,7 +11,7 @@ def test_faq_flow():
 
 def test_cita_flow():
     reply, sources = respond("Quiero una cita para limpieza mañana")
-    assert "¿cómo te llamas?" in reply
+    assert "nombre y apellido" in (reply.lower())
     assert sources == []
 
 
