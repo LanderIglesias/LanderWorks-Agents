@@ -16,7 +16,7 @@ def test_send_handoff_email_disabled_if_missing_config(monkeypatch):
         monkeypatch,
         RESEND_API_KEY="",
         NOTIFY_EMAIL_TO="",
-        EMAIL_FROM="",
+        RESEND_FROM="",
     )
 
     ok = notify.send_handoff_email("subj", "body")

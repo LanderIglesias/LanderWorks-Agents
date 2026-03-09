@@ -27,7 +27,12 @@ class Settings(BaseSettings):
 
     # Email via HTTP (Resend)
     RESEND_API_KEY: str = Field(default="")
-    EMAIL_FROM: str = Field(default="")  # ej: "Dental Agent <onboarding@resend.dev>"
+    RESEND_FROM: str | None = None  # ej: "Dental Agent <onboarding@resend.dev>"
 
 
 settings = Settings()
+
+
+@property
+def EFFECTIVE_EMAIL_FROM(self) -> str | None:
+    return self.RESEND_FROM or self.EMAIL_FROM

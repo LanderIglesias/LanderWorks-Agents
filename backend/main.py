@@ -6,7 +6,10 @@ from fastapi import BackgroundTasks, FastAPI, Header, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from twilio.request_validator import RequestValidator
 
+from backend.apps.scaffold_web_agent.tenant_cors import ScaffoldTenantCORSMiddleware
+
 from .agent import respond, route_message
+from .apps.scaffold_web_agent.api import router as scaffold_agent_router
 from .config import settings
 from .metrics import snapshot
 from .notify import send_handoff_email
@@ -40,6 +43,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Dental Agent", lifespan=lifespan)
+app.add_middleware(ScaffoldTenantCORSMiddleware)
+app.include_router(scaffold_agent_router)
 
 
 @app.post("/chat")
@@ -188,3 +193,8 @@ def debug_route(q: str):
             "render_commit": os.getenv("RENDER_GIT_COMMIT"),
         }
     )
+
+
+@app.get("/scaffold-agent/health")
+def scaffold_health():
+    return {"ok": True}

@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Scaffold Web Agent Demo</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f6f7f9;
+    }
+
+    .wrap {
+      max-width: 880px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 14px 16px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .title {
+      font-weight: 650;
+    }
+
+    .hint {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .chat {
+      height: 420px;
+      overflow: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .row {
+      display: flex;
+    }
+
+    .row.user {
+      justify-content: flex-end;
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      line-height: 1.35;
+      white-space: pre-wrap;
+    }
+
+    .user .bubble {
+      background: #1f6feb;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot .bubble {
+      background: #f0f2f5;
+      color: #111;
+      border-bottom-left-radius: 4px;
+    }
+
+    .composer {
+      display: flex;
+      gap: 10px;
+      padding: 12px;
+      border-top: 1px solid #eee;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      outline: none;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 0;
+      background: #111;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .settings {
+      display: flex;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .settings input {
+      width: 320px;
+    }
+
+    code {
+      background: #f0f2f5;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="header">
+        <div>
+          <div class="title">Scaffold Web Agent (Demo)</div>
+          <div class="hint">Backend endpoint: <code>/scaffold-agent/chat</code></div>
+        </div>
+        <div class="hint" id="sid"></div>
+      </div>
+
+      <div class="settings">
+        <input id="baseUrl" type="text" placeholder="Base URL (e.g., http://127.0.0.1:8000)" />
+        <button id="reset">Reset session</button>
+      </div>
+
+      <div class="chat" id="chat"></div>
+
+      <div class="composer">
+        <input id="msg" type="text" placeholder="Type your message..." />
+        <button id="send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chatEl = document.getElementById("chat");
+    const msgEl = document.getElementById("msg");
+    const sendBtn = document.getElementById("send");
+    const baseUrlEl = document.getElementById("baseUrl");
+    const sidEl = document.getElementById("sid");
+    const resetBtn = document.getElementById("reset");
+
+    const SID_KEY = "scaffold_demo_session_id";
+    const BASE_KEY = "scaffold_demo_base_url";
+
+    function uuid() {
+      // good enough for demo
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+
+    function getSessionId() {
+      let sid = localStorage.getItem(SID_KEY);
+      if (!sid) {
+        sid = uuid();
+        localStorage.setItem(SID_KEY, sid);
+      }
+      return sid;
+    }
+
+    function setBaseUrl(v) {
+      localStorage.setItem(BASE_KEY, v);
+    }
+
+    function getBaseUrl() {
+      return localStorage.getItem(BASE_KEY) || "http://127.0.0.1:8000";
+    }
+
+    function addBubble(text, who) {
+      const row = document.createElement("div");
+      row.className = "row " + who;
+      const b = document.createElement("div");
+      b.className = "bubble";
+      b.textContent = text;
+      row.appendChild(b);
+      chatEl.appendChild(row);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+
+    async function sendMessage(text) {
+      const sid = getSessionId();
+      sidEl.textContent = "session: " + sid.slice(0, 8) + "…";
+
+      const base = getBaseUrl().replace(/\/+$/, "");
+      const url = base + "/scaffold-agent/chat";
+
+      sendBtn.disabled = true;
+      msgEl.disabled = true;
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Widget-Token": "<TU_TOKEN_AQUI>"
+          },
+          body: JSON.stringify({ session_id: sid, message: text })
+        });
+
+        if (!res.ok) {
+          const t = await res.text();
+          addBubble("Server error: " + res.status + " " + t, "bot");
+          return;
+        }
+
+        const data = await res.json();
+        addBubble(data.reply || "(no reply)", "bot");
+      } catch (e) {
+        addBubble("Network error: " + String(e), "bot");
+      } finally {
+        sendBtn.disabled = false;
+        msgEl.disabled = false;
+        msgEl.focus();
+      }
+    }
+
+    // init
+    baseUrlEl.value = getBaseUrl();
+    sidEl.textContent = "session: " + getSessionId().slice(0, 8) + "…";
+
+    baseUrlEl.addEventListener("change", () => setBaseUrl(baseUrlEl.value.trim()));
+    resetBtn.addEventListener("click", () => {
+      localStorage.removeItem(SID_KEY);
+      chatEl.innerHTML = "";
+      sidEl.textContent = "session: " + getSessionId().slice(0, 8) + "…";
+      addBubble("Session reset. Say hi.", "bot");
+    });
+
+    sendBtn.addEventListener("click", () => {
+      const t = msgEl.value.trim();
+      if (!t) return;
+      addBubble(t, "user");
+      msgEl.value = "";
+      sendMessage(t);
+    });
+
+    msgEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+
+    addBubble("Hi. Ask about scaffolding products, pricing (MOQ/Incoterms), shipping, documents, or issues.", "bot");
+    msgEl.focus();
+  </script>
+</body>
+
+</html>

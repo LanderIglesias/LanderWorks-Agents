@@ -67,7 +67,7 @@ def send_handoff_email(subject: str, body: str) -> bool:
     """
     api_key = (settings.RESEND_API_KEY or "").strip()
     to = (settings.NOTIFY_EMAIL_TO or "").strip()
-    sender = (settings.EMAIL_FROM or "").strip() or "Dental Agent <onboarding@resend.dev>"
+    sender = (settings.RESEND_FROM or "").strip() or "Dental Agent <onboarding@resend.dev>"
 
     print(
         "[EMAIL] cfg",
