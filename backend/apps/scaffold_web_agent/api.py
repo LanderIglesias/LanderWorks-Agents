@@ -7,8 +7,6 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field
 
-from backend.config import settings as global_settings
-
 from .admin_template import admin_html
 from .demo_template import demo_html
 from .domain import Status, Step
@@ -112,9 +110,10 @@ def admin_upsert_tenant(
     payload: TenantUpsertIn,
     x_admin_token: str = Header(default="", alias="X-Admin-Token"),
 ):
-    # uses the same ADMIN_TOKEN you already have in Render
+    import os
 
-    if x_admin_token != (getattr(global_settings, "ADMIN_TOKEN", "") or ""):
+    admin_token = os.getenv("ADMIN_TOKEN", "")
+    if not admin_token or x_admin_token != admin_token:
         raise HTTPException(status_code=403, detail="Forbidden")
 
     upsert_tenant(
