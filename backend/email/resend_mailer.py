@@ -49,6 +49,7 @@ class ResendMailer:
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self.api_key}",
+                "User-Agent": "landerworks-scaffold-agent/1.0",
             },
             method="POST",
         )
