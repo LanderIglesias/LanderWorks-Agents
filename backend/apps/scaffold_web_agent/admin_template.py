@@ -367,45 +367,68 @@ def admin_html() -> str:
         });
       }
       
-      document.getElementById("loadTenants").addEventListener("click", async () => {
-        try {
-          const data = await apiGet("/scaffold-agent/admin/tenants");
-          tenantsOut.textContent = JSON.stringify(data, null, 2);
-          renderTenants(data);
-        } catch (e) {
-          tenantsOut.textContent = String(e);
-          tenantCards.innerHTML = "";
-        }
-      });
+       const loadTenantsBtn = document.getElementById("loadTenants");
 
-      document.getElementById("loadAnalytics").addEventListener("click", async () => {
-        try {
-          const tenantId = tenantIdEl.value.trim();
-          const data = await apiGet("/scaffold-agent/admin/analytics/" + encodeURIComponent(tenantId));
-          analyticsOut.textContent = JSON.stringify(data, null, 2);
-        } catch (e) {
-          analyticsOut.textContent = String(e);
-        }
-      });
+      if (loadTenantsBtn) {
+        loadTenantsBtn.addEventListener("click", async () => {
+          try {
+            tenantsOut.textContent = "Loading...";
+            const data = await apiGet("/scaffold-agent/admin/tenants");
+            tenantsOut.textContent = JSON.stringify(data, null, 2);
+            renderTenants(data);
+          } catch (e) {
+            console.error("loadTenants failed:", e);
+            tenantsOut.textContent = String(e);
+            tenantCards.innerHTML = "";
+            alert("Load tenants failed: " + String(e));
+          }
+        });
+      } else {
+        console.error("Button #loadTenants not found");
+      }
 
-      document.getElementById("loadSessions").addEventListener("click", async () => {
-        try {
-          const tenantId = tenantIdEl.value.trim();
-          const data = await apiGet("/scaffold-agent/admin/sessions/" + encodeURIComponent(tenantId));
-          sessionsOut.textContent = JSON.stringify(data, null, 2);
-        } catch (e) {
-          sessionsOut.textContent = String(e);
-        }
-      });
-      document.getElementById("loadLeads").addEventListener("click", async () => {
-        try {
-          const tenantId = tenantIdEl.value.trim();
-          const data = await apiGet("/scaffold-agent/admin/leads/" + encodeURIComponent(tenantId));
-          renderLeads(data);
-        } catch (e) {
-          leadsOut.innerHTML = String(e);
-        }
-      });
+      const loadAnalyticsBtn = document.getElementById("loadAnalytics");
+
+      if (loadAnalyticsBtn) {
+        loadAnalyticsBtn.addEventListener("click", async () => {
+          try {
+            const tenantId = tenantIdEl.value.trim();
+            const data = await apiGet("/scaffold-agent/admin/analytics/" + encodeURIComponent(tenantId));
+            analyticsOut.textContent = JSON.stringify(data, null, 2);
+          } catch (e) {
+            console.error("loadAnalytics failed:", e);
+            analyticsOut.textContent = String(e);
+          }
+        });
+
+      const loadSessionsBtn = document.getElementById("loadSessions");
+
+      if (loadSessionsBtn) {
+        loadSessionsBtn.addEventListener("click", async () => {
+          try {
+            const tenantId = tenantIdEl.value.trim();
+            const data = await apiGet("/scaffold-agent/admin/sessions/" + encodeURIComponent(tenantId));
+            sessionsOut.textContent = JSON.stringify(data, null, 2);
+          } catch (e) {
+            console.error("loadSessions failed:", e);
+            sessionsOut.textContent = String(e);
+          }
+        });
+        
+       const loadLeadsBtn = document.getElementById("loadLeads");
+
+      if (loadLeadsBtn) {
+        loadLeadsBtn.addEventListener("click", async () => {
+          try {
+            const tenantId = tenantIdEl.value.trim();
+            const data = await apiGet("/scaffold-agent/admin/leads/" + encodeURIComponent(tenantId));
+            renderLeads(data);
+          } catch (e) {
+            console.error("loadLeads failed:", e);
+            leadsOut.innerHTML = String(e);
+          }
+        });
+        
     </script>
   </body>
 </html>
