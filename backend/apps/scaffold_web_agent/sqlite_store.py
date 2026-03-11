@@ -88,6 +88,21 @@ def _connect() -> sqlite3.Connection:
         """
     )
 
+    # ---------- scaffold_leads ----------
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS scaffold_leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            session_id TEXT NOT NULL,
+            email TEXT,
+            topic TEXT,
+            summary TEXT,
+            created_at INTEGER NOT NULL
+        )
+        """
+    )
+
     con.commit()
     return con
 
@@ -227,3 +242,53 @@ def tenant_analytics(tenant_id: str) -> dict:
         "confirm_sessions": confirm_sessions,
         "sessions_with_email": sessions_with_email,
     }
+
+
+def insert_lead(
+    tenant_id: str,
+    session_id: str,
+    email: str | None,
+    topic: str | None,
+    summary: str | None,
+) -> None:
+    now = int(time.time())
+
+    with _connect() as con:
+        con.execute(
+            """
+            INSERT INTO scaffold_leads(tenant_id, session_id, email, topic, summary, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (tenant_id, session_id, email, topic, summary, now),
+        )
+        con.commit()
+
+
+def list_leads_for_tenant(tenant_id: str, limit: int = 50):
+    with _connect() as con:
+        rows = con.execute(
+            """
+            SELECT id, tenant_id, session_id, email, topic, summary, created_at
+            FROM scaffold_leads
+            WHERE tenant_id = ?
+            ORDER BY created_at DESC
+            LIMIT ?
+            """,
+            (tenant_id, limit),
+        ).fetchall()
+
+    result = []
+    for r in rows:
+        result.append(
+            {
+                "id": r[0],
+                "tenant_id": r[1],
+                "session_id": r[2],
+                "email": r[3],
+                "topic": r[4],
+                "summary": r[5],
+                "created_at": r[6],
+            }
+        )
+
+    return result

@@ -223,10 +223,26 @@ def widget_js() -> str:
     });
 
     if (!res.ok) {
-      var t = await res.text();
-      bubble("Server error: " + res.status + " " + t, "bot");
-      return;
-    }
+      let fallback =
+        "Something went wrong while processing your request.\nPlease try again in a few minutes.";
+
+      if (res.status === 401) {
+        fallback =
+          "This widget is not configured correctly for this website.\nPlease contact the site owner.";
+      } else if (res.status === 403) {
+        fallback =
+          "This website is not allowed to use this widget.\nPlease contact the site owner.";
+      } else if (res.status === 429) {
+        fallback =
+          "Too many requests in a short time.\nPlease wait a moment and try again.";
+      } else if (res.status >= 500) {
+        fallback =
+          "Something went wrong sending your request.\nPlease try again in a few minutes or contact the company directly.";
+      }
+
+  bubble(fallback, "bot");
+  return;
+}
 
     var data = await res.json();
     bubble(data.reply || "(no reply)", "bot");

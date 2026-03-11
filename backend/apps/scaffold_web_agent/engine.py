@@ -192,10 +192,16 @@ def handle_user_message(state: SessionState, user_text: str) -> tuple[SessionSta
     if state.step == Step.CONFIRM:
         if _is_yes(text):
             new_state = replace(state, step=Step.SEND)
-            return new_state, "Thanks — sending it now."
+            return new_state, (
+                "Thanks — your request has been sent to our team.\n\n"
+                "We usually reply within 24 hours.\n\n"
+                "If you need anything else, feel free to ask."
+            )
+
         if _is_no(text):
             new_state = replace(state, step=Step.COLLECT_CASE)
             return new_state, "Sure. Please add the missing details in one message."
+
         return state, "Please reply YES to send, or NO to add more details."
 
     if state.step in {Step.SEND, Step.DONE}:

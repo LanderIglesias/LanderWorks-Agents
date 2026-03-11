@@ -25,8 +25,8 @@ def test_rate_limit_blocks_after_threshold(monkeypatch, tmp_path):
         "Origin": "https://client.example",
     }
 
-    # 20 requests allowed
-    for i in range(20):
+    # 15 requests allowed
+    for i in range(15):
         r = client.post(
             "/scaffold-agent/chat",
             json={"session_id": "s1", "message": f"msg-{i}"},

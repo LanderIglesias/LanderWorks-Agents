@@ -5,7 +5,7 @@ import time
 from .sqlite_store import _connect
 
 WINDOW_SECONDS = 300  # 5 minutes
-MAX_REQUESTS = 20  # max messages per window
+MAX_REQUESTS = 15  # max messages per window
 
 
 def ensure_rate_limit_table() -> None:

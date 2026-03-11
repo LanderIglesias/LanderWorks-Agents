@@ -14,7 +14,13 @@ from .engine import handle_user_message
 from .mailer import FakeMailer, Mailer, load_prod_mailer
 from .rate_limit import is_rate_limited
 from .settings import ScaffoldAgentSettings, load_settings
-from .sqlite_store import SQLiteSessionStore, list_sessions_for_tenant, tenant_analytics
+from .sqlite_store import (
+    SQLiteSessionStore,
+    insert_lead,
+    list_leads_for_tenant,
+    list_sessions_for_tenant,
+    tenant_analytics,
+)
 from .tenants import (
     Tenant,
     list_tenants,
@@ -87,9 +93,18 @@ def chat(
             raise HTTPException(
                 status_code=500, detail="Invariant violated: tried to send without ready summary."
             )
-        subject = f"{tenant.subject_prefix} {new_state.data.category.value if new_state.data.category else 'inquiry'}"
 
+        subject = f"{tenant.subject_prefix} {new_state.data.category.value if new_state.data.category else 'inquiry'}"
         mailer.send(tenant.inbox_email, subject, new_state.data.summary)
+
+        insert_lead(
+            tenant_id=tenant.tenant_id,
+            session_id=payload.session_id,
+            email=new_state.data.email,
+            topic=new_state.data.topic,
+            summary=new_state.data.summary,
+        )
+
         new_state.step = Step.DONE
         new_state.data.status = Status.SENT
 
@@ -211,6 +226,24 @@ def admin_list_sessions(
     return {
         "tenant_id": tenant_id,
         "sessions": list_sessions_for_tenant(tenant_id, limit),
+    }
+
+
+@router.get("/admin/leads/{tenant_id}")
+def admin_list_leads(
+    tenant_id: str,
+    limit: int = 50,
+    x_admin_token: str = Header(default="", alias="X-Admin-Token"),
+):
+    import os
+
+    admin_token = os.getenv("ADMIN_TOKEN", "")
+    if not admin_token or x_admin_token != admin_token:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    return {
+        "tenant_id": tenant_id,
+        "leads": list_leads_for_tenant(tenant_id, limit),
     }
 
 
