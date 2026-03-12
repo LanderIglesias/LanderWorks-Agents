@@ -180,256 +180,268 @@ def admin_html() -> str:
     </div>
 
     <script>
-      const baseUrlEl = document.getElementById("baseUrl");
-      const adminTokenEl = document.getElementById("adminToken");
-      const tenantIdEl = document.getElementById("tenantId");
-      const tenantsOut = document.getElementById("tenantsOut");
-      const tenantCards = document.getElementById("tenantCards");
-      const analyticsOut = document.getElementById("analyticsOut");
-      const sessionsOut = document.getElementById("sessionsOut");
-      const leadsOut = document.getElementById("leadsOut");
+  document.addEventListener("DOMContentLoaded", function () {
+    const baseUrlEl = document.getElementById("baseUrl");
+    const adminTokenEl = document.getElementById("adminToken");
+    const tenantIdEl = document.getElementById("tenantId");
 
-      baseUrlEl.value = window.location.origin;
+    const tenantsOut = document.getElementById("tenantsOut");
+    const tenantCards = document.getElementById("tenantCards");
+    const analyticsOut = document.getElementById("analyticsOut");
+    const sessionsOut = document.getElementById("sessionsOut");
+    const leadsOut = document.getElementById("leadsOut");
 
-      async function apiGet(path) {
-        const base = baseUrlEl.value.replace(/\\/+$/, "");
-        const token = adminTokenEl.value.trim();
-        const res = await fetch(base + path, {
-          headers: { "X-Admin-Token": token }
-        });
-        const text = await res.text();
-        if (!res.ok) {
-          throw new Error(text || ("HTTP " + res.status));
-        }
-        try {
-          return JSON.parse(text);
-        } catch {
-          return text;
-        }
-      }
-      
-      async function apiPost(path) {
-        const base = baseUrlEl.value.replace(/\/+$/, "");
-        const token = adminTokenEl.value.trim();
-        const res = await fetch(base + path, {
-          method: "POST",
-          headers: { "X-Admin-Token": token }
-        });
-        const text = await res.text();
-        if (!res.ok) {
-          throw new Error(text || ("HTTP " + res.status));
-        }
-        try {
-          return JSON.parse(text);
-        } catch {
-          return text;
-        }
-      }
-      
+    const loadTenantsBtn = document.getElementById("loadTenants");
+    const loadAnalyticsBtn = document.getElementById("loadAnalytics");
+    const loadSessionsBtn = document.getElementById("loadSessions");
+    const loadLeadsBtn = document.getElementById("loadLeads");
+
+    baseUrlEl.value = window.location.origin;
+
     function fmtTs(ts) {
-        if (!ts) return "-";
-        try {
-          return new Date(ts * 1000).toLocaleString();
-        } catch {
-          return String(ts);
+      if (!ts) return "-";
+      try {
+        return new Date(ts * 1000).toLocaleString();
+      } catch (e) {
+        return String(ts);
+      }
+    }
+
+    async function apiGet(path) {
+      const base = (baseUrlEl.value || "").replace(/\/+$/, "");
+      const token = (adminTokenEl.value || "").trim();
+
+      const res = await fetch(base + path, {
+        method: "GET",
+        headers: {
+          "X-Admin-Token": token
         }
+      });
+
+      const text = await res.text();
+
+      if (!res.ok) {
+        throw new Error(text || ("HTTP " + res.status));
       }
 
-       function renderLeads(data) {
-        leadsOut.innerHTML = "";
-
-        const leads = (data && data.leads) || [];
-        if (!leads.length) {
-          leadsOut.innerHTML = "<div class='muted'>No leads found.</div>";
-          return;
-        }
-
-        for (const lead of leads) {
-          const email = lead.email || "-";
-          const topic = lead.topic || "-";
-          const summary = lead.summary || "-";
-          const created = fmtTs(lead.created_at);
-
-          const card = document.createElement("div");
-          card.className = "lead-card";
-
-          card.innerHTML = `
-            <div class="lead-head">
-              <div class="lead-title">Lead #${lead.id}</div>
-              <div class="lead-created">${created}</div>
-            </div>
-            <div class="lead-line lead-email"><strong>Email:</strong> ${email}</div>
-            <div class="lead-line lead-topic"><strong>Topic:</strong> ${topic}</div>
-            <div class="lead-summary">${summary}</div>
-          `;
-
-          leadsOut.appendChild(card);
-        }
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        return text;
       }
-      
-       function renderTenants(data) {
-        tenantCards.innerHTML = "";
+    }
 
-        const tenants = (data && data.tenants) || [];
-        if (!tenants.length) {
-          tenantCards.innerHTML = "<div class='muted'>No tenants found.</div>";
-          return;
+    async function apiPost(path) {
+      const base = (baseUrlEl.value || "").replace(/\/+$/, "");
+      const token = (adminTokenEl.value || "").trim();
+
+      const res = await fetch(base + path, {
+        method: "POST",
+        headers: {
+          "X-Admin-Token": token
         }
+      });
 
-        for (const tenant of tenants) {
-          const card = document.createElement("div");
-          card.className = "tenant-card";
+      const text = await res.text();
 
-          const allowed = (tenant.allowed_origins || []).join(", ") || "-";
-          const tokenState = tenant.token_active ? "active" : "revoked";
+      if (!res.ok) {
+        throw new Error(text || ("HTTP " + res.status));
+      }
 
-          card.innerHTML = `
-            <div class="tenant-head">
-              <div class="tenant-name">${tenant.tenant_id}</div>
-              <div class="muted">token: ${tokenState}</div>
-            </div>
-            <div class="lead-line"><strong>Inbox:</strong> ${tenant.inbox_email || "-"}</div>
-            <div class="lead-line"><strong>Subject prefix:</strong> ${tenant.subject_prefix || "-"}</div>
-            <div class="lead-line"><strong>Allowed origins:</strong> ${allowed}</div>
-            <div class="tenant-actions">
-              <button data-action="use" data-tenant="${tenant.tenant_id}">Use</button>
-              <button data-action="analytics" data-tenant="${tenant.tenant_id}">Analytics</button>
-              <button data-action="sessions" data-tenant="${tenant.tenant_id}">Sessions</button>
-              <button data-action="leads" data-tenant="${tenant.tenant_id}">Leads</button>
-              <button data-action="rotate" data-tenant="${tenant.tenant_id}">Rotate token</button>
-              <button data-action="revoke" data-tenant="${tenant.tenant_id}">Revoke token</button>
-            </div>
-          `;
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        return text;
+      }
+    }
 
-          tenantCards.appendChild(card);
-        }
+    function renderLeads(data) {
+      leadsOut.innerHTML = "";
 
-        tenantCards.querySelectorAll("button[data-action]").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const tenantId = btn.getAttribute("data-tenant");
-            const action = btn.getAttribute("data-action");
-            tenantIdEl.value = tenantId;
+      const leads = (data && data.leads) || [];
+      if (!leads.length) {
+        leadsOut.innerHTML = "<div class='muted'>No leads found.</div>";
+        return;
+      }
 
+      for (const lead of leads) {
+        const card = document.createElement("div");
+        card.className = "lead-card";
+
+        card.innerHTML = `
+          <div class="lead-head">
+            <div class="lead-title">Lead #${lead.id}</div>
+            <div class="lead-created">${fmtTs(lead.created_at)}</div>
+          </div>
+          <div class="lead-line lead-email"><strong>Email:</strong> ${lead.email || "-"}</div>
+          <div class="lead-line lead-topic"><strong>Topic:</strong> ${lead.topic || "-"}</div>
+          <div class="lead-summary">${lead.summary || "-"}</div>
+        `;
+
+        leadsOut.appendChild(card);
+      }
+    }
+
+    async function loadAnalyticsForTenant(tenantId) {
+      const data = await apiGet("/scaffold-agent/admin/analytics/" + encodeURIComponent(tenantId));
+      analyticsOut.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function loadSessionsForTenant(tenantId) {
+      const data = await apiGet("/scaffold-agent/admin/sessions/" + encodeURIComponent(tenantId));
+      sessionsOut.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function loadLeadsForTenant(tenantId) {
+      const data = await apiGet("/scaffold-agent/admin/leads/" + encodeURIComponent(tenantId));
+      renderLeads(data);
+    }
+
+    function renderTenants(data) {
+      tenantCards.innerHTML = "";
+
+      const tenants = (data && data.tenants) || [];
+      if (!tenants.length) {
+        tenantCards.innerHTML = "<div class='muted'>No tenants found.</div>";
+        return;
+      }
+
+      for (const tenant of tenants) {
+        const card = document.createElement("div");
+        card.className = "tenant-card";
+
+        const allowed = (tenant.allowed_origins || []).join(", ") || "-";
+        const tokenState = tenant.token_active ? "active" : "revoked";
+
+        card.innerHTML = `
+          <div class="tenant-head">
+            <div class="tenant-name">${tenant.tenant_id}</div>
+            <div class="muted">token: ${tokenState}</div>
+          </div>
+          <div class="lead-line"><strong>Inbox:</strong> ${tenant.inbox_email || "-"}</div>
+          <div class="lead-line"><strong>Subject prefix:</strong> ${tenant.subject_prefix || "-"}</div>
+          <div class="lead-line"><strong>Allowed origins:</strong> ${allowed}</div>
+          <div class="tenant-actions">
+            <button data-action="use" data-tenant="${tenant.tenant_id}">Use</button>
+            <button data-action="analytics" data-tenant="${tenant.tenant_id}">Analytics</button>
+            <button data-action="sessions" data-tenant="${tenant.tenant_id}">Sessions</button>
+            <button data-action="leads" data-tenant="${tenant.tenant_id}">Leads</button>
+            <button data-action="rotate" data-tenant="${tenant.tenant_id}">Rotate token</button>
+            <button data-action="revoke" data-tenant="${tenant.tenant_id}">Revoke token</button>
+          </div>
+        `;
+
+        tenantCards.appendChild(card);
+      }
+
+      tenantCards.querySelectorAll("button[data-action]").forEach((btn) => {
+        btn.addEventListener("click", async function () {
+          const tenantId = btn.getAttribute("data-tenant");
+          const action = btn.getAttribute("data-action");
+          tenantIdEl.value = tenantId;
+
+          try {
             if (action === "use") {
               return;
             }
 
             if (action === "analytics") {
-              try {
-                const data = await apiGet("/scaffold-agent/admin/analytics/" + encodeURIComponent(tenantId));
-                analyticsOut.textContent = JSON.stringify(data, null, 2);
-              } catch (e) {
-                analyticsOut.textContent = String(e);
-              }
+              await loadAnalyticsForTenant(tenantId);
+              return;
             }
 
             if (action === "sessions") {
-              try {
-                const data = await apiGet("/scaffold-agent/admin/sessions/" + encodeURIComponent(tenantId));
-                sessionsOut.textContent = JSON.stringify(data, null, 2);
-              } catch (e) {
-                sessionsOut.textContent = String(e);
-              }
+              await loadSessionsForTenant(tenantId);
+              return;
             }
 
             if (action === "leads") {
-              try {
-                const data = await apiGet("/scaffold-agent/admin/leads/" + encodeURIComponent(tenantId));
-                renderLeads(data);
-              } catch (e) {
-                leadsOut.innerHTML = String(e);
-              }
+              await loadLeadsForTenant(tenantId);
+              return;
             }
-             if (action === "rotate") {
-              try {
-                const data = await apiPost("/scaffold-agent/admin/tenants/" + encodeURIComponent(tenantId) + "/rotate-token");
-                alert("New widget token for " + tenantId + ":\n\n" + data.new_widget_token);
-                const refreshed = await apiGet("/scaffold-agent/admin/tenants");
-                tenantsOut.textContent = JSON.stringify(refreshed, null, 2);
-                renderTenants(refreshed);
-              } catch (e) {
-                alert(String(e));
-              }
+
+            if (action === "rotate") {
+              const data = await apiPost("/scaffold-agent/admin/tenants/" + encodeURIComponent(tenantId) + "/rotate-token");
+              alert("New widget token for " + tenantId + ":\n\n" + data.new_widget_token);
+
+              const refreshed = await apiGet("/scaffold-agent/admin/tenants");
+              tenantsOut.textContent = JSON.stringify(refreshed, null, 2);
+              renderTenants(refreshed);
+              return;
             }
 
             if (action === "revoke") {
-              try {
-                await apiPost("/scaffold-agent/admin/tenants/" + encodeURIComponent(tenantId) + "/revoke-token");
-                alert("Token revoked for " + tenantId);
-                const refreshed = await apiGet("/scaffold-agent/admin/tenants");
-                tenantsOut.textContent = JSON.stringify(refreshed, null, 2);
-                renderTenants(refreshed);
-              } catch (e) {
-                alert(String(e));
-              }
+              await apiPost("/scaffold-agent/admin/tenants/" + encodeURIComponent(tenantId) + "/revoke-token");
+              alert("Token revoked for " + tenantId);
+
+              const refreshed = await apiGet("/scaffold-agent/admin/tenants");
+              tenantsOut.textContent = JSON.stringify(refreshed, null, 2);
+              renderTenants(refreshed);
+              return;
             }
-          });
-        });
-      }
-      
-       const loadTenantsBtn = document.getElementById("loadTenants");
-
-      if (loadTenantsBtn) {
-        loadTenantsBtn.addEventListener("click", async () => {
-          try {
-            tenantsOut.textContent = "Loading...";
-            const data = await apiGet("/scaffold-agent/admin/tenants");
-            tenantsOut.textContent = JSON.stringify(data, null, 2);
-            renderTenants(data);
           } catch (e) {
-            console.error("loadTenants failed:", e);
-            tenantsOut.textContent = String(e);
-            tenantCards.innerHTML = "";
-            alert("Load tenants failed: " + String(e));
+            console.error(e);
+            alert(String(e));
           }
         });
-      } else {
-        console.error("Button #loadTenants not found");
-      }
+      });
+    }
 
-      const loadAnalyticsBtn = document.getElementById("loadAnalytics");
+    if (loadTenantsBtn) {
+      loadTenantsBtn.addEventListener("click", async function () {
+        try {
+          tenantsOut.textContent = "Loading...";
+          const data = await apiGet("/scaffold-agent/admin/tenants");
+          tenantsOut.textContent = JSON.stringify(data, null, 2);
+          renderTenants(data);
+        } catch (e) {
+          console.error(e);
+          tenantsOut.textContent = String(e);
+          tenantCards.innerHTML = "";
+          alert("Load tenants failed: " + String(e));
+        }
+      });
+    }
 
-      if (loadAnalyticsBtn) {
-        loadAnalyticsBtn.addEventListener("click", async () => {
-          try {
-            const tenantId = tenantIdEl.value.trim();
-            const data = await apiGet("/scaffold-agent/admin/analytics/" + encodeURIComponent(tenantId));
-            analyticsOut.textContent = JSON.stringify(data, null, 2);
-          } catch (e) {
-            console.error("loadAnalytics failed:", e);
-            analyticsOut.textContent = String(e);
-          }
-        });
+    if (loadAnalyticsBtn) {
+      loadAnalyticsBtn.addEventListener("click", async function () {
+        try {
+          const tenantId = (tenantIdEl.value || "").trim();
+          await loadAnalyticsForTenant(tenantId);
+        } catch (e) {
+          console.error(e);
+          analyticsOut.textContent = String(e);
+        }
+      });
+    }
 
-      const loadSessionsBtn = document.getElementById("loadSessions");
+    if (loadSessionsBtn) {
+      loadSessionsBtn.addEventListener("click", async function () {
+        try {
+          const tenantId = (tenantIdEl.value || "").trim();
+          await loadSessionsForTenant(tenantId);
+        } catch (e) {
+          console.error(e);
+          sessionsOut.textContent = String(e);
+        }
+      });
+    }
 
-      if (loadSessionsBtn) {
-        loadSessionsBtn.addEventListener("click", async () => {
-          try {
-            const tenantId = tenantIdEl.value.trim();
-            const data = await apiGet("/scaffold-agent/admin/sessions/" + encodeURIComponent(tenantId));
-            sessionsOut.textContent = JSON.stringify(data, null, 2);
-          } catch (e) {
-            console.error("loadSessions failed:", e);
-            sessionsOut.textContent = String(e);
-          }
-        });
-        
-       const loadLeadsBtn = document.getElementById("loadLeads");
+    if (loadLeadsBtn) {
+      loadLeadsBtn.addEventListener("click", async function () {
+        try {
+          const tenantId = (tenantIdEl.value || "").trim();
+          await loadLeadsForTenant(tenantId);
+        } catch (e) {
+          console.error(e);
+          leadsOut.innerHTML = String(e);
+        }
+      });
+    }
 
-      if (loadLeadsBtn) {
-        loadLeadsBtn.addEventListener("click", async () => {
-          try {
-            const tenantId = tenantIdEl.value.trim();
-            const data = await apiGet("/scaffold-agent/admin/leads/" + encodeURIComponent(tenantId));
-            renderLeads(data);
-          } catch (e) {
-            console.error("loadLeads failed:", e);
-            leadsOut.innerHTML = String(e);
-          }
-        });
-        
-    </script>
+    console.log("Scaffold admin page loaded");
+  });
+</script>
   </body>
 </html>
 """
