@@ -14,6 +14,11 @@ def _db_path() -> Path:
     return Path(__file__).resolve().parents[2] / "data" / "scaffold.db"
 
 
+def _table_columns(con: sqlite3.Connection, table_name: str) -> list[str]:
+    rows = con.execute(f"PRAGMA table_info({table_name})").fetchall()
+    return [r[1] for r in rows]
+
+
 def _connect() -> sqlite3.Connection:
     p = _db_path()
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -21,21 +26,21 @@ def _connect() -> sqlite3.Connection:
     con = sqlite3.connect(str(p))
 
     # ---------- scaffold_sessions ----------
-    con.execute(
-        """
-        CREATE TABLE IF NOT EXISTS scaffold_sessions (
-            tenant_id TEXT NOT NULL,
-            session_id TEXT NOT NULL,
-            state_json TEXT NOT NULL,
-            updated_at INTEGER NOT NULL,
-            PRIMARY KEY (tenant_id, session_id)
-        )
-        """
-    )
+    session_cols = _table_columns(con, "scaffold_sessions")
 
-    # MIGRATION: old schema without tenant_id
-    cols = [r[1] for r in con.execute("PRAGMA table_info(scaffold_sessions)").fetchall()]
-    if "tenant_id" not in cols:
+    if not session_cols:
+        con.execute(
+            """
+            CREATE TABLE scaffold_sessions (
+                tenant_id TEXT NOT NULL,
+                session_id TEXT NOT NULL,
+                state_json TEXT NOT NULL,
+                updated_at INTEGER NOT NULL,
+                PRIMARY KEY (tenant_id, session_id)
+            )
+            """
+        )
+    elif "tenant_id" not in session_cols:
         con.execute("ALTER TABLE scaffold_sessions RENAME TO scaffold_sessions_old")
         con.execute(
             """
@@ -58,23 +63,39 @@ def _connect() -> sqlite3.Connection:
         con.execute("DROP TABLE scaffold_sessions_old")
 
     # ---------- scaffold_tenants ----------
-    con.execute(
-        """
-        CREATE TABLE IF NOT EXISTS scaffold_tenants (
-            tenant_id TEXT PRIMARY KEY,
-            widget_token TEXT UNIQUE NOT NULL,
-            inbox_email TEXT NOT NULL,
-            subject_prefix TEXT NOT NULL,
-            allowed_origins TEXT NOT NULL
-        )
-        """
-    )
+    tenant_cols = _table_columns(con, "scaffold_tenants")
 
-    # MIGRATION: tenants without allowed_origins
-    cols = [r[1] for r in con.execute("PRAGMA table_info(scaffold_tenants)").fetchall()]
-    if "allowed_origins" not in cols:
+    if not tenant_cols:
+        con.execute(
+            """
+            CREATE TABLE scaffold_tenants (
+                tenant_id TEXT PRIMARY KEY,
+                widget_token TEXT UNIQUE NOT NULL,
+                inbox_email TEXT NOT NULL,
+                subject_prefix TEXT NOT NULL,
+                allowed_origins TEXT NOT NULL,
+                agent_type TEXT NOT NULL DEFAULT 'scaffold_web_agent',
+                knowledge_text TEXT NOT NULL DEFAULT ''
+            )
+            """
+        )
+        tenant_cols = _table_columns(con, "scaffold_tenants")
+
+    if "allowed_origins" not in tenant_cols:
         con.execute(
             "ALTER TABLE scaffold_tenants ADD COLUMN allowed_origins TEXT NOT NULL DEFAULT ''"
+        )
+        tenant_cols = _table_columns(con, "scaffold_tenants")
+
+    if "agent_type" not in tenant_cols:
+        con.execute(
+            "ALTER TABLE scaffold_tenants ADD COLUMN agent_type TEXT NOT NULL DEFAULT 'scaffold_web_agent'"
+        )
+        tenant_cols = _table_columns(con, "scaffold_tenants")
+
+    if "knowledge_text" not in tenant_cols:
+        con.execute(
+            "ALTER TABLE scaffold_tenants ADD COLUMN knowledge_text TEXT NOT NULL DEFAULT ''"
         )
 
     # ---------- scaffold_rate_limits ----------
@@ -98,6 +119,20 @@ def _connect() -> sqlite3.Connection:
             email TEXT,
             topic TEXT,
             summary TEXT,
+            created_at INTEGER NOT NULL
+        )
+        """
+    )
+
+    # ---------- scaffold_events ----------
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS scaffold_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            session_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            event_payload_json TEXT NOT NULL,
             created_at INTEGER NOT NULL
         )
         """
@@ -288,6 +323,55 @@ def list_leads_for_tenant(tenant_id: str, limit: int = 50):
                 "topic": r[4],
                 "summary": r[5],
                 "created_at": r[6],
+            }
+        )
+
+    return result
+
+
+def insert_event(
+    tenant_id: str,
+    session_id: str,
+    event_type: str,
+    event_payload: dict | None,
+) -> None:
+    now = int(time.time())
+    payload_json = json.dumps(event_payload or {}, ensure_ascii=False)
+
+    with _connect() as con:
+        con.execute(
+            """
+            INSERT INTO scaffold_events(tenant_id, session_id, event_type, event_payload_json, created_at)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (tenant_id, session_id, event_type, payload_json, now),
+        )
+        con.commit()
+
+
+def list_events_for_tenant(tenant_id: str, limit: int = 100) -> list[dict]:
+    with _connect() as con:
+        rows = con.execute(
+            """
+            SELECT id, tenant_id, session_id, event_type, event_payload_json, created_at
+            FROM scaffold_events
+            WHERE tenant_id = ?
+            ORDER BY created_at DESC, id DESC
+            LIMIT ?
+            """,
+            (tenant_id, limit),
+        ).fetchall()
+
+    result = []
+    for r in rows:
+        result.append(
+            {
+                "id": r[0],
+                "tenant_id": r[1],
+                "session_id": r[2],
+                "event_type": r[3],
+                "event_payload_json": r[4],
+                "created_at": r[5],
             }
         )
 

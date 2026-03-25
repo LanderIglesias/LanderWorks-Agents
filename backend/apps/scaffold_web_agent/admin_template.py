@@ -7,7 +7,7 @@ def admin_html() -> str:
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Scaffold Admin</title>
+    <title>Web Lead Agent Admin</title>
     <style>
       body {
         margin: 0;
@@ -146,7 +146,7 @@ def admin_html() -> str:
   <body>
     <div class="wrap">
       <div class="card">
-        <h1>Scaffold Admin</h1>
+        <h1>Web Lead Agent Admin</h1>
         <div class="row">
           <input id="baseUrl" style="width:320px" placeholder="Base URL" />
           <input id="adminToken" style="width:320px" placeholder="Admin token" />
@@ -176,6 +176,10 @@ def admin_html() -> str:
 
         <h3>Leads</h3>
         <div id="leadsOut" class="leads"></div>
+        <h3>Events</h3>
+        <pre id="eventsOut">(not loaded)</pre>
+        <h3>Knowledge</h3>
+        <pre id="knowledgeOut">(not loaded)</pre>
       </div>
     </div>
 
@@ -296,6 +300,18 @@ def admin_html() -> str:
       const data = await apiGet("/scaffold-agent/admin/leads/" + encodeURIComponent(tenantId));
       renderLeads(data);
     }
+    
+    async function loadEventsForTenant(tenantId) {
+      const data = await apiGet("/scaffold-agent/admin/events/" + encodeURIComponent(tenantId));
+      const out = document.getElementById("eventsOut");
+      out.textContent = JSON.stringify(data, null, 2);
+    }
+    
+    async function loadKnowledgeForTenant(tenantId) {
+    const data = await apiGet("/scaffold-agent/admin/knowledge/" + encodeURIComponent(tenantId));
+    const out = document.getElementById("knowledgeOut");
+    out.textContent = JSON.stringify(data, null, 2);
+    }
 
     function renderTenants(data) {
       tenantCards.innerHTML = "";
@@ -318,6 +334,7 @@ def admin_html() -> str:
             <div class="tenant-name">${tenant.tenant_id}</div>
             <div class="muted">token: ${tokenState}</div>
           </div>
+          <div class="lead-line"><strong>Agent type:</strong> ${tenant.agent_type || "-"}</div>
           <div class="lead-line"><strong>Inbox:</strong> ${tenant.inbox_email || "-"}</div>
           <div class="lead-line"><strong>Subject prefix:</strong> ${tenant.subject_prefix || "-"}</div>
           <div class="lead-line"><strong>Allowed origins:</strong> ${allowed}</div>
@@ -326,6 +343,8 @@ def admin_html() -> str:
             <button data-action="analytics" data-tenant="${tenant.tenant_id}">Analytics</button>
             <button data-action="sessions" data-tenant="${tenant.tenant_id}">Sessions</button>
             <button data-action="leads" data-tenant="${tenant.tenant_id}">Leads</button>
+            <button data-action="events" data-tenant="${tenant.tenant_id}">Events</button>
+            <button data-action="knowledge" data-tenant="${tenant.tenant_id}">Knowledge</button>
             <button data-action="rotate" data-tenant="${tenant.tenant_id}">Rotate token</button>
             <button data-action="revoke" data-tenant="${tenant.tenant_id}">Revoke token</button>
           </div>
@@ -357,6 +376,16 @@ def admin_html() -> str:
 
             if (action === "leads") {
               await loadLeadsForTenant(tenantId);
+              return;
+            }
+            
+            if (action === "events") {
+              await loadEventsForTenant(tenantId);
+              return;
+            }
+            
+            if (action === "knowledge") {
+              await loadKnowledgeForTenant(tenantId);
               return;
             }
 

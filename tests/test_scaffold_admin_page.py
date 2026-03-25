@@ -8,4 +8,4 @@ def test_admin_page_served():
     r = client.get("/scaffold-agent/admin/page")
     assert r.status_code == 200
     assert "text/html" in r.headers.get("content-type", "")
-    assert "Scaffold Admin" in r.text
+    assert "Web Lead Agent Admin" in r.text

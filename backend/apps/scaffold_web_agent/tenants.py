@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import secrets
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .sqlite_store import _connect
 
@@ -11,8 +11,10 @@ class Tenant:
     tenant_id: str
     widget_token: str
     inbox_email: str
-    subject_prefix: str = "[Scaffold Web Agent]"
-    allowed_origins: list[str] = None
+    subject_prefix: str = "[Web Lead Agent]"
+    allowed_origins: list[str] = field(default_factory=list)
+    agent_type: str = "scaffold_web_agent"
+    knowledge_text: str = ""
 
 
 def ensure_tenants_table() -> None:
@@ -30,7 +32,7 @@ def resolve_tenant_by_token(widget_token: str) -> Tenant | None:
     with _connect() as con:
         row = con.execute(
             """
-            SELECT tenant_id, widget_token, inbox_email, subject_prefix, allowed_origins
+            SELECT tenant_id, widget_token, inbox_email, subject_prefix, allowed_origins, agent_type, knowledge_text
             FROM scaffold_tenants
             WHERE widget_token = ?
             """,
@@ -47,6 +49,8 @@ def resolve_tenant_by_token(widget_token: str) -> Tenant | None:
         inbox_email=row[2],
         subject_prefix=row[3],
         allowed_origins=allowed,
+        agent_type=row[5] or "scaffold_web_agent",
+        knowledge_text=row[6] or "",
     )
 
 
@@ -56,13 +60,23 @@ def upsert_tenant(tenant: Tenant) -> None:
     with _connect() as con:
         con.execute(
             """
-            INSERT INTO scaffold_tenants(tenant_id, widget_token, inbox_email, subject_prefix, allowed_origins)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO scaffold_tenants(
+                tenant_id,
+                widget_token,
+                inbox_email,
+                subject_prefix,
+                allowed_origins,
+                agent_type,
+                knowledge_text
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(tenant_id) DO UPDATE SET
                 widget_token=excluded.widget_token,
                 inbox_email=excluded.inbox_email,
                 subject_prefix=excluded.subject_prefix,
-                allowed_origins=excluded.allowed_origins
+                allowed_origins=excluded.allowed_origins,
+                agent_type=excluded.agent_type,
+                knowledge_text=excluded.knowledge_text
             """,
             (
                 tenant.tenant_id,
@@ -70,6 +84,8 @@ def upsert_tenant(tenant: Tenant) -> None:
                 tenant.inbox_email,
                 tenant.subject_prefix,
                 allowed_csv,
+                tenant.agent_type,
+                tenant.knowledge_text,
             ),
         )
     con.commit()
@@ -111,7 +127,7 @@ def list_tenants() -> list[dict]:
     with _connect() as con:
         rows = con.execute(
             """
-            SELECT tenant_id, widget_token, inbox_email, subject_prefix, allowed_origins
+            SELECT tenant_id, widget_token, inbox_email, subject_prefix, allowed_origins, agent_type, knowledge_text
             FROM scaffold_tenants
             ORDER BY tenant_id
             """
@@ -127,6 +143,8 @@ def list_tenants() -> list[dict]:
                 "inbox_email": r[2],
                 "subject_prefix": r[3],
                 "allowed_origins": [x for x in (r[4] or "").split(",") if x],
+                "agent_type": r[5] or "scaffold_web_agent",
+                "knowledge_text": r[6] or "",
             }
         )
 

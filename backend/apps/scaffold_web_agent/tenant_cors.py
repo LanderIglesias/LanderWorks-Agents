@@ -11,8 +11,9 @@ class ScaffoldTenantCORSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
-        # Only apply to scaffold endpoints
-        if not path.startswith("/scaffold-agent/"):
+        # Only apply tenant CORS validation to scaffold chat endpoint.
+        # Admin, demo, widget.js and health must remain accessible without tenant token.
+        if path != "/scaffold-agent/chat":
             return await call_next(request)
 
         origin = request.headers.get("origin", "")
