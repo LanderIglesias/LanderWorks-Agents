@@ -14,9 +14,9 @@ class Category(str, Enum):
 
 
 class Urgency(str, Enum):
-    URGENT = "urgent"  # today
-    NORMAL = "normal"  # this week
-    LOW = "low"  # no rush
+    URGENT = "urgent"
+    NORMAL = "normal"
+    LOW = "low"
 
 
 class Status(str, Enum):
@@ -58,3 +58,9 @@ class CaseData:
 class SessionState:
     step: Step = Step.START
     data: CaseData = field(default_factory=CaseData)
+
+    # Historial de mensajes para el motor LLM.
+    # Cada elemento es {"role": "user" | "assistant", "content": "..."}
+    # Los motores de reglas (engine.py) no usan este campo — queda vacío.
+    # Es compatible hacia atrás: sesiones antiguas sin este campo reciben lista vacía.
+    messages: list[dict] = field(default_factory=list)

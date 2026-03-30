@@ -58,7 +58,21 @@ class ChatApplicationService:
         )
 
         state = self._session_service.get_state(tenant.tenant_id, session_id)
-        new_state, reply = handle_user_message(state, message)
+
+        # ── Enrutamiento al motor correcto ────────────────────────────────
+        # Si el tenant tiene knowledge_text → usamos el motor LLM (Claude).
+        # Si no → usamos el motor de reglas original (engine.py).
+        # Esto permite que ambos modos coexistan sin romper nada existente.
+        if tenant.knowledge_text:
+            from .llm_engine import handle_user_message_llm
+
+            new_state, reply = handle_user_message_llm(
+                state,
+                message,
+                knowledge_text=tenant.knowledge_text,
+            )
+        else:
+            new_state, reply = handle_user_message(state, message)
 
         self._event_service.record(
             tenant_id=tenant.tenant_id,
@@ -67,9 +81,11 @@ class ChatApplicationService:
             event_payload={
                 "step": new_state.step.value,
                 "is_done": new_state.step == Step.DONE,
+                "engine": "llm" if tenant.knowledge_text else "rules",
             },
         )
 
+        # ── Procesamiento del lead cuando el usuario confirma ─────────────
         if new_state.step == Step.SEND:
             if not new_state.data.summary or new_state.data.status.value != "ready_to_send":
                 raise HTTPException(

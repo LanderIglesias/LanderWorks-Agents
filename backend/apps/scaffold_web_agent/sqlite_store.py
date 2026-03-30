@@ -143,18 +143,28 @@ def _connect() -> sqlite3.Connection:
 
 
 def _serialize(state: SessionState) -> str:
+    """
+    Convierte un SessionState a JSON para guardarlo en SQLite.
+    Los Enums se convierten a su valor string.
+    El campo 'messages' (historial LLM) se incluye directamente como lista.
+    """
     d = asdict(state)
-    # Enums to values
+    # Enums → valores string
     if d["step"]:
         d["step"] = state.step.value
     sd = d["data"]
     sd["status"] = state.data.status.value
     sd["category"] = state.data.category.value if state.data.category else None
     sd["urgency"] = state.data.urgency.value if state.data.urgency else None
+    # 'messages' ya es una lista de dicts, asdict() la maneja correctamente
     return json.dumps(d, ensure_ascii=False)
 
 
 def _deserialize(s: str) -> SessionState:
+    """
+    Reconstruye un SessionState desde JSON.
+    Compatible hacia atrás: sesiones antiguas sin 'messages' reciben lista vacía.
+    """
     d = json.loads(s)
     st = SessionState()
     st.step = Step(d.get("step", Step.START.value))
@@ -177,6 +187,11 @@ def _deserialize(s: str) -> SessionState:
 
     st.data.summary = data.get("summary")
     st.data.status = Status(data.get("status", Status.COLLECTING.value))
+
+    # Campo nuevo: historial de mensajes para el motor LLM
+    # Si no existe en sesiones antiguas, devuelve lista vacía (compatible)
+    st.messages = d.get("messages") or []
+
     return st
 
 

@@ -41,6 +41,11 @@ def admin_html() -> str:
         background: #111;
         color: white;
         border: 0;
+        transition: opacity .15s;
+      }
+      button:disabled {
+        opacity: .45;
+        cursor: not-allowed;
       }
       .row {
         display: flex;
@@ -116,6 +121,11 @@ def admin_html() -> str:
         border: 1px solid #e4e7eb;
         border-radius: 12px;
         padding: 14px;
+        transition: border-color .2s;
+      }
+      .tenant-card.active {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,.15);
       }
       .tenant-head {
         display: flex;
@@ -140,6 +150,41 @@ def admin_html() -> str:
         border-radius: 8px;
         padding: 8px 10px;
         cursor: pointer;
+        font-size: 13px;
+      }
+      .tenant-actions button[data-action="use"] {
+        background: #6366f1;
+      }
+      .tenant-actions button[data-action="rotate"] {
+        background: #d97706;
+      }
+      .tenant-actions button[data-action="revoke"] {
+        background: #dc2626;
+      }
+
+      /* ── Detail panel (inline, below each tenant card) ── */
+      .detail-panel {
+        display: none;
+        margin-top: 12px;
+        border-top: 1px solid #e4e7eb;
+        padding-top: 12px;
+      }
+      .detail-panel.open {
+        display: block;
+      }
+      .detail-panel h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+      }
+      .detail-panel pre {
+        margin: 0;
+        font-size: 13px;
+      }
+      .detail-panel .leads {
+        margin: 0;
       }
     </style>
   </head>
@@ -157,122 +202,78 @@ def admin_html() -> str:
 
       <div class="card">
         <h2>Tenants</h2>
-        <pre id="tenantsOut" style="display:none">(not loaded)</pre>
         <div id="tenantCards" class="tenant-list"></div>
-      </div>
-
-      <div class="card">
-        <h2>Tenant details</h2>
-        <div class="row">
-          <input id="tenantId" style="width:260px" placeholder="tenant_id" />
-          <button id="loadAnalytics">Load analytics</button>
-          <button id="loadSessions">Load sessions</button>
-          <button id="loadLeads">Load leads</button>
-        </div>
-        <h3>Analytics</h3>
-        <pre id="analyticsOut">(not loaded)</pre>
-        <h3>Sessions</h3>
-        <pre id="sessionsOut" style="display:none">(not loaded)</pre>
-
-        <h3>Leads</h3>
-        <div id="leadsOut" class="leads"></div>
-        <h3>Events</h3>
-        <pre id="eventsOut">(not loaded)</pre>
-        <h3>Knowledge</h3>
-        <pre id="knowledgeOut">(not loaded)</pre>
       </div>
     </div>
 
     <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const baseUrlEl = document.getElementById("baseUrl");
+    const baseUrlEl    = document.getElementById("baseUrl");
     const adminTokenEl = document.getElementById("adminToken");
-    const tenantIdEl = document.getElementById("tenantId");
-
-    const tenantsOut = document.getElementById("tenantsOut");
-    const tenantCards = document.getElementById("tenantCards");
-    const analyticsOut = document.getElementById("analyticsOut");
-    const sessionsOut = document.getElementById("sessionsOut");
-    const leadsOut = document.getElementById("leadsOut");
-
+    const tenantCards  = document.getElementById("tenantCards");
     const loadTenantsBtn = document.getElementById("loadTenants");
-    const loadAnalyticsBtn = document.getElementById("loadAnalytics");
-    const loadSessionsBtn = document.getElementById("loadSessions");
-    const loadLeadsBtn = document.getElementById("loadLeads");
 
     baseUrlEl.value = window.location.origin;
 
+    // ── helpers ──────────────────────────────────────────────────────────
+
     function fmtTs(ts) {
       if (!ts) return "-";
-      try {
-        return new Date(ts * 1000).toLocaleString();
-      } catch (e) {
-        return String(ts);
-      }
+      try { return new Date(ts * 1000).toLocaleString(); }
+      catch (e) { return String(ts); }
     }
 
     async function apiGet(path) {
-      const base = (baseUrlEl.value || "").replace(/\/+$/, "");
+      const base  = (baseUrlEl.value || "").replace(/\/+$/, "");
       const token = (adminTokenEl.value || "").trim();
-
-      const res = await fetch(base + path, {
+      const res   = await fetch(base + path, {
         method: "GET",
-        headers: {
-          "X-Admin-Token": token
-        }
+        headers: { "X-Admin-Token": token },
       });
-
       const text = await res.text();
-
-      if (!res.ok) {
-        throw new Error(text || ("HTTP " + res.status));
-      }
-
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        return text;
-      }
+      if (!res.ok) throw new Error(text || ("HTTP " + res.status));
+      try { return JSON.parse(text); } catch (e) { return text; }
     }
 
     async function apiPost(path) {
-      const base = (baseUrlEl.value || "").replace(/\/+$/, "");
+      const base  = (baseUrlEl.value || "").replace(/\/+$/, "");
       const token = (adminTokenEl.value || "").trim();
-
-      const res = await fetch(base + path, {
+      const res   = await fetch(base + path, {
         method: "POST",
-        headers: {
-          "X-Admin-Token": token
-        }
+        headers: { "X-Admin-Token": token },
       });
-
       const text = await res.text();
-
-      if (!res.ok) {
-        throw new Error(text || ("HTTP " + res.status));
-      }
-
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        return text;
-      }
+      if (!res.ok) throw new Error(text || ("HTTP " + res.status));
+      try { return JSON.parse(text); } catch (e) { return text; }
     }
 
-    function renderLeads(data) {
-      leadsOut.innerHTML = "";
+    // Set a button to loading state; returns restore function
+    function setLoading(btn) {
+      const orig = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = "…";
+      return () => { btn.disabled = false; btn.textContent = orig; };
+    }
 
+    // ── detail panel helpers ──────────────────────────────────────────────
+
+    function getPanel(card) {
+      return card.querySelector(".detail-panel");
+    }
+
+    function showPanel(card, title, html) {
+      const panel = getPanel(card);
+      panel.querySelector("h4").textContent = title;
+      panel.querySelector(".panel-body").innerHTML = html;
+      panel.classList.add("open");
+      panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function buildLeadsHtml(data) {
       const leads = (data && data.leads) || [];
-      if (!leads.length) {
-        leadsOut.innerHTML = "<div class='muted'>No leads found.</div>";
-        return;
-      }
-
-      for (const lead of leads) {
-        const card = document.createElement("div");
-        card.className = "lead-card";
-
-        card.innerHTML = `
+      if (!leads.length) return "<div class='muted'>No leads found.</div>";
+      return leads.map(lead => `
+        <div class="lead-card">
           <div class="lead-head">
             <div class="lead-title">Lead #${lead.id}</div>
             <div class="lead-created">${fmtTs(lead.created_at)}</div>
@@ -280,38 +281,11 @@ def admin_html() -> str:
           <div class="lead-line lead-email"><strong>Email:</strong> ${lead.email || "-"}</div>
           <div class="lead-line lead-topic"><strong>Topic:</strong> ${lead.topic || "-"}</div>
           <div class="lead-summary">${lead.summary || "-"}</div>
-        `;
-
-        leadsOut.appendChild(card);
-      }
+        </div>
+      `).join("");
     }
 
-    async function loadAnalyticsForTenant(tenantId) {
-      const data = await apiGet("/scaffold-agent/admin/analytics/" + encodeURIComponent(tenantId));
-      analyticsOut.textContent = JSON.stringify(data, null, 2);
-    }
-
-    async function loadSessionsForTenant(tenantId) {
-      const data = await apiGet("/scaffold-agent/admin/sessions/" + encodeURIComponent(tenantId));
-      sessionsOut.textContent = JSON.stringify(data, null, 2);
-    }
-
-    async function loadLeadsForTenant(tenantId) {
-      const data = await apiGet("/scaffold-agent/admin/leads/" + encodeURIComponent(tenantId));
-      renderLeads(data);
-    }
-    
-    async function loadEventsForTenant(tenantId) {
-      const data = await apiGet("/scaffold-agent/admin/events/" + encodeURIComponent(tenantId));
-      const out = document.getElementById("eventsOut");
-      out.textContent = JSON.stringify(data, null, 2);
-    }
-    
-    async function loadKnowledgeForTenant(tenantId) {
-    const data = await apiGet("/scaffold-agent/admin/knowledge/" + encodeURIComponent(tenantId));
-    const out = document.getElementById("knowledgeOut");
-    out.textContent = JSON.stringify(data, null, 2);
-    }
+    // ── render tenants ────────────────────────────────────────────────────
 
     function renderTenants(data) {
       tenantCards.innerHTML = "";
@@ -325,8 +299,9 @@ def admin_html() -> str:
       for (const tenant of tenants) {
         const card = document.createElement("div");
         card.className = "tenant-card";
+        card.dataset.tenantId = tenant.tenant_id;
 
-        const allowed = (tenant.allowed_origins || []).join(", ") || "-";
+        const allowed    = (tenant.allowed_origins || []).join(", ") || "-";
         const tokenState = tenant.token_active ? "active" : "revoked";
 
         card.innerHTML = `
@@ -339,131 +314,113 @@ def admin_html() -> str:
           <div class="lead-line"><strong>Subject prefix:</strong> ${tenant.subject_prefix || "-"}</div>
           <div class="lead-line"><strong>Allowed origins:</strong> ${allowed}</div>
           <div class="tenant-actions">
-            <button data-action="use" data-tenant="${tenant.tenant_id}">Use</button>
             <button data-action="analytics" data-tenant="${tenant.tenant_id}">Analytics</button>
-            <button data-action="sessions" data-tenant="${tenant.tenant_id}">Sessions</button>
-            <button data-action="leads" data-tenant="${tenant.tenant_id}">Leads</button>
-            <button data-action="events" data-tenant="${tenant.tenant_id}">Events</button>
+            <button data-action="sessions"  data-tenant="${tenant.tenant_id}">Sessions</button>
+            <button data-action="leads"     data-tenant="${tenant.tenant_id}">Leads</button>
+            <button data-action="events"    data-tenant="${tenant.tenant_id}">Events</button>
             <button data-action="knowledge" data-tenant="${tenant.tenant_id}">Knowledge</button>
-            <button data-action="rotate" data-tenant="${tenant.tenant_id}">Rotate token</button>
-            <button data-action="revoke" data-tenant="${tenant.tenant_id}">Revoke token</button>
+            <button data-action="rotate"    data-tenant="${tenant.tenant_id}">Rotate token</button>
+            <button data-action="revoke"    data-tenant="${tenant.tenant_id}">Revoke token</button>
+          </div>
+          <div class="detail-panel">
+            <h4></h4>
+            <div class="panel-body"></div>
           </div>
         `;
 
         tenantCards.appendChild(card);
       }
-
-      tenantCards.querySelectorAll("button[data-action]").forEach((btn) => {
-        btn.addEventListener("click", async function () {
-          const tenantId = btn.getAttribute("data-tenant");
-          const action = btn.getAttribute("data-action");
-          tenantIdEl.value = tenantId;
-
-          try {
-            if (action === "use") {
-              return;
-            }
-
-            if (action === "analytics") {
-              await loadAnalyticsForTenant(tenantId);
-              return;
-            }
-
-            if (action === "sessions") {
-              await loadSessionsForTenant(tenantId);
-              return;
-            }
-
-            if (action === "leads") {
-              await loadLeadsForTenant(tenantId);
-              return;
-            }
-            
-            if (action === "events") {
-              await loadEventsForTenant(tenantId);
-              return;
-            }
-            
-            if (action === "knowledge") {
-              await loadKnowledgeForTenant(tenantId);
-              return;
-            }
-
-            if (action === "rotate") {
-              const data = await apiPost("/scaffold-agent/admin/tenants/" + encodeURIComponent(tenantId) + "/rotate-token");
-              alert("New widget token for " + tenantId + ":\n\n" + data.new_widget_token);
-
-              const refreshed = await apiGet("/scaffold-agent/admin/tenants");
-              tenantsOut.textContent = JSON.stringify(refreshed, null, 2);
-              renderTenants(refreshed);
-              return;
-            }
-
-            if (action === "revoke") {
-              await apiPost("/scaffold-agent/admin/tenants/" + encodeURIComponent(tenantId) + "/revoke-token");
-              alert("Token revoked for " + tenantId);
-
-              const refreshed = await apiGet("/scaffold-agent/admin/tenants");
-              tenantsOut.textContent = JSON.stringify(refreshed, null, 2);
-              renderTenants(refreshed);
-              return;
-            }
-          } catch (e) {
-            console.error(e);
-            alert(String(e));
-          }
-        });
-      });
     }
+
+    // ── event delegation (ONE listener, never breaks on re-render) ────────
+
+    tenantCards.addEventListener("click", async function (e) {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+
+      const action   = btn.dataset.action;
+      const tenantId = btn.dataset.tenant;
+      const card     = btn.closest(".tenant-card");
+
+      // Mark active card
+      tenantCards.querySelectorAll(".tenant-card").forEach(c => c.classList.remove("active"));
+      card.classList.add("active");
+
+      const restore = setLoading(btn);
+
+      try {
+
+        if (action === "analytics") {
+          const data = await apiGet("/scaffold-agent/admin/analytics/" + encodeURIComponent(tenantId));
+          showPanel(card, "Analytics", `<pre>${JSON.stringify(data, null, 2)}</pre>`);
+        }
+
+        else if (action === "sessions") {
+          const data = await apiGet("/scaffold-agent/admin/sessions/" + encodeURIComponent(tenantId));
+          showPanel(card, "Sessions", `<pre>${JSON.stringify(data, null, 2)}</pre>`);
+        }
+
+        else if (action === "leads") {
+          const data = await apiGet("/scaffold-agent/admin/leads/" + encodeURIComponent(tenantId));
+          showPanel(card, "Leads", `<div class="leads">${buildLeadsHtml(data)}</div>`);
+        }
+
+        else if (action === "events") {
+          const data = await apiGet("/scaffold-agent/admin/events/" + encodeURIComponent(tenantId));
+          showPanel(card, "Events", `<pre>${JSON.stringify(data, null, 2)}</pre>`);
+        }
+
+        else if (action === "knowledge") {
+          const data = await apiGet("/scaffold-agent/admin/knowledge/" + encodeURIComponent(tenantId));
+          showPanel(card, "Knowledge", `<pre>${JSON.stringify(data, null, 2)}</pre>`);
+        }
+
+        else if (action === "rotate") {
+          if (!confirm("Rotate token for " + tenantId + "? The current widget token will stop working.")) {
+            return;
+          }
+          const data = await apiPost(
+            "/scaffold-agent/admin/tenants/" + encodeURIComponent(tenantId) + "/rotate-token"
+          );
+          showPanel(card, "New widget token", `<pre>${data.new_widget_token}</pre>`);
+          // Refresh tenant list to reflect new token state
+          const refreshed = await apiGet("/scaffold-agent/admin/tenants");
+          renderTenants(refreshed);
+        }
+
+        else if (action === "revoke") {
+          if (!confirm("Revoke token for " + tenantId + "? The widget will stop working immediately.")) {
+            return;
+          }
+          await apiPost(
+            "/scaffold-agent/admin/tenants/" + encodeURIComponent(tenantId) + "/revoke-token"
+          );
+          showPanel(card, "Token status", `<pre>Token revoked for ${tenantId}</pre>`);
+          const refreshed = await apiGet("/scaffold-agent/admin/tenants");
+          renderTenants(refreshed);
+        }
+
+      } catch (err) {
+        console.error("[admin]", action, tenantId, err);
+        showPanel(card, "Error", `<pre style="color:#dc2626">${String(err)}</pre>`);
+      } finally {
+        restore();
+      }
+    });
+
+    // ── load tenants button ───────────────────────────────────────────────
 
     if (loadTenantsBtn) {
       loadTenantsBtn.addEventListener("click", async function () {
+        const restore = setLoading(loadTenantsBtn);
         try {
-          tenantsOut.textContent = "Loading...";
           const data = await apiGet("/scaffold-agent/admin/tenants");
-          tenantsOut.textContent = JSON.stringify(data, null, 2);
           renderTenants(data);
-        } catch (e) {
-          console.error(e);
-          tenantsOut.textContent = String(e);
-          tenantCards.innerHTML = "";
-          alert("Load tenants failed: " + String(e));
-        }
-      });
-    }
-
-    if (loadAnalyticsBtn) {
-      loadAnalyticsBtn.addEventListener("click", async function () {
-        try {
-          const tenantId = (tenantIdEl.value || "").trim();
-          await loadAnalyticsForTenant(tenantId);
-        } catch (e) {
-          console.error(e);
-          analyticsOut.textContent = String(e);
-        }
-      });
-    }
-
-    if (loadSessionsBtn) {
-      loadSessionsBtn.addEventListener("click", async function () {
-        try {
-          const tenantId = (tenantIdEl.value || "").trim();
-          await loadSessionsForTenant(tenantId);
-        } catch (e) {
-          console.error(e);
-          sessionsOut.textContent = String(e);
-        }
-      });
-    }
-
-    if (loadLeadsBtn) {
-      loadLeadsBtn.addEventListener("click", async function () {
-        try {
-          const tenantId = (tenantIdEl.value || "").trim();
-          await loadLeadsForTenant(tenantId);
-        } catch (e) {
-          console.error(e);
-          leadsOut.innerHTML = String(e);
+        } catch (err) {
+          console.error("[admin] load tenants:", err);
+          tenantCards.innerHTML = `<div class='muted' style='color:#dc2626'>${String(err)}</div>`;
+        } finally {
+          restore();
         }
       });
     }
