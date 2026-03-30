@@ -82,6 +82,12 @@ def _build_lead_summary(messages: list[dict], email: str | None) -> str:
     return "\n".join(lines)
 
 
+# Mensaje especial que envía el widget al abrirse por primera vez.
+# El engine lo intercepta para generar un saludo con el LLM sin que
+# el usuario haya escrito nada.
+_GREETING_TRIGGER = "__greeting__"
+
+
 def handle_user_message_llm(
     state: SessionState,
     user_text: str,
@@ -93,24 +99,47 @@ def handle_user_message_llm(
 
     Args:
         state: Estado actual de la sesión (incluye historial en state.messages)
-        user_text: Mensaje del usuario
+        user_text: Mensaje del usuario (o __greeting__ para el saludo inicial)
         knowledge_text: Texto de conocimiento del tenant (de la BD)
 
     Returns:
         (new_state, reply): Estado actualizado + respuesta del agente
     """
-    # ── 1. Detectar email en el mensaje del usuario ───────────────────────
+    client = anthropic.Anthropic()
+
+    # ── Caso especial: saludo inicial ─────────────────────────────────────
+    # El widget envía "__greeting__" al abrirse por primera vez.
+    # Claude genera el saludo basándose en el knowledge del tenant.
+    # El mensaje especial NO se guarda en el historial — solo la respuesta.
+    if user_text == _GREETING_TRIGGER:
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=200,
+            system=_build_system(knowledge_text),
+            messages=[
+                {
+                    "role": "user",
+                    "content": "Saluda al visitante en español e indícale brevemente en qué puedes ayudarle. Máximo 2 frases.",
+                }
+            ],
+        )
+        reply = response.content[0].text.strip()
+        # Guardamos solo la respuesta del asistente, no el trigger interno
+        updated_messages = [{"role": "assistant", "content": reply}]
+        new_state = replace(state, messages=updated_messages)
+        return new_state, reply
+
+    # ── Flujo normal ──────────────────────────────────────────────────────
+
+    # 1. Detectar email en el mensaje del usuario
     email_found = _extract_email(user_text)
     if email_found and not state.data.email:
-        # Guardamos el email en data para que el lead_service lo use
         state.data.email = email_found
 
-    # ── 2. Construir lista de mensajes para la API ────────────────────────
-    # Añadimos el mensaje actual al historial existente
+    # 2. Construir lista de mensajes para la API (historial + mensaje actual)
     messages_for_api = list(state.messages) + [{"role": "user", "content": user_text}]
 
-    # ── 3. Llamar a Claude claude-haiku (rápido y económico para demos) ──────
-    client = anthropic.Anthropic()  # Lee ANTHROPIC_API_KEY del entorno
+    # 3. Llamar a Claude Haiku
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=600,
@@ -119,31 +148,24 @@ def handle_user_message_llm(
     )
     raw_reply: str = response.content[0].text.strip()
 
-    # ── 4. Detectar marcador de lead confirmado ───────────────────────────
+    # 4. Detectar marcador de lead confirmado
     send_lead = _LEAD_MARKER in raw_reply
-    # Limpiamos el marcador del texto que verá el usuario
     reply = raw_reply.replace(_LEAD_MARKER, "").strip()
 
-    # ── 5. Guardar la respuesta del asistente en el historial ─────────────
+    # 5. Guardar el turno completo en el historial
     updated_messages = messages_for_api + [{"role": "assistant", "content": reply}]
 
-    # ── 6. Actualizar estado ──────────────────────────────────────────────
+    # 6. Actualizar estado
     new_step = state.step
 
     if send_lead:
-        # El usuario confirmó → preparamos el lead para ser guardado y enviado
         new_step = Step.SEND
-
         if not state.data.summary:
-            # Extraemos un topic del primer mensaje del visitante
             user_messages = [m["content"] for m in updated_messages if m["role"] == "user"]
             first_message = user_messages[0] if user_messages else "Consulta web"
             state.data.topic = first_message[:80]
             state.data.summary = _build_lead_summary(updated_messages, state.data.email)
             state.data.status = Status.READY_TO_SEND
 
-    # Creamos nuevo estado con el step actualizado y el historial completo
-    # Usamos replace() para crear una copia inmutable del estado
     new_state = replace(state, step=new_step, messages=updated_messages)
-
     return new_state, reply

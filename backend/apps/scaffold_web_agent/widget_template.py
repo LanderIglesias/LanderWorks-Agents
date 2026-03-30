@@ -24,7 +24,6 @@ def widget_js() -> str:
   }
 
   var API_BASE = (function() {
-    // infer API base from current script src (same origin where widget is hosted)
     try {
       var scripts = document.getElementsByTagName("script");
       var me = scripts[scripts.length - 1];
@@ -37,6 +36,9 @@ def widget_js() -> str:
   })();
 
   var SID_KEY = "scaffold_widget_session_id_" + (TOKEN || "no_token");
+  // Controla si el saludo inicial ya se pidió en esta página
+  // (evita pedirlo de nuevo si el usuario cierra y vuelve a abrir el widget)
+  var _greeted = false;
 
   function uuid() {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -156,6 +158,7 @@ def widget_js() -> str:
     row.appendChild(b);
     chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
+    return b; // devuelve el nodo para poder modificarlo (ej: loading)
   }
 
   var composer = el("div");
@@ -201,13 +204,7 @@ def widget_js() -> str:
   document.body.appendChild(btn);
   document.body.appendChild(panel);
 
-  function toggle(open) {
-    panel.style.display = open ? "block" : "none";
-    if (open) setTimeout(function(){ input.focus(); }, 0);
-  }
-
-  btn.addEventListener("click", function () { toggle(panel.style.display === "none"); });
-  close.addEventListener("click", function () { toggle(false); });
+  // ---- lógica de red ----
 
   async function postMessage(text) {
     var sid = getSessionId();
@@ -223,29 +220,57 @@ def widget_js() -> str:
     });
 
     if (!res.ok) {
-      let fallback =
-        "Something went wrong while processing your request.\nPlease try again in a few minutes.";
+      var fallback = "Something went wrong while processing your request.\nPlease try again in a few minutes.";
 
       if (res.status === 401) {
-        fallback =
-          "This widget is not configured correctly for this website.\nPlease contact the site owner.";
+        fallback = "This widget is not configured correctly for this website.\nPlease contact the site owner.";
       } else if (res.status === 403) {
-        fallback =
-          "This website is not allowed to use this widget.\nPlease contact the site owner.";
+        fallback = "This website is not allowed to use this widget.\nPlease contact the site owner.";
       } else if (res.status === 429) {
-        fallback =
-          "Too many requests in a short time.\nPlease wait a moment and try again.";
+        fallback = "Too many requests in a short time.\nPlease wait a moment and try again.";
       } else if (res.status >= 500) {
-        fallback =
-          "Something went wrong sending your request.\nPlease try again in a few minutes or contact the company directly.";
+        fallback = "Something went wrong sending your request.\nPlease try again in a few minutes or contact the company directly.";
       }
 
-  bubble(fallback, "bot");
-  return;
-}
+      bubble(fallback, "bot");
+      return;
+    }
 
     var data = await res.json();
     bubble(data.reply || "(no reply)", "bot");
+  }
+
+  // Pide el saludo al servidor la primera vez que se abre el widget.
+  // Muestra "..." mientras espera y lo reemplaza con la respuesta real.
+  async function fetchGreeting() {
+    var sid = getSessionId();
+    var url = API_BASE + "/scaffold-agent/chat?token=" + encodeURIComponent(TOKEN);
+
+    // Burbuja de "escribiendo..." mientras carga
+    var loadingNode = bubble("...", "bot");
+    send.disabled = true;
+    input.disabled = true;
+
+    try {
+      var res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Widget-Token": TOKEN },
+        body: JSON.stringify({ session_id: sid, message: "__greeting__" })
+      });
+
+      if (res.ok) {
+        var data = await res.json();
+        loadingNode.textContent = data.reply || "¡Hola! ¿En qué puedo ayudarte?";
+      } else {
+        loadingNode.textContent = "¡Hola! ¿En qué puedo ayudarte?";
+      }
+    } catch (e) {
+      loadingNode.textContent = "¡Hola! ¿En qué puedo ayudarte?";
+    } finally {
+      send.disabled = false;
+      input.disabled = false;
+      input.focus();
+    }
   }
 
   function sendNow() {
@@ -256,11 +281,25 @@ def widget_js() -> str:
     postMessage(t);
   }
 
+  function toggle(open) {
+    panel.style.display = open ? "block" : "none";
+    if (open) {
+      // Pide el saludo al LLM la primera vez que se abre
+      if (!_greeted) {
+        _greeted = true;
+        fetchGreeting();
+      } else {
+        setTimeout(function(){ input.focus(); }, 0);
+      }
+    }
+  }
+
+  btn.addEventListener("click", function () { toggle(panel.style.display === "none"); });
+  close.addEventListener("click", function () { toggle(false); });
   send.addEventListener("click", sendNow);
   input.addEventListener("keydown", function (e) {
     if (e.key === "Enter") sendNow();
   });
 
-  bubble("Hi. Tell me what you need (products, MOQ/Incoterms, shipping, documents, issues).", "bot");
 })();
 """.strip()
