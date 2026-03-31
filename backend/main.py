@@ -6,18 +6,23 @@ from fastapi import BackgroundTasks, FastAPI, Header, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from twilio.request_validator import RequestValidator
 
-from backend.apps.scaffold_web_agent.tenant_cors import ScaffoldTenantCORSMiddleware
+from backend.agents.scaffold_web_agent.tenant_cors import ScaffoldTenantCORSMiddleware
 
-from .agent import respond, route_message
-from .apps.scaffold_web_agent.api import router as scaffold_agent_router
-from .config import settings
-from .metrics import snapshot
-from .notify import send_handoff_email
-from .rag import ingest_markdown
-from .schemas import ChatIn
-from .store import close_handoff, get_state, list_handoffs, mark_message_processed
-from .tools import _cfg, _norm_q, validate_config
-from .twilio_worker import process_twilio_message
+from .agents.dental_agent.agent import respond, route_message
+from .agents.dental_agent.config import settings
+from .agents.dental_agent.metrics import snapshot
+from .agents.dental_agent.notify import send_handoff_email
+from .agents.dental_agent.rag import ingest_markdown
+from .agents.dental_agent.schemas import ChatIn
+from .agents.dental_agent.store import (
+    close_handoff,
+    get_state,
+    list_handoffs,
+    mark_message_processed,
+)
+from .agents.dental_agent.tools import _cfg, _norm_q, validate_config
+from .agents.dental_agent.twilio_worker import process_twilio_message
+from .agents.scaffold_web_agent.api import router as scaffold_agent_router
 
 
 @asynccontextmanager
@@ -169,7 +174,7 @@ def admin_test_email():
 def admin_reset(sender_id: str, x_admin_token: str = Header(default="")):
     if x_admin_token != (getattr(settings, "ADMIN_TOKEN", "") or ""):
         return Response("Forbidden", status_code=403)
-    from .store import reset_state
+    from .agents.dental_agent.store import reset_state
 
     reset_state(sender_id)
     return {"ok": True, "sender": sender_id}

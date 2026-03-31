@@ -7,8 +7,8 @@ line-length = 100
 target-version = "py312"
 exclude = [
   ".venv",
-  "backend/data",
-  "backend/data/leads.db",
+  "backend/agents/dental_agent/data", "backend/agents/scaffold_web_agent/data",
+  "backend/agents/dental_agent/data/leads.db",
 ]
 
 [tool.ruff.lint]
