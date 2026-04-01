@@ -1,4 +1,4 @@
-# Scaffold Web Agent
+# AI Lead Capture SaaS Platform
 
 A multi-tenant SaaS platform for deploying AI-powered lead capture agents on any website. Each client (tenant) gets their own embeddable chat widget, powered by Claude, trained on their own business knowledge.
 
@@ -86,6 +86,25 @@ scripts/
 └── create_scaffold_tenant.py        # CLI to create/update tenants
 tests/
 └── test_llm_engine.py               # LLM engine, routing, serialization tests
+```
+
+---
+
+## Code Quality & Security
+
+This project enforces code quality and security standards automatically via pre-commit hooks:
+
+| Tool | Purpose |
+|------|---------|
+| 🔒 **Gitleaks** | Prevents secrets and API keys from being committed |
+| ⚫ **Black** | Enforces consistent code formatting |
+| ⚡ **Ruff** | Fast Python linter for code quality |
+| 🧪 **Pytest** | Runs test suite before every commit |
+
+To set up the hooks locally:
+```bash
+pip install pre-commit
+pre-commit install
 ```
 
 ---
