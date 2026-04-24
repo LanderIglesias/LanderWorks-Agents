@@ -32,18 +32,18 @@ from __future__ import annotations
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
 from .analyzer_node import analyzer_node
+from .image_patcher_node import image_patcher_node
+from .image_strategy_node import image_strategy_node
+from .language_classifier_node import language_classifier_node
 from .quality_gate_node import quality_gate_node, should_retry
 from .reconstructor_node import reconstructor_node
-from .translator_node import translator_node
-from .language_classifier_node import language_classifier_node
-from .image_strategy_node import image_strategy_node
-from .image_patcher_node import image_patcher_node
 from .state import TranslationState
+from .translator_node import translator_node
 
 
 def build_graph() -> StateGraph:
@@ -85,7 +85,7 @@ def translate_pdf(
     output_dir: str = "outputs",
     source_language: str = "auto",
     max_quality_iterations: int = 2,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Punto de entrada principal del PDF Translator v2.
 
@@ -113,7 +113,7 @@ def translate_pdf(
     output_pdf_path = os.path.join(output_dir, output_filename)
 
     print(f"\n{'='*55}")
-    print(f"PDF Translator v2 — LangGraph Pipeline")
+    print("PDF Translator v2 — LangGraph Pipeline")
     print(f"  Entrada:  {input_pdf_path}")
     print(f"  Idioma:   {target_language}")
     print(f"  Max QA:   {max_quality_iterations} iteraciones")
@@ -150,7 +150,7 @@ def translate_pdf(
         print(f"  Elementos: {stats.get('total_elements', 0)}")
         print(f"  Traducidos: {stats.get('translatable', 0)}")
         print(f"  Iteraciones QA: {final_state.get('quality_iterations', 0)}")
-        print(f"{'='*55}\n")
+        print("='*55}\n")
 
         return {
             "success": True,

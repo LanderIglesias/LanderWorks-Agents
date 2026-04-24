@@ -7,9 +7,9 @@ from fastapi.responses import HTMLResponse, JSONResponse, Response
 from twilio.request_validator import RequestValidator
 
 from backend.agents.lead_capture_agent.tenant_cors import ScaffoldTenantCORSMiddleware
+from backend.agents.pdf_translator_v2.router import router as pdf_translator_v2_router
 
-from .agents.rag_pdf_agent.api import router as rag_pdf_router
-
+from .agents.bi_agent.api import router as bi_agent_router
 from .agents.dental_agent.agent import respond, route_message
 from .agents.dental_agent.config import settings
 from .agents.dental_agent.metrics import snapshot
@@ -25,7 +25,7 @@ from .agents.dental_agent.store import (
 from .agents.dental_agent.tools import _cfg, _norm_q, validate_config
 from .agents.dental_agent.twilio_worker import process_twilio_message
 from .agents.lead_capture_agent.api import router as lead_capture_agent_router
-from backend.agents.pdf_translator_v2.router import router as pdf_translator_v2_router
+from .agents.rag_pdf_agent.api import router as rag_pdf_router
 
 
 @asynccontextmanager
@@ -55,6 +55,7 @@ app.add_middleware(ScaffoldTenantCORSMiddleware)
 app.include_router(lead_capture_agent_router)
 app.include_router(rag_pdf_router)
 app.include_router(pdf_translator_v2_router)
+app.include_router(bi_agent_router)
 
 
 @app.post("/chat")
