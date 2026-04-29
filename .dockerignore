@@ -1,0 +1,37 @@
+# Entorno virtual
+.venv
+venv
+env
+
+# ChromaDB — carpeta real en este repo
+chroma
+
+# Cache Python
+__pycache__
+*.pyc
+*.pyo
+.mypy_cache
+.pytest_cache
+.ruff_cache
+
+# Datos generados
+backend/agents/bi_agent/data/
+*.csv
+*.db
+*.sqlite
+
+# Variables de entorno
+.env
+
+# Git
+.git
+
+# VS Code
+.vscode
+
+# Node
+node_modules
+
+# Docker
+Dockerfile
+docker-compose.yml

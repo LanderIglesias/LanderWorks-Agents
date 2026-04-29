@@ -24,6 +24,8 @@ from .agents.dental_agent.store import (
 )
 from .agents.dental_agent.tools import _cfg, _norm_q, validate_config
 from .agents.dental_agent.twilio_worker import process_twilio_message
+from .agents.doc_intel_agent.api import router as doc_intel_router
+from .agents.doc_intel_agent.database import init_db as init_doc_intel_db
 from .agents.lead_capture_agent.api import router as lead_capture_agent_router
 from .agents.rag_pdf_agent.api import router as rag_pdf_router
 
@@ -47,15 +49,18 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print("[CONFIG] fallo validando config:", e)
 
+    init_doc_intel_db()
+
     yield
 
 
-app = FastAPI(title="Dental Agent", lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(ScaffoldTenantCORSMiddleware)
 app.include_router(lead_capture_agent_router)
 app.include_router(rag_pdf_router)
 app.include_router(pdf_translator_v2_router)
 app.include_router(bi_agent_router)
+app.include_router(doc_intel_router)
 
 
 @app.post("/chat")
