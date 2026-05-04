@@ -4,8 +4,10 @@ import os
 from functools import lru_cache
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field
+
+from backend.agents.lead_capture_agent.domain import Step
 
 from .admin_template import admin_html
 from .agent_registry import AgentRegistry
@@ -102,6 +104,67 @@ def chat(
         reply=result.reply,
         step=result.step,
         is_done=result.is_done,
+    )
+
+
+@router.post("/chat/stream")
+def chat_stream(
+    request: Request,
+    payload: ChatIn,
+    mailer: Mailer = Depends(get_mailer),  # noqa: B008
+    x_widget_token: str = Header(default="", alias="X-Widget-Token"),
+    token: str = Query(default=""),
+):
+    """
+    Endpoint streaming con SSE.
+    Devuelve la respuesta de Claude chunk a chunk mientras se genera.
+    Solo disponible para tenants con knowledge_text (motor LLM).
+    """
+    widget_token = x_widget_token or token
+
+    tenant = _tenant_service.resolve_by_widget_token(widget_token)
+    if not tenant:
+        raise HTTPException(status_code=401, detail="Invalid or missing X-Widget-Token")
+
+    if not tenant.knowledge_text:
+        raise HTTPException(status_code=400, detail="Streaming only available for LLM tenants")
+
+    state = _session_service.get_state(tenant.tenant_id, payload.session_id)
+
+    from .llm_engine import stream_user_message_llm
+
+    # El callback guarda el estado final cuando el stream termina
+    def on_complete(new_state, clean_reply):
+        _session_service.save_state(tenant.tenant_id, payload.session_id, new_state)
+
+        # Procesamos el lead si corresponde — igual que en chat normal
+        if new_state.step == Step.SEND:
+            _delivery_service.deliver_lead(
+                tenant=tenant,
+                category_value=new_state.data.category.value if new_state.data.category else None,
+                summary=new_state.data.summary,
+                mailer=mailer,
+            )
+            _lead_service.create_lead(
+                tenant_id=tenant.tenant_id,
+                session_id=payload.session_id,
+                email=new_state.data.email,
+                topic=new_state.data.topic,
+                summary=new_state.data.summary,
+            )
+
+    return StreamingResponse(
+        stream_user_message_llm(
+            state,
+            payload.message,
+            tenant.knowledge_text,
+            on_complete=on_complete,
+        ),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
     )
 
 

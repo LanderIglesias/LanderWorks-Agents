@@ -16,7 +16,9 @@ Flujo:
 
 from __future__ import annotations
 
+import json
 import re
+from collections.abc import Generator
 from dataclasses import replace
 
 import anthropic
@@ -175,3 +177,101 @@ def handle_user_message_llm(
 
     new_state = replace(state, step=new_step, messages=updated_messages)
     return new_state, reply
+
+
+def stream_user_message_llm(
+    state: SessionState,
+    user_text: str,
+    knowledge_text: str = "",
+    on_complete: callable = None,
+) -> Generator[str, None, None]:
+    """
+    Version streaming del motor LLM.
+
+    Yields chunks en formato SSE: data: {"chunk": "texto"}\n\n
+    El ultimo evento es: data: {"done": true, "step": "...", "is_done": bool}\n\n
+
+    on_complete: callback que recibe (new_state, clean_reply) al terminar.
+    Lo usamos en el endpoint para guardar el estado en la BD.
+
+    Por que un callback en lugar de return?
+    Los generadores Python no pueden hacer yield y return con valor a la vez
+    de forma que el llamador pueda capturar ambos facilmente.
+    El callback es el patron mas limpio para este caso.
+    """
+    client = anthropic.Anthropic()
+
+    email_found = _extract_email(user_text)
+    if email_found and not state.data.email:
+        state.data.email = email_found
+
+    messages_for_api = list(state.messages) + [{"role": "user", "content": user_text}]
+    full_reply = ""
+    marker_buffer = ""
+
+    with client.messages.stream(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=600,
+        system=_build_system(knowledge_text),
+        messages=messages_for_api,
+    ) as stream:
+        for text_chunk in stream.text_stream:
+            full_reply += text_chunk
+            marker_buffer += text_chunk
+
+            # Si el marcador esta completo en el buffer lo vaciamos sin enviar
+            if _LEAD_MARKER in marker_buffer:
+                marker_buffer = marker_buffer.replace(_LEAD_MARKER, "")
+                continue
+
+            # Si el buffer empieza a parecerse al marcador, esperamos
+            # Ejemplo: buffer = "<<<" — podria ser el inicio del marcador
+            if any(_LEAD_MARKER.startswith(marker_buffer) and marker_buffer):
+                continue
+
+            # Buffer seguro — enviamos y vaciamos
+            if marker_buffer:
+                yield f"data: {json.dumps({'chunk': marker_buffer})}\n\n"
+                marker_buffer = ""
+
+        # Enviamos lo que quede en el buffer (si no era marcador)
+        if marker_buffer and _LEAD_MARKER not in marker_buffer:
+            yield f"data: {json.dumps({'chunk': marker_buffer})}\n\n"
+
+    # Stream terminado — procesamos estado igual que en flujo normal
+    send_lead = _LEAD_MARKER in full_reply
+    clean_reply = full_reply.replace(_LEAD_MARKER, "").strip()
+
+    updated_messages = messages_for_api + [{"role": "assistant", "content": clean_reply}]
+    new_step = state.step
+
+    if send_lead:
+        new_step = Step.SEND
+        if not state.data.summary:
+            user_messages = [m["content"] for m in updated_messages if m["role"] == "user"]
+            first_message = user_messages[0] if user_messages else "Consulta web"
+            state.data.topic = first_message[:80]
+            state.data.summary = _build_lead_summary(updated_messages, state.data.email)
+            state.data.status = Status.READY_TO_SEND
+
+    new_state = replace(state, step=new_step, messages=updated_messages)
+
+    # Evento final — el frontend lo usa para saber que termino
+    yield f"data: {json.dumps({'done': True, 'step': new_state.step.value, 'is_done': new_state.step == Step.DONE})}\n\n"
+
+    # Langfuse
+    try:
+        trace = langfuse.trace(name="lead-capture-stream")
+        trace.generation(
+            name="llm-call",
+            model="claude-haiku-4-5-20251001",
+            input=messages_for_api,
+            output=clean_reply,
+            metadata={"lead_captured": send_lead, "streaming": True},
+        )
+    except Exception:
+        pass
+
+    # Callback para guardar estado en BD desde el endpoint
+    if on_complete:
+        on_complete(new_state, clean_reply)
