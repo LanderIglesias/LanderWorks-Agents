@@ -20,14 +20,14 @@ import re
 from dataclasses import replace
 
 import anthropic
+from langfuse import Langfuse
 
 from .domain import SessionState, Status, Step
 
-# Regex para detectar emails en el texto del usuario
-_EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}")
+# Cliente Langfuse — lee LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY del .env
+langfuse = Langfuse()
 
-# Marcador que Claude incluye cuando el usuario confirma enviar el lead.
-# Usamos algo poco probable de aparecer en texto normal.
+_EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}")
 _LEAD_MARKER = "<<<SEND_LEAD>>>"
 
 _SYSTEM_TEMPLATE = """\
@@ -57,22 +57,16 @@ Eres un asistente virtual embebido en la web de una empresa. Tienes dos objetivo
 
 
 def _build_system(knowledge_text: str) -> str:
-    """Construye el system prompt inyectando el knowledge del tenant."""
     knowledge = knowledge_text.strip() or "(Este tenant no tiene knowledge configurado todavía.)"
     return _SYSTEM_TEMPLATE.format(knowledge_text=knowledge)
 
 
 def _extract_email(text: str) -> str | None:
-    """Extrae el primer email válido del texto, si existe."""
     match = _EMAIL_RE.search(text)
     return match.group(0) if match else None
 
 
 def _build_lead_summary(messages: list[dict], email: str | None) -> str:
-    """
-    Construye el resumen del lead a partir del historial de conversación.
-    Este texto es el que se guarda en la BD y se envía al inbox del tenant.
-    """
     lines = ["Lead capturado desde el chat web", "=" * 40, ""]
     for msg in messages:
         role = "Visitante" if msg["role"] == "user" else "Agente"
@@ -82,9 +76,6 @@ def _build_lead_summary(messages: list[dict], email: str | None) -> str:
     return "\n".join(lines)
 
 
-# Mensaje especial que envía el widget al abrirse por primera vez.
-# El engine lo intercepta para generar un saludo con el LLM sin que
-# el usuario haya escrito nada.
 _GREETING_TRIGGER = "__greeting__"
 
 
@@ -94,23 +85,19 @@ def handle_user_message_llm(
     knowledge_text: str = "",
 ) -> tuple[SessionState, str]:
     """
-    Motor LLM principal. Sustituye a handle_user_message() de engine.py
-    cuando el tenant tiene knowledge_text configurado.
+    Motor LLM principal con observabilidad Langfuse.
 
-    Args:
-        state: Estado actual de la sesión (incluye historial en state.messages)
-        user_text: Mensaje del usuario (o __greeting__ para el saludo inicial)
-        knowledge_text: Texto de conocimiento del tenant (de la BD)
+    El decorador @observe() registra automáticamente:
+    - Input (user_text, knowledge_text)
+    - Output (respuesta del agente)
+    - Latencia total de la función
+    - Cualquier error que ocurra
 
-    Returns:
-        (new_state, reply): Estado actualizado + respuesta del agente
+    Dentro añadimos metadata adicional manualmente con langfuse_context.
     """
     client = anthropic.Anthropic()
 
     # ── Caso especial: saludo inicial ─────────────────────────────────────
-    # El widget envía "__greeting__" al abrirse por primera vez.
-    # Claude genera el saludo basándose en el knowledge del tenant.
-    # El mensaje especial NO se guarda en el historial — solo la respuesta.
     if user_text == _GREETING_TRIGGER:
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
@@ -124,22 +111,30 @@ def handle_user_message_llm(
             ],
         )
         reply = response.content[0].text.strip()
-        # Guardamos solo la respuesta del asistente, no el trigger interno
+
+        # Registramos métricas del saludo en Langfuse
+        langfuse.create_event(
+            name="lead-capture-greeting",
+            input={"trigger": "greeting"},
+            output={"reply": reply},
+            metadata={
+                "tokens_input": response.usage.input_tokens,
+                "tokens_output": response.usage.output_tokens,
+                "model": "claude-haiku-4-5-20251001",
+            },
+        )
+
         updated_messages = [{"role": "assistant", "content": reply}]
         new_state = replace(state, messages=updated_messages)
         return new_state, reply
 
     # ── Flujo normal ──────────────────────────────────────────────────────
-
-    # 1. Detectar email en el mensaje del usuario
     email_found = _extract_email(user_text)
     if email_found and not state.data.email:
         state.data.email = email_found
 
-    # 2. Construir lista de mensajes para la API (historial + mensaje actual)
     messages_for_api = list(state.messages) + [{"role": "user", "content": user_text}]
 
-    # 3. Llamar a Claude Haiku
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=600,
@@ -148,14 +143,11 @@ def handle_user_message_llm(
     )
     raw_reply: str = response.content[0].text.strip()
 
-    # 4. Detectar marcador de lead confirmado
     send_lead = _LEAD_MARKER in raw_reply
     reply = raw_reply.replace(_LEAD_MARKER, "").strip()
 
-    # 5. Guardar el turno completo en el historial
     updated_messages = messages_for_api + [{"role": "assistant", "content": reply}]
 
-    # 6. Actualizar estado
     new_step = state.step
 
     if send_lead:
@@ -166,6 +158,20 @@ def handle_user_message_llm(
             state.data.topic = first_message[:80]
             state.data.summary = _build_lead_summary(updated_messages, state.data.email)
             state.data.status = Status.READY_TO_SEND
+
+    # Registramos métricas del turno normal en Langfuse
+    langfuse.create_event(
+        name="lead-capture-chat",
+        input={"user_text": user_text},
+        output={"reply": reply},
+        metadata={
+            "tokens_input": response.usage.input_tokens,
+            "tokens_output": response.usage.output_tokens,
+            "model": "claude-haiku-4-5-20251001",
+            "lead_captured": send_lead,
+            "email_detected": email_found,
+        },
+    )
 
     new_state = replace(state, step=new_step, messages=updated_messages)
     return new_state, reply
