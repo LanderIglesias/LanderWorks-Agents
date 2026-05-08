@@ -33,6 +33,7 @@ try:
 except Exception as e:
     print(f"[DOC_INTEL] No disponible: {e}")
     DOC_INTEL_AVAILABLE = False
+from .agents.job_matcher.api import router as job_matcher_router
 from .agents.lead_capture_agent.api import router as lead_capture_agent_router
 from .agents.rag_pdf_agent.api import router as rag_pdf_router
 
@@ -72,6 +73,7 @@ app.include_router(lead_capture_agent_router)
 app.include_router(rag_pdf_router)
 app.include_router(pdf_translator_v2_router)
 app.include_router(bi_agent_router)
+app.include_router(job_matcher_router)
 if DOC_INTEL_AVAILABLE:
     app.include_router(doc_intel_router)
 

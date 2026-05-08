@@ -1,24 +1,25 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.0
+    rev: v0.4.4
     hooks:
-      - id: ruff-format
+      - id: ruff          # linting — detecta errores reales
+        args: [--fix]
+                          # ruff-format comentado — lo hace black
 
   - repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 24.4.2
     hooks:
-      - id: black
+      - id: black         # formateo — único responsable
 
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.4
     hooks:
-      - id: gitleaks
+      - id: gitleaks      # secretos — crítico
 
   - repo: local
     hooks:
       - id: pytest
         name: pytest
-        entry: pytest -q
+        entry: pytest
         language: system
         pass_filenames: false
-        always_run: true
