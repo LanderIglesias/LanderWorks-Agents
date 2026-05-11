@@ -21,7 +21,7 @@ Conversational AI agent that handles patient inquiries on WhatsApp, collects str
 ### 2. AI Lead Capture SaaS Platform
 Multi-tenant SaaS platform that deploys custom AI agents on any website with a single `<script>` tag. Features streaming responses (SSE), LLM observability via Langfuse, and is deployed on both AWS EC2 and Azure App Service.
 
-**Tech:** Python · FastAPI · Claude Haiku · SQLite · Resend · Langfuse · Streaming SSE · Render · AWS EC2 · Azure App Service  
+**Tech:** Python · FastAPI · Claude Haiku · SQLite · Resend · Langfuse · Streaming SSE · AWS EC2 · Azure App Service  
 **[View project →](backend/agents/lead_capture_agent/)**
 
 ---
@@ -58,17 +58,26 @@ Production-grade document Q&A system. Upload PDFs, ask questions in natural lang
 
 ---
 
+### 7. Job Matcher Agent
+Hybrid ML + LLM system that scores the fit between a CV and a job offer. Claude labels 500 synthetic training pairs, a GradientBoostingRegressor learns the scoring pattern, and Claude generates a qualitative gap report. Accepts PDF/DOCX/URL input.
+
+**Tech:** Python · scikit-learn · GradientBoostingRegressor · Claude Haiku · PyMuPDF · python-docx · httpx · BeautifulSoup · FastAPI  
+**[View project →](backend/agents/job_matcher_agent/)**
+
+---
+
 ## Stack
 
 ### AI & LLMs
 | Tool | Used for |
 |---|---|
-| Claude Haiku (Anthropic) | Conversational agents, translation, lead capture, analytics |
+| Claude Haiku (Anthropic) | Conversational agents, translation, lead capture, analytics, gap reports |
 | Claude Sonnet Vision (Anthropic) | PDF image analysis, text detection in images |
 | OpenAI Embeddings (`text-embedding-3-small`) | RAG vector search, document indexing |
 | LangChain + LCEL | RAG pipeline orchestration |
 | LangGraph | Multi-agent pipelines with conditional edges and retry loops |
 | Langfuse | LLM observability — traces, token tracking, conversation metadata |
+| scikit-learn | GradientBoosting, RandomForest, LinearRegression — Job Matcher Agent |
 
 ### Backend
 | Tool | Used for |
@@ -77,9 +86,11 @@ Production-grade document Q&A system. Upload PDFs, ask questions in natural lang
 | FastAPI | REST API for all agents |
 | Streaming SSE | Progressive streaming responses (Lead Capture Agent) |
 | Pydantic | Data validation and schemas |
-| PyMuPDF | PDF parsing, text extraction span-by-span, PDF reconstruction |
+| PyMuPDF | PDF parsing, text extraction, PDF reconstruction |
 | Pillow | Pixel-level image manipulation |
 | pypdf | PDF text extraction for RAG |
+| python-docx | DOCX extraction — Job Matcher Agent |
+| httpx + BeautifulSoup | URL scraping — Job Matcher Agent |
 | SQLAlchemy | ORM for PostgreSQL |
 | boto3 | S3-compatible storage client (Cloudflare R2) |
 | Twilio | WhatsApp messaging |
@@ -129,11 +140,13 @@ backend/
     ├── rag_pdf_agent/       # RAG PDF chat agent
     ├── pdf_translator_v2/   # LangGraph PDF translation pipeline
     ├── bi_agent/            # Multi-agent BI analytics (LangGraph)
-    └── doc_intel_agent/     # Document intelligence (Docker + PostgreSQL)
+    ├── doc_intel_agent/     # Document intelligence (Docker + PostgreSQL)
+    └── job_matcher_agent/   # ML + LLM CV/job fit scorer
+ml_intro/                    # Classical ML fundamentals (sklearn)
 tests/
 scripts/
-docker-compose.yml           # PostgreSQL + FastAPI containers
-Dockerfile                   # Python 3.12-slim image
+docker-compose.yml
+Dockerfile
 ```
 
 ---
