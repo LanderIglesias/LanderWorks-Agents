@@ -24,6 +24,7 @@ from .agents.dental_agent.store import (
 )
 from .agents.dental_agent.tools import _cfg, _norm_q, validate_config
 from .agents.dental_agent.twilio_worker import process_twilio_message
+from .agents.tech_debt_agent.api import router as tech_debt_router
 
 try:
     from .agents.doc_intel_agent.api import router as doc_intel_router
@@ -74,6 +75,7 @@ app.include_router(rag_pdf_router)
 app.include_router(pdf_translator_v2_router)
 app.include_router(bi_agent_router)
 app.include_router(job_matcher_router)
+app.include_router(tech_debt_router)
 if DOC_INTEL_AVAILABLE:
     app.include_router(doc_intel_router)
 
