@@ -36,6 +36,7 @@ except Exception as e:
     DOC_INTEL_AVAILABLE = False
 from .agents.job_matcher.api import router as job_matcher_router
 from .agents.lead_capture_agent.api import router as lead_capture_agent_router
+from .agents.meeting_intel_agent.api import router as meeting_intel_router
 from .agents.rag_pdf_agent.api import router as rag_pdf_router
 
 
@@ -76,6 +77,7 @@ app.include_router(pdf_translator_v2_router)
 app.include_router(bi_agent_router)
 app.include_router(job_matcher_router)
 app.include_router(tech_debt_router)
+app.include_router(meeting_intel_router)
 if DOC_INTEL_AVAILABLE:
     app.include_router(doc_intel_router)
 

@@ -60,3 +60,7 @@ PyGithub==2.5.0
 packaging==24.2
 python-docx==1.1.2
 beautifulsoup4==4.12.3
+
+# Meeting Intelligence Agent
+faster-whisper==1.1.1
+pydub==0.25.1
