@@ -192,3 +192,18 @@ def search_meeting(meeting_id: str, query: str, top_k: int = 5) -> list[dict]:
             }
             for row in result.fetchall()
         ]
+
+
+def update_meeting_summary(meeting_id: str, executive_summary: str, key_topics: list) -> None:
+    """Actualiza el resumen ejecutivo y temas clave tras la síntesis."""
+    with get_connection() as conn:
+        conn.execute(
+            text(
+                """
+            UPDATE meetings 
+            SET executive_summary = :summary, key_topics = :topics
+            WHERE id = :id
+        """
+            ),
+            {"id": meeting_id, "summary": executive_summary, "topics": json.dumps(key_topics)},
+        )

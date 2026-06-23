@@ -21,6 +21,7 @@ import anthropic
 from dotenv import load_dotenv
 
 from ..state import MeetingState
+from .indexer_node import update_meeting_summary
 
 load_dotenv(override=False)
 
@@ -52,10 +53,10 @@ def synthesizer_node(state: MeetingState) -> dict:
     if state.get("error"):
         return {}
 
-    decisions = state.get("decisions", [])
-    action_items = state.get("action_items", [])
-    open_questions = state.get("open_questions", [])
-    pending_topics = state.get("pending_topics", [])
+    decisions = state.get("decisions") or []
+    action_items = state.get("action_items") or []
+    open_questions = state.get("open_questions") or []
+    pending_topics = state.get("pending_topics") or []
 
     # Si no hay nada extraído, generamos un resumen básico de la transcripción
     if not any([decisions, action_items, open_questions, pending_topics]):
@@ -97,11 +98,20 @@ Respond ONLY with this JSON:
             messages=[{"role": "user", "content": prompt}],
         )
 
-        raw = response.content[0].text.strip()
+        raw = response.content[0].text.strip()  # type: ignore
         clean = raw.replace("```json", "").replace("```", "").strip()
         result = json.loads(clean)
 
-        print(f"[SynthesizerNode] Resumen generado. " f"Temas: {result.get('key_topics', [])}")
+        print(f"[SynthesizerNode] Resumen generado. Temas: {result.get('key_topics', [])}")
+
+        # Actualizar PostgreSQL con el resumen generado
+        meeting_id = state.get("meeting_id")
+        if meeting_id and result.get("executive_summary"):
+            update_meeting_summary(
+                meeting_id=meeting_id,
+                executive_summary=result["executive_summary"],
+                key_topics=result.get("key_topics", []),
+            )
 
         return {
             "executive_summary": result.get("executive_summary", ""),
@@ -109,7 +119,6 @@ Respond ONLY with this JSON:
         }
 
     except json.JSONDecodeError:
-        # Fallback si Claude no devuelve JSON válido
         return {
             "executive_summary": f"Meeting with {len(decisions)} decisions and {len(action_items)} action items.",
             "key_topics": [],
