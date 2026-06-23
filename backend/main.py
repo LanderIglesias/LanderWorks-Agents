@@ -171,7 +171,13 @@ def show_config():
 @app.get("/admin/routes")
 def admin_routes():
     return sorted(
-        [{"path": r.path, "methods": sorted(list(r.methods or []))} for r in app.routes],
+        [
+            {
+                "path": getattr(r, "path", ""),
+                "methods": sorted(list(getattr(r, "methods", []) or [])),
+            }
+            for r in app.routes
+        ],
         key=lambda x: x["path"],
     )
 

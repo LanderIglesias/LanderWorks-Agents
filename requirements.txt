@@ -64,3 +64,6 @@ beautifulsoup4==4.12.3
 # Meeting Intelligence Agent
 faster-whisper==1.1.1
 pydub==0.25.1
+
+# MCP
+mcp==1.28.0

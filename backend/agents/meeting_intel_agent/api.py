@@ -107,7 +107,7 @@ async def analyze_stream(
                 yield send("transcribing", "Transcribing audio with Whisper...", 10)
             else:
                 yield send("transcribing", "Processing text input...", 10)
-            state.update(transcriber_node(state))
+            state.update(transcriber_node(state))  # type: ignore
             if state.get("error"):
                 yield send("error", state["error"], 0, error=True)
                 return
@@ -116,7 +116,7 @@ async def analyze_stream(
 
             # Nodo 2 — Segmentación
             yield send("segmenting", "Segmenting transcription into chunks...", 30)
-            state.update(segmenter_node(state))
+            state.update(segmenter_node(state))  # type: ignore
             if state.get("error"):
                 yield send("error", state["error"], 0, error=True)
                 return
@@ -129,7 +129,7 @@ async def analyze_stream(
                 f"Claude extracting decisions and action items from {n_segs} segments...",
                 45,
             )
-            state.update(extractor_node(state))
+            state.update(extractor_node(state))  # type: ignore
             if state.get("error"):
                 yield send("error", state["error"], 0, error=True)
                 return
@@ -139,7 +139,7 @@ async def analyze_stream(
 
             # Nodo 4 — Indexación
             yield send("indexing", "Indexing meeting in PostgreSQL + pgvector for RAG...", 70)
-            state.update(indexer_node(state))
+            state.update(indexer_node(state))  # type: ignore
             if state.get("error"):
                 yield send("error", state["error"], 0, error=True)
                 return
@@ -147,7 +147,7 @@ async def analyze_stream(
 
             # Nodo 5 — Síntesis
             yield send("synthesizing", "Claude generating executive summary...", 85)
-            state.update(synthesizer_node(state))
+            state.update(synthesizer_node(state))  # type: ignore
             if state.get("error"):
                 yield send("error", state["error"], 0, error=True)
                 return
@@ -155,8 +155,10 @@ async def analyze_stream(
 
             # Nodo 6 — Informe
             yield send("generating", "Generating final report...", 96)
-            state.update(report_generator_node(state))
-            yield send("done", "Analysis complete!", 100, report=state.get("report_json"))
+            state.update(report_generator_node(state))  # type: ignore
+            report_data = state.get("report_json", {})
+            report_data["report_markdown"] = state.get("report_markdown", "")
+            yield send("done", "Analysis complete!", 100, report=report_data)
 
         except Exception as e:
             yield send("error", str(e), 0, error=True)
@@ -214,7 +216,7 @@ async def ask_meeting(payload: AskRequest):
     )
 
     return {
-        "answer": response.content[0].text,
+        "answer": response.content[0].text,  # type: ignore
         "chunks_used": len(chunks),
         "meeting_id": payload.meeting_id,
     }
