@@ -13,7 +13,7 @@ serialización de la respuesta.
 from __future__ import annotations
 
 import json
-import time
+from datetime import UTC, datetime
 
 import pytest
 from fastapi import FastAPI
@@ -85,7 +85,7 @@ def test_webhook_unmatched_bank_email_returns_200_with_null_amount(client):
         "occurred_at": "2026-08-11T09:00:00",
     }
     body = json.dumps(payload)
-    timestamp = str(int(time.time()))
+    timestamp = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     response = client.post(
         "/expense-tracker/webhook/expense", content=body, headers=_webhook_headers(timestamp)

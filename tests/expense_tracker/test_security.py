@@ -10,7 +10,7 @@ una rechazada no crea ninguna.
 from __future__ import annotations
 
 import json
-import time
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from fastapi import FastAPI
@@ -89,12 +89,21 @@ def _row_count(db) -> int:
     return db.query(Expense).count()
 
 
+def _iso_timestamp(offset_seconds: int = 0) -> str:
+    """X-Timestamp es ISO 8601 (ej. "2026-08-11T10:45:00Z"), no unix time
+    — Atajos en iOS solo ofrece ISO 8601 nativo en la acción "Fecha
+    actual", el patrón de formato personalizado no genera unix time como
+    cabría esperar."""
+    when = datetime.now(UTC) + timedelta(seconds=offset_seconds)
+    return when.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 # ── Autenticación del webhook (Bearer token + timestamp) ────────────────
 
 
 def test_webhook_valid_token_within_window_creates_row(client):
     body = json.dumps(_webhook_payload())
-    timestamp = str(int(time.time()))
+    timestamp = _iso_timestamp()
 
     response = client.post(
         "/expense-tracker/webhook/expense", content=body, headers=_webhook_headers(timestamp)
@@ -110,7 +119,7 @@ def test_webhook_valid_token_within_window_creates_row(client):
 
 def test_webhook_wrong_token_rejected_and_no_row_created(client):
     body = json.dumps(_webhook_payload())
-    timestamp = str(int(time.time()))
+    timestamp = _iso_timestamp()
 
     response = client.post(
         "/expense-tracker/webhook/expense",
@@ -128,7 +137,7 @@ def test_webhook_wrong_token_rejected_and_no_row_created(client):
 
 def test_webhook_correct_token_expired_timestamp_rejected(client):
     body = json.dumps(_webhook_payload())
-    timestamp = str(int(time.time()) - 120)  # 2 minutos atrás, fuera de la ventana de 60s
+    timestamp = _iso_timestamp(-120)  # 2 minutos atrás, fuera de la ventana de 60s
 
     response = client.post(
         "/expense-tracker/webhook/expense", content=body, headers=_webhook_headers(timestamp)
@@ -144,7 +153,7 @@ def test_webhook_correct_token_expired_timestamp_rejected(client):
 
 def test_webhook_correct_token_future_timestamp_rejected(client):
     body = json.dumps(_webhook_payload())
-    timestamp = str(int(time.time()) + 120)  # 2 minutos por delante, fuera de la ventana de 60s
+    timestamp = _iso_timestamp(120)  # 2 minutos por delante, fuera de la ventana de 60s
 
     response = client.post(
         "/expense-tracker/webhook/expense", content=body, headers=_webhook_headers(timestamp)

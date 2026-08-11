@@ -84,9 +84,11 @@ con `Content-Type: application/json`.
    - **Cabeceras:**
      - `Content-Type: application/json`
      - `Authorization: Bearer <EXPENSE_TRACKER_WEBHOOK_SECRET>`
-     - `X-Timestamp`: hora actual en unix timestamp (segundos) — en Atajos,
-       **Fecha actual** → **Formatear fecha** con formato "Segundos desde
-       1970" (Unix Time).
+     - `X-Timestamp`: hora actual en formato **ISO 8601** — en Atajos,
+       **Fecha actual** → **Formatear fecha** → elige **"ISO 8601"**
+       directamente en el desplegable de formato, sin pasos intermedios.
+       (El patrón de formato personalizado no genera unix time como cabría
+       esperar — por eso el header usa ISO 8601 y no un entero unix.)
    - **Cuerpo de solicitud:** `JSON`, con estos campos (usa las variables
      mágicas del activador de Transacción):
      ```json
@@ -174,8 +176,12 @@ Dos esquemas de autenticación distintos, para dos audiencias distintas
   - `Authorization: Bearer <EXPENSE_TRACKER_WEBHOOK_SECRET>` — secreto
     estático, **distinto** de `EXPENSE_TRACKER_APP_TOKEN` (nunca se
     reutiliza el mismo secreto para el webhook y para la PWA).
-  - `X-Timestamp`: unix timestamp en segundos, generado por el propio Atajo
-    en el momento de la llamada.
+  - `X-Timestamp`: fecha en formato ISO 8601 (ej. "2026-08-11T10:45:00Z"),
+    generada por el propio Atajo en el momento de la llamada — no unix
+    timestamp: Atajos no tiene forma sencilla de generar un entero unix
+    directamente (el patrón de formato personalizado no lo soporta como
+    cabría esperar), pero sí ofrece "ISO 8601" nativo en el desplegable de
+    formato de fecha.
 
   El servidor rechaza la petición (401 genérico, sin detallar cuál de las
   dos comprobaciones falló) si el token no coincide (comparación con
@@ -189,8 +195,9 @@ Dos esquemas de autenticación distintos, para dos audiencias distintas
 
   Al configurar la acción **Obtener contenido de URL** en Atajos, añade en
   **Cabeceras** `Authorization: Bearer <EXPENSE_TRACKER_WEBHOOK_SECRET>` y
-  `X-Timestamp` con la hora actual en formato unix (**Fecha actual** →
-  **Formatear fecha** → "Segundos desde 1970").
+  `X-Timestamp` con la hora actual en formato ISO 8601 (**Fecha actual** →
+  **Formatear fecha** → elige "ISO 8601" directamente en el desplegable,
+  sin pasos intermedios).
 
 - **`GET /expenses`, `GET /expenses/{id}`, `GET /expenses/review`,
   `PATCH /expenses/{id}`, `POST /expenses`** (usados solo por ti, desde el

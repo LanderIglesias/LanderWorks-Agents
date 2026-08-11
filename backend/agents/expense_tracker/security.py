@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import hmac
 import os
-import time
+from datetime import UTC, datetime
 
 from fastapi import Header, HTTPException
 
@@ -52,11 +52,21 @@ def verify_webhook_signature(
 
 
 def _timestamp_within_tolerance(raw_timestamp: str) -> bool:
+    """`raw_timestamp` es ISO 8601 (ej. "2026-08-11T10:45:00Z"), no unix
+    time — Atajos en iOS no tiene forma sencilla de generar un entero unix
+    directamente (el patrón de formato personalizado no lo soporta como
+    cabría esperar), pero sí ofrece "ISO 8601" nativo en el desplegable de
+    formato de fecha. `datetime.fromisoformat` entiende el sufijo "Z" desde
+    Python 3.11 (este proyecto corre en 3.12).
+    """
     try:
-        timestamp = int(raw_timestamp)
+        parsed = datetime.fromisoformat(raw_timestamp)
     except ValueError:
         return False
-    return abs(time.time() - timestamp) <= TIMESTAMP_TOLERANCE_SECONDS
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    delta = datetime.now(UTC) - parsed
+    return abs(delta.total_seconds()) <= TIMESTAMP_TOLERANCE_SECONDS
 
 
 def verify_app_token(authorization: str | None = Header(default=None)) -> None:
