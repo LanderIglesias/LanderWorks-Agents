@@ -28,8 +28,7 @@ El grafo decide el siguiente nodo según lo que devuelve este nodo:
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, List
+from typing import Any
 
 from .state import PDFElement, QualityStatus, TranslationState
 
@@ -50,7 +49,7 @@ CJK_RANGES = [
 ]
 
 
-def quality_gate_node(state: TranslationState) -> Dict[str, Any]:
+def quality_gate_node(state: TranslationState) -> dict[str, Any]:
     """
     Nodo LangGraph: verifica calidad y calcula font sizes óptimos.
 
@@ -139,11 +138,11 @@ def should_retry(state: TranslationState) -> str:
         print(f"[QualityGate] → RETRY (iteración {quality_iterations}/{max_iterations})")
         return "translate"
 
-    print(f"[QualityGate] → IMAGE PIPELINE (calidad OK o máximo alcanzado)")
+    print("[QualityGate] → IMAGE PIPELINE (calidad OK o máximo alcanzado)")
     return "language_classifier"
 
 
-def _check_element_quality(elem: PDFElement, target_language: str) -> List[str]:
+def _check_element_quality(elem: PDFElement, target_language: str) -> list[str]:
     """
     Verifica la calidad de la traducción de un elemento.
     Devuelve lista de problemas encontrados (vacía = OK).

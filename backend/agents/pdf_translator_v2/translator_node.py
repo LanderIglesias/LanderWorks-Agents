@@ -30,7 +30,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 import anthropic
 from dotenv import load_dotenv
@@ -42,7 +42,7 @@ load_dotenv()
 BATCH_SIZE = 40  # bloques por llamada a la API
 
 
-def translator_node(state: TranslationState) -> Dict[str, Any]:
+def translator_node(state: TranslationState) -> dict[str, Any]:
     """
     Nodo LangGraph: traduce todos los elementos que necesitan traducción.
 
@@ -102,7 +102,7 @@ def translator_node(state: TranslationState) -> Dict[str, Any]:
     }
 
 
-def _get_context_hint(batch: List[PDFElement]) -> str:
+def _get_context_hint(batch: list[PDFElement]) -> str:
     """
     Genera una pista de contexto basada en los tipos de elementos del lote.
     Ayuda al modelo a traducir con el registro correcto.
@@ -119,11 +119,11 @@ def _get_context_hint(batch: List[PDFElement]) -> str:
 
 def _call_claude_translate(
     client: anthropic.Anthropic,
-    batch_dict: Dict[str, str],
+    batch_dict: dict[str, str],
     target_language: str,
     source_hint: str,
     context_hint: str,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """
     Llama a Claude Haiku para traducir un lote de textos.
 
@@ -177,7 +177,7 @@ Output: {{"0": "translated0", "1": "translated1"}}"""
                     return json.loads(m.group())
                 except json.JSONDecodeError:
                     pass
-            print(f"[Translator] Warning: no se pudo parsear JSON. Usando originales.")
+            print("[Translator] Warning: no se pudo parsear JSON. Usando originales.")
             return {k: v for k, v in batch_dict.items()}
 
     except Exception as e:

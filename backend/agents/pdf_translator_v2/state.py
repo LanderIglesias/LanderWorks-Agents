@@ -17,10 +17,9 @@ empieza vacío y se va enriqueciendo nodo a nodo hasta que el PDF está listo.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, TypedDict
-
+from typing import Any, TypedDict
 
 # ── Enums de clasificación ─────────────────────────────────────────────────
 
@@ -128,7 +127,7 @@ class PDFElement:
     is_bold: bool = False
 
     # Para imágenes (Vision agent)
-    image_bytes: Optional[bytes] = None
+    image_bytes: bytes | None = None
     image_xref: int = 0
     text_color_hex: str = "#000000"  # color hex detectado por Vision
     bg_color_hex: str = "#ffffff"  # alias para bg_color
@@ -186,9 +185,9 @@ class TranslationState(TypedDict):
     source_language: str
 
     # Elementos del PDF
-    elements: List[PDFElement]
-    pages_info: List[Dict[str, Any]]
-    page_images: Dict[int, bytes]  # page_num → JPEG renderizado (para image patcher)
+    elements: list[PDFElement]
+    pages_info: list[dict[str, Any]]
+    page_images: dict[int, bytes]  # page_num → JPEG renderizado (para image patcher)
 
     # Control del flujo
     current_phase: str
@@ -196,5 +195,5 @@ class TranslationState(TypedDict):
     max_quality_iterations: int
 
     # Resultados
-    errors: List[str]
-    stats: Dict[str, Any]
+    errors: list[str]
+    stats: dict[str, Any]

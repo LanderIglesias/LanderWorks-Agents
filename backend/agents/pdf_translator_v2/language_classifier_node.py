@@ -19,12 +19,12 @@ Rápido y 100% fiable para detectar el script.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
-from .state import ElementType, LanguageScript, PDFElement, TranslationState
+from .state import ElementType, LanguageScript, TranslationState
 
 
-def language_classifier_node(state: TranslationState) -> Dict[str, Any]:
+def language_classifier_node(state: TranslationState) -> dict[str, Any]:
     """
     Nodo LangGraph: clasifica el script de cada IMAGE_TEXT element.
     Opera solo sobre elementos de imagen — el texto nativo no lo necesita.

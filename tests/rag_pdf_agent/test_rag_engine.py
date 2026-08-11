@@ -12,10 +12,7 @@ Conceptos de testing que usamos aquí:
 
 from __future__ import annotations
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from backend.agents.rag_pdf_agent.rag_engine import (
     CHUNK_OVERLAP,
@@ -23,7 +20,6 @@ from backend.agents.rag_pdf_agent.rag_engine import (
     create_session_id,
     session_exists,
 )
-
 
 # ── Tests del motor ───────────────────────────────────────────────────────────
 
@@ -149,7 +145,7 @@ class TestRagEngine:
         with (
             patch.object(engine, "Chroma") as chroma_cls,
             patch.object(engine, "OpenAIEmbeddings"),
-            patch.object(engine, "ChatAnthropic") as llm_cls,
+            patch.object(engine, "ChatAnthropic"),
         ):
             chroma_cls.return_value = mock_vectorstore
 
@@ -201,6 +197,7 @@ class TestRagApi:
     def test_chat_sin_session_devuelve_400(self):
         """Preguntar sin session_id debe dar error 400."""
         from fastapi.testclient import TestClient
+
         from backend.main import app
 
         client = TestClient(app)
@@ -210,6 +207,7 @@ class TestRagApi:
     def test_chat_session_inexistente_devuelve_404(self):
         """Preguntar sobre una sesión que no existe debe dar 404."""
         from fastapi.testclient import TestClient
+
         from backend.main import app
 
         client = TestClient(app)
@@ -222,6 +220,7 @@ class TestRagApi:
     def test_session_info_inexistente(self):
         """Info de sesión inexistente debe indicar exists=False."""
         from fastapi.testclient import TestClient
+
         from backend.main import app
 
         client = TestClient(app)
@@ -232,6 +231,7 @@ class TestRagApi:
     def test_demo_page_carga(self):
         """La página demo debe cargar con status 200."""
         from fastapi.testclient import TestClient
+
         from backend.main import app
 
         client = TestClient(app)
@@ -242,6 +242,7 @@ class TestRagApi:
     def test_upload_sin_pdf_devuelve_422(self):
         """Subir sin archivo debe dar error de validación."""
         from fastapi.testclient import TestClient
+
         from backend.main import app
 
         client = TestClient(app)
@@ -250,9 +251,11 @@ class TestRagApi:
 
     def test_upload_archivo_no_pdf_devuelve_400(self):
         """Subir un archivo que no es PDF debe dar 400."""
-        from fastapi.testclient import TestClient
-        from backend.main import app
         import io
+
+        from fastapi.testclient import TestClient
+
+        from backend.main import app
 
         client = TestClient(app)
         res = client.post(

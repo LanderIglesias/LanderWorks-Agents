@@ -8,8 +8,8 @@ El endpoint muestra el número de iteraciones del quality gate en los headers.
 from __future__ import annotations
 
 import os
-import uuid
 import tempfile
+import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -117,7 +117,7 @@ async def translate(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
     finally:
         if os.path.exists(input_path):
             os.remove(input_path)

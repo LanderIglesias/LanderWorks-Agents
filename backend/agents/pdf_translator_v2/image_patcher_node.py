@@ -14,8 +14,7 @@ que quedan detrás de la imagen raster.
 from __future__ import annotations
 
 import io
-import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import fitz
 
@@ -25,7 +24,7 @@ from .state import ElementType, ImageStrategy, PDFElement, TranslationState
 TEXT_PADDING = 1.5
 
 
-def image_patcher_node(state: TranslationState) -> Dict[str, Any]:
+def image_patcher_node(state: TranslationState) -> dict[str, Any]:
     input_path = state["input_pdf_path"]
     output_path = state["output_pdf_path"]
     elements = state["elements"]
@@ -36,7 +35,7 @@ def image_patcher_node(state: TranslationState) -> Dict[str, Any]:
     source_path = output_path if os.path.exists(output_path) else input_path
     doc = fitz.open(source_path)
 
-    by_page: Dict[int, List[PDFElement]] = {}
+    by_page: dict[int, list[PDFElement]] = {}
     for elem in elements:
         if elem.element_type == ElementType.IMAGE_TEXT:
             if elem.image_strategy != ImageStrategy.SKIP and elem.is_translated:
@@ -82,7 +81,8 @@ def image_patcher_node(state: TranslationState) -> Dict[str, Any]:
     print(f"[ImagePatcher] {patched_total} elementos de imagen parcheados")
 
     tmp_path = None
-    import tempfile, shutil
+    import shutil
+    import tempfile
 
     same_file = os.path.abspath(source_path) == os.path.abspath(output_path)
     if same_file:
@@ -166,7 +166,7 @@ def _clean_text(text: str) -> str:
     return cleaned.strip()
 
 
-def _get_bg_color(elem: PDFElement, page_image_bytes: Optional[bytes]) -> tuple:
+def _get_bg_color(elem: PDFElement, page_image_bytes: bytes | None) -> tuple:
     """Obtiene el color de fondo para la redacción."""
     if elem.bg_is_solid:
         return _hex_to_rgb(elem.bg_color)
@@ -189,7 +189,7 @@ def _sample_corners(
     y0_pct: float,
     x1_pct: float,
     y1_pct: float,
-) -> Tuple[float, float, float]:
+) -> tuple[float, float, float]:
     """Muestrea el color de fondo de las esquinas del bbox."""
     try:
         from PIL import Image
@@ -216,7 +216,7 @@ def _sample_corners(
         return (1.0, 1.0, 1.0)
 
 
-def _hex_to_rgb(hex_color: str) -> Tuple[float, float, float]:
+def _hex_to_rgb(hex_color: str) -> tuple[float, float, float]:
     h = hex_color.lstrip("#")
     if len(h) == 3:
         h = "".join(c * 2 for c in h)

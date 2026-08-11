@@ -35,8 +35,7 @@ Criterios de decisión:
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, List
+from typing import Any
 
 from .state import ElementType, ImageStrategy, LanguageScript, PDFElement, TranslationState
 
@@ -47,7 +46,7 @@ CHAR_WIDTH_RATIO = 0.55
 MIN_READABLE_FONT = 6.0
 
 
-def image_strategy_node(state: TranslationState) -> Dict[str, Any]:
+def image_strategy_node(state: TranslationState) -> dict[str, Any]:
     """
     Nodo LangGraph: decide la estrategia de patch para cada IMAGE_TEXT element.
     """
@@ -179,7 +178,6 @@ def _is_numeric_or_code(text: str) -> bool:
 
     # Contamos caracteres: dígitos, puntuación y símbolos de unidad
     numeric_chars = sum(1 for c in stripped if c.isdigit() or c in ".,.-€$£%/³²°")
-    alpha_chars = sum(1 for c in stripped if c.isalpha())
 
     # Si >60% son numéricos/puntuación → skip
     if numeric_chars / max(1, len(stripped)) > 0.60:
@@ -196,7 +194,7 @@ def _is_numeric_or_code(text: str) -> bool:
     return False
 
 
-def compute_font_size_for_strategy(elem: "PDFElement") -> float:
+def compute_font_size_for_strategy(elem: PDFElement) -> float:
     """
     Calcula el font size real a usar según la estrategia.
     Llamado por el image_patcher_node.

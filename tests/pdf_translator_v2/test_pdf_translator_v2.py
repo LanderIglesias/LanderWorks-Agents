@@ -14,10 +14,7 @@ Qué cubrimos:
 - reconstructor: _select_font elige la fuente correcta
 """
 
-import math
 import pytest
-from unittest.mock import MagicMock, patch
-
 
 # ── Helpers para crear elementos de prueba ────────────────────────────────────
 
@@ -36,12 +33,10 @@ def make_element(
 ):
     """Crea un PDFElement mínimo para tests sin necesitar ficheros."""
     from backend.agents.pdf_translator_v2.state import (
-        PDFElement,
         BBox,
         ElementType,
+        PDFElement,
         QualityStatus,
-        LanguageScript,
-        ImageStrategy,
     )
 
     elem = PDFElement(
@@ -137,9 +132,9 @@ class TestImageStrategy:
         """Texto corto latino cabe al 100% → FULL_STYLE."""
         from backend.agents.pdf_translator_v2.image_strategy_node import _decide_strategy
         from backend.agents.pdf_translator_v2.state import (
-            LanguageScript,
-            ImageStrategy,
             ElementType,
+            ImageStrategy,
+            LanguageScript,
         )
 
         elem = make_element(
@@ -156,9 +151,9 @@ class TestImageStrategy:
         """Traducción muy larga → BEST_EFFORT."""
         from backend.agents.pdf_translator_v2.image_strategy_node import _decide_strategy
         from backend.agents.pdf_translator_v2.state import (
-            LanguageScript,
-            ImageStrategy,
             ElementType,
+            ImageStrategy,
+            LanguageScript,
         )
 
         elem = make_element(
@@ -175,9 +170,9 @@ class TestImageStrategy:
         """Bbox asiático muy pequeño → SKIP (ilegible)."""
         from backend.agents.pdf_translator_v2.image_strategy_node import _decide_strategy
         from backend.agents.pdf_translator_v2.state import (
-            LanguageScript,
-            ImageStrategy,
             ElementType,
+            ImageStrategy,
+            LanguageScript,
         )
 
         elem = make_element(
@@ -194,9 +189,9 @@ class TestImageStrategy:
         """Bbox asiático razonable → BEST_EFFORT."""
         from backend.agents.pdf_translator_v2.image_strategy_node import _decide_strategy
         from backend.agents.pdf_translator_v2.state import (
-            LanguageScript,
-            ImageStrategy,
             ElementType,
+            ImageStrategy,
+            LanguageScript,
         )
 
         elem = make_element(
@@ -213,9 +208,9 @@ class TestImageStrategy:
         """Texto numérico → SKIP (no necesita traducción)."""
         from backend.agents.pdf_translator_v2.image_strategy_node import _decide_strategy
         from backend.agents.pdf_translator_v2.state import (
-            LanguageScript,
-            ImageStrategy,
             ElementType,
+            ImageStrategy,
+            LanguageScript,
         )
 
         elem = make_element(
@@ -232,7 +227,7 @@ class TestImageStrategy:
         from backend.agents.pdf_translator_v2.image_strategy_node import (
             compute_font_size_for_strategy,
         )
-        from backend.agents.pdf_translator_v2.state import ImageStrategy, ElementType
+        from backend.agents.pdf_translator_v2.state import ElementType, ImageStrategy
 
         elem = make_element(font_size=24.0, element_type=ElementType.IMAGE_TEXT)
         elem.image_strategy = ImageStrategy.FULL_STYLE
@@ -243,7 +238,7 @@ class TestImageStrategy:
         from backend.agents.pdf_translator_v2.image_strategy_node import (
             compute_font_size_for_strategy,
         )
-        from backend.agents.pdf_translator_v2.state import ImageStrategy, ElementType
+        from backend.agents.pdf_translator_v2.state import ElementType, ImageStrategy
 
         elem = make_element(font_size=20.0, element_type=ElementType.IMAGE_TEXT)
         elem.image_strategy = ImageStrategy.REDUCED_SIZE

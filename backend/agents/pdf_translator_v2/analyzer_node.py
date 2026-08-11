@@ -27,14 +27,13 @@ import base64
 import json
 import os
 import re
-import uuid
-from typing import Any, Dict, List
+from typing import Any
 
 import anthropic
 import fitz
 from dotenv import load_dotenv
 
-from .state import BBox, ElementType, PDFElement, QualityStatus, TranslationState
+from .state import BBox, ElementType, PDFElement, TranslationState
 
 load_dotenv()
 
@@ -50,15 +49,15 @@ VISION_RENDER_SCALE = 2.0
 MIN_CONTRAST_LUMINANCE = 50
 
 
-def analyzer_node(state: TranslationState) -> Dict[str, Any]:
+def analyzer_node(state: TranslationState) -> dict[str, Any]:
     print(f"\n[Analyzer] Analizando PDF: {state['input_pdf_path']}")
 
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     doc = fitz.open(state["input_pdf_path"])
 
-    all_elements: List[PDFElement] = []
-    pages_info: List[Dict[str, Any]] = []
-    page_images: Dict[int, bytes] = {}
+    all_elements: list[PDFElement] = []
+    pages_info: list[dict[str, Any]] = []
+    page_images: dict[int, bytes] = {}
 
     for page_num in range(len(doc)):
         page = doc[page_num]
@@ -120,7 +119,7 @@ def _extract_native_text(
     page_num: int,
     page_w: float,
     page_h: float,
-) -> List[PDFElement]:
+) -> list[PDFElement]:
     """
     Extrae texto nativo del PDF span a span.
 
@@ -180,7 +179,7 @@ def _analyze_images(
     page_num: int,
     page_w: float,
     page_h: float,
-) -> List[PDFElement]:
+) -> list[PDFElement]:
     image_list = page.get_images(full=True)
     if not image_list:
         return []
@@ -224,7 +223,7 @@ def _vision_detect_image_text(
     page_bytes: bytes,
     img_w: int,
     img_h: int,
-) -> List[Dict]:
+) -> list[dict]:
     """
     Envía la página renderizada a Claude Sonnet Vision.
     Detecta SOLO texto en fondos de color sólido no-blanco.
@@ -302,7 +301,7 @@ If no translatable text: {{"regions": []}}"""
         return []
 
 
-def _parse_vision_response(raw: str) -> List[Dict]:
+def _parse_vision_response(raw: str) -> list[dict]:
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
@@ -411,9 +410,9 @@ def _is_numeric_or_untranslatable(text: str) -> bool:
 
 
 def _deduplicate_with_native(
-    image_elements: List[PDFElement],
-    native_elements: List[PDFElement],
-) -> List[PDFElement]:
+    image_elements: list[PDFElement],
+    native_elements: list[PDFElement],
+) -> list[PDFElement]:
     """
     Descarta elementos IMAGE_TEXT que se solapan con texto nativo.
 

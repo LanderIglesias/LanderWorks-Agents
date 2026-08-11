@@ -34,8 +34,7 @@ primero las nativas, luego las de imagen.
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, List
+from typing import Any
 
 import fitz
 
@@ -45,7 +44,7 @@ MAX_EXTRA_LINES = 3
 TEXT_PADDING = 1.5
 
 
-def reconstructor_node(state: TranslationState) -> Dict[str, Any]:
+def reconstructor_node(state: TranslationState) -> dict[str, Any]:
     """
     Nodo LangGraph: reconstruye el PDF con todas las traducciones.
 
@@ -78,7 +77,7 @@ def reconstructor_node(state: TranslationState) -> Dict[str, Any]:
         tmp_path = None
 
     # Agrupamos elementos por página
-    by_page: Dict[int, List[PDFElement]] = {}
+    by_page: dict[int, list[PDFElement]] = {}
     for elem in elements:
         by_page.setdefault(elem.page_num, []).append(elem)
 

@@ -48,7 +48,7 @@ class ExpenseOut(BaseModel):
     source: Source
     merged_source: Source | None
     merchant: str | None
-    amount: float
+    amount: float | None
     currency: str
     category: str | None
     category_confidence: float | None
