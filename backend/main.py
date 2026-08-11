@@ -24,7 +24,6 @@ from .agents.dental_agent.store import (
 )
 from .agents.dental_agent.tools import _cfg, _norm_q, validate_config
 from .agents.dental_agent.twilio_worker import process_twilio_message
-from .agents.tech_debt_agent.api import router as tech_debt_router
 
 try:
     from .agents.doc_intel_agent.api import router as doc_intel_router
@@ -34,10 +33,34 @@ try:
 except Exception as e:
     print(f"[DOC_INTEL] No disponible: {e}")
     DOC_INTEL_AVAILABLE = False
-from .agents.job_matcher.api import router as job_matcher_router
+
+try:
+    from .agents.tech_debt_agent.api import router as tech_debt_router
+
+    TECH_DEBT_AGENT_AVAILABLE = True
+except Exception as e:
+    print(f"[TECH_DEBT_AGENT] No disponible: {e}")
+    TECH_DEBT_AGENT_AVAILABLE = False
+
+try:
+    from .agents.job_matcher.api import router as job_matcher_router
+
+    JOB_MATCHER_AVAILABLE = True
+except Exception as e:
+    print(f"[JOB_MATCHER] No disponible: {e}")
+    JOB_MATCHER_AVAILABLE = False
 from .agents.lead_capture_agent.api import router as lead_capture_agent_router
 from .agents.meeting_intel_agent.api import router as meeting_intel_router
 from .agents.rag_pdf_agent.api import router as rag_pdf_router
+
+try:
+    from .agents.expense_tracker.api import router as expense_tracker_router
+    from .agents.expense_tracker.database import init_db as init_expense_tracker_db
+
+    EXPENSE_TRACKER_AVAILABLE = True
+except Exception as e:
+    print(f"[EXPENSE_TRACKER] No disponible: {e}")
+    EXPENSE_TRACKER_AVAILABLE = False
 
 
 @asynccontextmanager
@@ -66,6 +89,13 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             print(f"[DOC_INTEL] fallo al inicializar BD: {e}")
 
+    if EXPENSE_TRACKER_AVAILABLE:
+        try:
+            init_expense_tracker_db()
+            print("[EXPENSE_TRACKER] Base de datos inicializada")
+        except Exception as e:
+            print(f"[EXPENSE_TRACKER] fallo al inicializar BD: {e}")
+
     yield
 
 
@@ -75,11 +105,22 @@ app.include_router(lead_capture_agent_router)
 app.include_router(rag_pdf_router)
 app.include_router(pdf_translator_v2_router)
 app.include_router(bi_agent_router)
-app.include_router(job_matcher_router)
-app.include_router(tech_debt_router)
+if JOB_MATCHER_AVAILABLE:
+    app.include_router(job_matcher_router)
+if TECH_DEBT_AGENT_AVAILABLE:
+    app.include_router(tech_debt_router)
 app.include_router(meeting_intel_router)
 if DOC_INTEL_AVAILABLE:
     app.include_router(doc_intel_router)
+if EXPENSE_TRACKER_AVAILABLE:
+    app.include_router(expense_tracker_router)
+    from .agents.expense_tracker.api import mount_static as _mount_expense_tracker_static
+    from .agents.expense_tracker.api import (
+        setup_rate_limiting as _setup_expense_tracker_rate_limiting,
+    )
+
+    _mount_expense_tracker_static(app)
+    _setup_expense_tracker_rate_limiting(app)
 
 
 @app.post("/chat")

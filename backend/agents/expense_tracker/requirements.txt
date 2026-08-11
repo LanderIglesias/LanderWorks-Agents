@@ -1,0 +1,24 @@
+# Dependencias mínimas de expense_tracker en solitario — versiones idénticas
+# a las pinneadas en el requirements.txt raíz del monorepo (probadas hoy:
+# pydantic 2.13.4 por el fix del conflicto con mcp, fastapi 0.115.6 por el
+# fix del bug de anotaciones diferidas + slowapi). No dupliques estas
+# versiones sin sincronizarlas también aquí si cambian arriba.
+
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# Config
+python-dotenv==1.0.1
+pydantic[dotenv]==2.13.4
+pydantic-settings==2.7.0
+
+# LLM (categorizer.py)
+anthropic==0.41.0
+
+# Database
+psycopg2-binary==2.9.10
+sqlalchemy==2.0.36
+
+# Rate limiting del webhook
+slowapi==0.1.9

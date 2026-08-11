@@ -17,3 +17,12 @@ ignore = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["backend"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's Depends()/Query()/etc. in argument defaults is the documented,
+# intended pattern (the call is evaluated once per request by FastAPI's
+# dependency injection, not at function-definition time like a real mutable
+# default) — not the bug B008 exists to catch. Without this, every agent's
+# FastAPI endpoints using Depends() hit B008 the first time pre-commit runs
+# against them, one file at a time, instead of being fixed once here.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.File"]

@@ -1,4 +1,4 @@
-version: "3.9"
+
 
 services:
   db:
@@ -20,10 +20,27 @@ services:
       - "8001:8000"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      EXPENSE_TRACKER_DATABASE_URL: postgresql://${EXPENSE_TRACKER_POSTGRES_USER}:${EXPENSE_TRACKER_POSTGRES_PASSWORD}@db_expense_tracker:5432/${EXPENSE_TRACKER_POSTGRES_DB}
+      EXPENSE_TRACKER_WEBHOOK_SECRET: ${EXPENSE_TRACKER_WEBHOOK_SECRET}
+      EXPENSE_TRACKER_APP_TOKEN: ${EXPENSE_TRACKER_APP_TOKEN}
     depends_on:
       - db
+      - db_expense_tracker
     volumes:
       - .:/app
 
+  db_expense_tracker:
+    image: postgres:16
+    container_name: expense_tracker_db
+    environment:
+      POSTGRES_DB: ${EXPENSE_TRACKER_POSTGRES_DB}
+      POSTGRES_USER: ${EXPENSE_TRACKER_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${EXPENSE_TRACKER_POSTGRES_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - expense_tracker_postgres_data:/var/lib/postgresql/data
+
 volumes:
   postgres_data:
+  expense_tracker_postgres_data:

@@ -1,0 +1,40 @@
+# Imagen ligera SOLO de expense_tracker — separada de la imagen grande
+# compartida (Dockerfile raíz) que instala las dependencias de los ~13
+# agentes del monorepo. expense_tracker no importa código de ningún otro
+# agente (solo imports relativos dentro de su propia carpeta), así que
+# puede construirse con un requirements.txt propio, mucho más pequeño.
+#
+# Build context: la RAÍZ del repo (no esta carpeta) — necesario para que
+# los COPY de abajo puedan reproducir la ruta backend/agents/expense_tracker
+# que requieren los imports relativos del paquete, sin sacar el código del
+# monorepo a un directorio aparte. Ver docker-compose.prod.yml:
+#   build:
+#     context: .
+#     dockerfile: backend/agents/expense_tracker/Dockerfile.prod
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# libpq-dev + gcc: requeridos por psycopg2-binary para compilar contra la
+# librería cliente de PostgreSQL. Sin git — expense_tracker no usa
+# gitpython (eso es solo tech_debt_agent, que no está en esta imagen).
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiamos solo el requirements.txt primero para aprovechar la caché de
+# capas de Docker en rebuilds donde no cambian las dependencias.
+COPY backend/agents/expense_tracker/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# backend/agents/__init__.py es necesario para que `backend.agents` resuelva
+# como paquete regular (backend/ en sí es un namespace package implícito,
+# igual que en la imagen grande — no lleva __init__.py y no lo necesita).
+COPY backend/agents/__init__.py backend/agents/__init__.py
+COPY backend/agents/expense_tracker/ backend/agents/expense_tracker/
+
+EXPOSE 8000
+
+CMD ["uvicorn", "backend.agents.expense_tracker.standalone_main:app", "--host", "0.0.0.0", "--port", "8000"]

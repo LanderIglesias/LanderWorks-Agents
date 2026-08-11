@@ -6,7 +6,7 @@ httpx==0.28.1
 
 # Config
 python-dotenv==1.0.1
-pydantic[dotenv]==2.10.4
+pydantic[dotenv]==2.13.4
 pydantic-settings==2.7.0
 pyyaml==6.0.1
 
@@ -35,6 +35,11 @@ pandas==2.2.3
 numpy==1.26.4
 matplotlib==3.9.4
 faker==33.1.0
+
+# Job Matcher — pin exacto: el pickle embebe _sklearn_version=1.8.0 (el
+# mismo que estaba instalado en .venv, donde se entrenó); confirmado
+# leyendo el estado interno del estimador, no adivinado.
+scikit-learn==1.8.0
 
 # Database (nuevo agente)
 psycopg2-binary==2.9.10
@@ -67,3 +72,6 @@ pydub==0.25.1
 
 # MCP
 mcp==1.28.0
+
+# Expense Tracker (rate limiting del webhook)
+slowapi==0.1.9

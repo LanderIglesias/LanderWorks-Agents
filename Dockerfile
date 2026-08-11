@@ -16,6 +16,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
+    git \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 

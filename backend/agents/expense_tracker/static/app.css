@@ -1,0 +1,471 @@
+/* app.css — Expense Tracker PWA
+   Tipografía del sistema, paleta neutra + un acento, tarjetas con borde
+   1px (sin box-shadow decorativo), navbar translúcida con blur, curvas
+   spring-aproximadas para transiciones (ver apple-design skill). */
+
+:root {
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --surface-translucent: rgba(255, 255, 255, 0.72);
+  --border: rgba(0, 0, 0, 0.08);
+  --text: #1c1c1e;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #98989d;
+  --accent: #ff6b35;
+  --accent-contrast: #ffffff;
+  --danger: #ff3b30;
+  --radius-card: 14px;
+  --radius-pill: 999px;
+
+  /* Curvas que aproximan un spring critically-damped (damping 1.0) y uno
+     con ligero rebote (damping ~0.8) para donde el gesto trae momentum. */
+  --spring-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --surface-translucent: rgba(28, 28, 30, 0.72);
+    --border: rgba(255, 255, 255, 0.12);
+    --text: #f2f2f7;
+    --text-secondary: #98989d;
+    --text-tertiary: #636366;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+  overscroll-behavior-y: none;
+}
+
+body {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Navbar translúcida ─────────────────────────────────────────────── */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(52px + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  background: var(--surface-translucent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Selector día / mes / año ───────────────────────────────────────── */
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  margin: 14px 16px;
+  padding: 2px;
+  background: var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.segmented button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 7px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: var(--radius-pill);
+  transition: background 0.3s var(--spring-settle), color 0.3s var(--spring-settle);
+}
+
+.segmented button.active {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* ── Tarjeta de total ───────────────────────────────────────────────── */
+
+.total-card {
+  margin: 0 16px 20px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  transition: transform 0.35s var(--spring-settle), opacity 0.35s var(--spring-settle);
+}
+
+.total-card .amount {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.total-card .meta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ── Lista de gastos ────────────────────────────────────────────────── */
+
+.list-scroll {
+  height: calc(100dvh - 52px - env(safe-area-inset-top));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 100px;
+}
+
+.day-group {
+  margin-bottom: 18px;
+}
+
+.day-label {
+  padding: 0 16px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.expense-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  touch-action: pan-y;
+  will-change: transform;
+}
+
+.expense-row:active {
+  background: var(--bg);
+  transition: background 0.1s ease-out;
+}
+
+.expense-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.expense-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.expense-merchant {
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expense-category {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.expense-amount {
+  font-size: 15px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.needs-review-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.empty-state {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+/* ── Botón flotante de alta manual ──────────────────────────────────── */
+
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 28px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  transition: transform 0.2s var(--spring-bounce);
+}
+
+.fab:active {
+  transform: scale(0.92);
+}
+
+/* ── Tab bar inferior ───────────────────────────────────────────────── */
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface-translucent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid var(--border);
+}
+
+.tabbar button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 0 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.tabbar button.active {
+  color: var(--accent);
+}
+
+.tabbar .tab-icon {
+  font-size: 20px;
+}
+
+.tabbar .review-badge {
+  position: absolute;
+  transform: translate(10px, -8px);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--danger);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Pantalla de detalle (overlay deslizante) ───────────────────────── */
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform 0.38s var(--spring-settle);
+  overflow-y: auto;
+}
+
+.sheet.open {
+  transform: translateX(0);
+}
+
+.sheet.dragging {
+  transition: none;
+}
+
+.lock-screen {
+  z-index: 60;
+}
+
+.sheet-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: calc(52px + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) 8px 0;
+  background: var(--surface-translucent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+
+.back-button {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 500;
+  padding: 8px 12px;
+}
+
+.sheet-body {
+  padding: 20px 16px 40px;
+}
+
+.field-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.field-row:last-child {
+  border-bottom: none;
+}
+
+.field-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.field-row input,
+.field-row select {
+  flex: 1;
+  border: none;
+  background: transparent;
+  text-align: right;
+  font-size: 15px;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.field-row input:focus,
+.field-row select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.raw-text-block {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.review-badge-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 107, 53, 0.15);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.primary-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-card);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.15s var(--spring-bounce);
+}
+
+.primary-button:active {
+  transform: scale(0.98);
+}
+
+.review-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.review-actions button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.review-actions button.confirm {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .total-card,
+  .segmented button,
+  .fab,
+  .primary-button {
+    transition-duration: 0.01ms !important;
+  }
+}

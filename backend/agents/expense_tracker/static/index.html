@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Gastos</title>
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Gastos" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ── Clave de acceso (una sola vez, se guarda en localStorage) ───── -->
+    <div class="sheet lock-screen" id="view-lock" hidden>
+      <div class="sheet-body" style="padding-top: max(60px, env(safe-area-inset-top))">
+        <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 14px">
+          Introduce tu clave de acceso para ver tus gastos.
+        </p>
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Clave</span>
+            <input id="lock-token" type="password" placeholder="••••••••" autocomplete="off" />
+          </div>
+        </div>
+        <button class="primary-button" id="lock-save">Entrar</button>
+        <p id="lock-error" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden>
+          Clave incorrecta.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Pantalla principal ─────────────────────────────────────────── -->
+    <div id="view-main">
+      <header class="navbar"><span class="navbar-title">Gastos</span></header>
+
+      <div class="list-scroll">
+        <div class="segmented" id="granularity-switch">
+          <button data-granularity="day">Día</button>
+          <button data-granularity="month" class="active">Mes</button>
+          <button data-granularity="year">Año</button>
+        </div>
+
+        <div class="total-card" id="total-card">
+          <div class="amount" id="total-amount">—</div>
+          <div class="meta" id="total-meta">Cargando…</div>
+        </div>
+
+        <div id="expense-list"></div>
+      </div>
+
+      <button class="fab" id="fab-add" aria-label="Añadir gasto manual">+</button>
+
+      <nav class="tabbar">
+        <button class="active" data-tab="main">
+          <span class="tab-icon">◎</span>
+          <span>Gastos</span>
+        </button>
+        <button data-tab="review" style="position: relative">
+          <span class="tab-icon">!</span>
+          <span>Revisión</span>
+          <span class="review-badge" id="review-badge" hidden>0</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ── Cola de revisión ───────────────────────────────────────────── -->
+    <div class="sheet" id="view-review">
+      <div class="sheet-header">
+        <button class="back-button" data-close="review">Cerrar</button>
+        <span class="navbar-title">Revisión</span>
+      </div>
+      <div class="sheet-body" id="review-list"></div>
+    </div>
+
+    <!-- ── Detalle de gasto ───────────────────────────────────────────── -->
+    <div class="sheet" id="view-detail">
+      <div class="sheet-header">
+        <button class="back-button" data-close="detail">Atrás</button>
+        <span class="navbar-title" id="detail-title">Gasto</span>
+      </div>
+      <div class="sheet-body">
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Comercio</span>
+            <input id="detail-merchant" type="text" placeholder="—" />
+          </div>
+          <div class="field-row">
+            <span class="field-label">Importe (€)</span>
+            <input id="detail-amount" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="field-row">
+            <span class="field-label">Categoría</span>
+            <select id="detail-category">
+              <option value="">—</option>
+              <option value="comida">Comida</option>
+              <option value="transporte">Transporte</option>
+              <option value="suscripciones">Suscripciones</option>
+              <option value="ocio">Ocio</option>
+              <option value="salud">Salud</option>
+              <option value="hogar">Hogar</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Origen</span>
+            <span id="detail-source" style="color: var(--text-secondary)"></span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Fecha</span>
+            <span id="detail-date" style="color: var(--text-secondary)"></span>
+          </div>
+          <div class="field-row" id="detail-review-row" hidden>
+            <span class="field-label">Estado</span>
+            <span class="review-badge-pill">Pendiente de revisión</span>
+          </div>
+        </div>
+
+        <div class="field-group" id="detail-raw-group" hidden>
+          <div class="raw-text-block" id="detail-raw-text"></div>
+        </div>
+
+        <button class="primary-button" id="detail-save">Guardar cambios</button>
+      </div>
+    </div>
+
+    <!-- ── Alta manual ────────────────────────────────────────────────── -->
+    <div class="sheet" id="view-add">
+      <div class="sheet-header">
+        <button class="back-button" data-close="add">Cancelar</button>
+        <span class="navbar-title">Añadir gasto</span>
+      </div>
+      <div class="sheet-body">
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Comercio</span>
+            <input id="add-merchant" type="text" placeholder="Ej. Mercadona" />
+          </div>
+          <div class="field-row">
+            <span class="field-label">Importe (€)</span>
+            <input id="add-amount" type="number" step="0.01" placeholder="0.00" inputmode="decimal" />
+          </div>
+          <div class="field-row">
+            <span class="field-label">Categoría</span>
+            <select id="add-category">
+              <option value="">Auto (IA)</option>
+              <option value="comida">Comida</option>
+              <option value="transporte">Transporte</option>
+              <option value="suscripciones">Suscripciones</option>
+              <option value="ocio">Ocio</option>
+              <option value="salud">Salud</option>
+              <option value="hogar">Hogar</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Fecha</span>
+            <input id="add-date" type="datetime-local" />
+          </div>
+        </div>
+        <button class="primary-button" id="add-save">Guardar gasto</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

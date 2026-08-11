@@ -1,0 +1,62 @@
+# docker-compose.prod.yml — SOLO expense_tracker + su Postgres, para correr
+# en el EC2 junto al proceso NATIVO de Lead Capture Agent (que no vive en
+# Docker), sin construir ni tocar la imagen grande compartida del resto de
+# agentes (esa la define docker-compose.yml, y no se usa en este stack).
+#
+# Puertos elegidos DISTINTOS de los que ya usa docker-compose.yml (api en
+# 8001, db_expense_tracker en 5434) por si ambos stacks llegan a coexistir
+# en el mismo host durante una transición. AÚN NO VERIFICADO contra los
+# puertos reales que ya tiene ocupados Lead Capture en el EC2 — confirmar
+# con `sudo ss -tlnp` (o `netstat -tlnp`) en el servidor antes del primer
+# `docker-compose -f docker-compose.prod.yml up -d`, y ajustar si choca.
+#
+# Uso:
+#   docker-compose -f docker-compose.prod.yml up -d --build
+#
+# `name:` de abajo aísla este stack en su propio proyecto/red de Docker
+# Compose (project "expense-tracker-prod"), en vez del nombre por defecto
+# derivado del directorio ("ai-portfolio") que docker-compose.yml también
+# usa por defecto — sin esto, un `docker-compose -f docker-compose.prod.yml
+# down` se lleva por delante los contenedores del OTRO compose (ya
+# ocurrió una vez al probar esto en local: tumbó doc_intel_api/db y
+# expense_tracker_db del stack de dev sin tocarlos directamente).
+name: expense-tracker-prod
+
+services:
+  expense_tracker_api:
+    build:
+      context: .
+      dockerfile: backend/agents/expense_tracker/Dockerfile.prod
+    container_name: expense_tracker_api_prod
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
+    environment:
+      EXPENSE_TRACKER_DATABASE_URL: postgresql://${EXPENSE_TRACKER_POSTGRES_USER}:${EXPENSE_TRACKER_POSTGRES_PASSWORD}@expense_tracker_db:5432/${EXPENSE_TRACKER_POSTGRES_DB}
+      EXPENSE_TRACKER_WEBHOOK_SECRET: ${EXPENSE_TRACKER_WEBHOOK_SECRET}
+      EXPENSE_TRACKER_APP_TOKEN: ${EXPENSE_TRACKER_APP_TOKEN}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    depends_on:
+      expense_tracker_db:
+        condition: service_healthy
+
+  expense_tracker_db:
+    image: postgres:16
+    container_name: expense_tracker_db_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${EXPENSE_TRACKER_POSTGRES_DB}
+      POSTGRES_USER: ${EXPENSE_TRACKER_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${EXPENSE_TRACKER_POSTGRES_PASSWORD}
+    ports:
+      - "5435:5432"
+    volumes:
+      - expense_tracker_postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${EXPENSE_TRACKER_POSTGRES_USER} -d ${EXPENSE_TRACKER_POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  expense_tracker_postgres_data_prod:
