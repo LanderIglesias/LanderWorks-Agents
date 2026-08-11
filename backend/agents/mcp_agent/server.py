@@ -9,6 +9,8 @@ import asyncio
 import json
 import os
 import sys
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
@@ -102,6 +104,25 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["meeting_id", "owner"],
             },
+        ),
+        Tool(
+            name="get_current_datetime",
+            description="ALWAYS use this tool when asked about current date, time, or 'today'. Get the current date and time in the user's local timezone",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA timezone name (default: Europe/Madrid)",
+                        "default": "Europe/Madrid",
+                    }
+                },
+            },
+        ),
+        Tool(
+            name="get_current_date",
+            description="Get the current date",
+            inputSchema={"type": "object", "properties": {}},
         ),
     ]
 
@@ -201,6 +222,30 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         owner = arguments["owner"].lower()
         filtered = [item for item in all_items if owner in item.get("owner", "").lower()]
         return [TextContent(type="text", text=json.dumps(filtered, ensure_ascii=False, indent=2))]
+
+    elif name == "get_current_datetime":
+        tz_name = arguments.get("timezone", "Europe/Madrid")
+        now = datetime.now(ZoneInfo(tz_name))
+        result = {
+            "datetime": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "date": now.strftime("%Y-%m-%d"),
+            "time": now.strftime("%H:%M:%S"),
+            "timezone": tz_name,
+            "day_of_week": now.strftime("%A"),
+            "iso8601": now.isoformat(),
+        }
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
+
+    elif name == "get_current_date":
+        today = datetime.now(ZoneInfo("Europe/Madrid"))
+        result = {
+            "date": today.strftime("%Y-%m-%d"),
+            "day_of_week": today.strftime("%A"),
+            "day": today.day,
+            "month": today.month,
+            "year": today.year,
+        }
+        return [TextContent(type="text", text=json.dumps(result, ensure_ascii=False, indent=2))]
 
     return [TextContent(type="text", text=f"Herramienta desconocida: {name}")]
 
