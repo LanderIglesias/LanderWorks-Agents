@@ -1,20 +1,44 @@
 /* app.css — Expense Tracker PWA
-   Tipografía del sistema, paleta neutra + un acento, tarjetas con borde
-   1px (sin box-shadow decorativo), navbar translúcida con blur, curvas
-   spring-aproximadas para transiciones (ver apple-design skill). */
+   Dirección "Liquid Glass" (iOS Control Center / Wallet): backdrop-filter
+   real sobre fondo degradado violeta-negro (claro: blanco-lavanda), no
+   gradientes CSS simulando cristal. Ver DESIGN.md para el registro
+   completo de la dirección visual, y el comentario de contrato al
+   principio de index.html.
+
+   Blur pesado limitado a cromo FIJO (navbar, tarjeta de total, segmented
+   control, botones circulares, tabbar, sheets) — las filas de la lista
+   van con fondo semitransparente plano, sin backdrop-filter, para no
+   sacrificar scroll suave en listas largas en Safari de iPhone. */
 
 :root {
-  --bg: #f2f2f7;
-  --surface: #ffffff;
-  --surface-translucent: rgba(255, 255, 255, 0.72);
-  --border: rgba(0, 0, 0, 0.08);
-  --text: #1c1c1e;
-  --text-secondary: #6e6e73;
-  --text-tertiary: #98989d;
+  /* ── Fondo: degradado claro con MÁS contraste que blanco plano, para
+     que el blur tenga algo real que difuminar (feedback tras la primera
+     prueba: blanco liso no dejaba notarse el cristal). ── */
+  --bg-top: #fdfcff;
+  --bg-mid: #f2eefa;
+  --bg-bottom: #e7e0f2;
+  --halo-color: 255, 138, 91; /* coral, para el halo tras navbar/tarjetas */
+  --halo-opacity: 0.14;
+
+  --glass-fill: rgba(255, 255, 255, 0.55);
+  --glass-fill-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(24, 12, 46, 0.08);
+  --glass-border-top: rgba(255, 255, 255, 0.9);
+  --glass-row: rgba(255, 255, 255, 0.42);
+  --shadow-card: 0 8px 28px -10px rgba(60, 40, 90, 0.16);
+
+  --text: #1c1230;
+  --text-secondary: rgba(28, 18, 48, 0.6);
+  --text-tertiary: rgba(28, 18, 48, 0.4);
+
   --accent: #ff6b35;
   --accent-contrast: #ffffff;
-  --danger: #ff3b30;
-  --radius-card: 14px;
+  --warning: #b8720a;
+  --warning-contrast: #ffffff;
+  --danger: #d9483a;
+
+  --radius-card: 20px;
+  --radius-row: 14px;
   --radius-pill: 999px;
 
   /* Curvas que aproximan un spring critically-damped (damping 1.0) y uno
@@ -24,15 +48,55 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #000000;
-    --surface: #1c1c1e;
-    --surface-translucent: rgba(28, 28, 30, 0.72);
-    --border: rgba(255, 255, 255, 0.12);
-    --text: #f2f2f7;
-    --text-secondary: #98989d;
-    --text-tertiary: #636366;
+  :root:not([data-theme="light"]) {
+    --bg-top: #1a1230;
+    --bg-mid: #140d26;
+    --bg-bottom: #0a0a0f;
+    --halo-color: 168, 116, 255;
+    --halo-opacity: 0.3;
+
+    --glass-fill: rgba(255, 255, 255, 0.08);
+    --glass-fill-strong: rgba(255, 255, 255, 0.14);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-top: rgba(255, 255, 255, 0.22);
+    --glass-row: rgba(255, 255, 255, 0.05);
+    --shadow-card: 0 10px 34px -10px rgba(0, 0, 0, 0.55);
+
+    --text: #f5f3fa;
+    --text-secondary: rgba(245, 243, 250, 0.6);
+    --text-tertiary: rgba(245, 243, 250, 0.38);
+
+    --accent: #ff8a5b;
+    --accent-contrast: #241030;
+    --warning: #ffb340;
+    --warning-contrast: #2b1a05;
+    --danger: #ff6b6b;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg-top: #1a1230;
+  --bg-mid: #140d26;
+  --bg-bottom: #0a0a0f;
+  --halo-color: 168, 116, 255;
+  --halo-opacity: 0.3;
+
+  --glass-fill: rgba(255, 255, 255, 0.08);
+  --glass-fill-strong: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-top: rgba(255, 255, 255, 0.22);
+  --glass-row: rgba(255, 255, 255, 0.05);
+  --shadow-card: 0 10px 34px -10px rgba(0, 0, 0, 0.55);
+
+  --text: #f5f3fa;
+  --text-secondary: rgba(245, 243, 250, 0.6);
+  --text-tertiary: rgba(245, 243, 250, 0.38);
+
+  --accent: #ff8a5b;
+  --accent-contrast: #241030;
+  --warning: #ffb340;
+  --warning-contrast: #2b1a05;
+  --danger: #ff6b6b;
 }
 
 * {
@@ -50,20 +114,46 @@ body {
 
 body {
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: var(--bg);
   color: var(--text);
   font-size: 16px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s ease;
 }
 
 #app {
   position: relative;
   height: 100dvh;
   overflow: hidden;
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
 }
 
-/* ── Navbar translúcida ─────────────────────────────────────────────── */
+/* Halo de color suave tras el cromo fijo — sin esto el cristal no tiene
+   nada con textura/color real que difuminar y se ve plano, sobre todo en
+   claro (feedback explícito tras la primera prueba). */
+#app::before {
+  content: "";
+  position: absolute;
+  inset: -10% -20% auto -20%;
+  height: 46%;
+  background: radial-gradient(closest-side, rgba(var(--halo-color), var(--halo-opacity)), transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+/* ── Navbar de cristal ────────────────────────────────────────────────
+   Fija con blur real al hacer scroll (no un color sólido). */
 
 .navbar {
   position: sticky;
@@ -74,10 +164,10 @@ body {
   justify-content: center;
   height: calc(52px + env(safe-area-inset-top));
   padding-top: env(safe-area-inset-top);
-  background: var(--surface-translucent);
+  background: var(--glass-fill);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .navbar-title {
@@ -86,18 +176,58 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* ── Selector día / mes / año ───────────────────────────────────────── */
+.theme-toggle {
+  position: absolute;
+  right: 12px;
+  top: calc(env(safe-area-inset-top) + 8px);
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
+  border-radius: 50%;
+  background: var(--glass-fill);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: transform 0.2s var(--spring-bounce);
+}
+
+.theme-toggle:active {
+  transform: scale(0.9);
+}
+
+/* ── Selector día / mes / año — cristal, thumb con spring ────────────── */
 
 .segmented {
+  position: relative;
   display: flex;
-  gap: 2px;
   margin: 14px 16px;
-  padding: 2px;
-  background: var(--border);
+  padding: 3px;
+  background: var(--glass-fill);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-pill);
 }
 
+.segmented-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(33.333% - 2px);
+  height: calc(100% - 6px);
+  background: var(--glass-fill-strong);
+  border: 1px solid var(--glass-border-top);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.22);
+  transition: transform 0.5s var(--spring-settle);
+}
+
 .segmented button {
+  position: relative;
+  z-index: 1;
   flex: 1;
   border: none;
   background: transparent;
@@ -106,22 +236,29 @@ body {
   font-weight: 600;
   color: var(--text-secondary);
   border-radius: var(--radius-pill);
-  transition: background 0.3s var(--spring-settle), color 0.3s var(--spring-settle);
+  transition: color 0.3s var(--spring-settle);
 }
 
 .segmented button.active {
-  background: var(--surface);
   color: var(--text);
 }
 
-/* ── Tarjeta de total ───────────────────────────────────────────────── */
+/* ── Tarjeta de total ─────────────────────────────────────────────────
+   Cristal pesado — es uno de los pocos elementos fijos superiores donde
+   el blur alto está permitido. */
 
 .total-card {
-  margin: 0 16px 20px;
+  position: relative;
+  z-index: 1;
+  margin: 0 16px 18px;
   padding: 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--glass-fill);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
   border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
   transition: transform 0.35s var(--spring-settle), opacity 0.35s var(--spring-settle);
 }
 
@@ -130,6 +267,7 @@ body {
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.05;
+  font-variant-numeric: tabular-nums;
 }
 
 .total-card .meta {
@@ -138,54 +276,139 @@ body {
   color: var(--text-secondary);
 }
 
-/* ── Lista de gastos ────────────────────────────────────────────────── */
+/* ── Acciones rápidas circulares — cristal, no FAB sólido ────────────── */
+
+.quick-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 14px;
+  margin: 0 16px 22px;
+}
+
+.quick-action {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  transition: transform 0.2s var(--spring-bounce);
+}
+
+.quick-action:active {
+  transform: scale(0.93);
+}
+
+.quick-action .circle {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: var(--glass-fill);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
+  box-shadow: var(--shadow-card);
+}
+
+.quick-action.primary .circle {
+  background: color-mix(in srgb, var(--accent) 85%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, white 20%);
+  color: var(--accent-contrast);
+}
+
+.quick-action .circle .badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--danger);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-action .label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ── Lista de gastos — SIN blur pesado a propósito ───────────────────
+   backdrop-filter en cada fila de una lista larga es justo lo que puede
+   tirar el scroll en Safari de iPhone. Fondo semitransparente simple. */
 
 .list-scroll {
+  position: relative;
+  z-index: 1;
   height: calc(100dvh - 52px - env(safe-area-inset-top));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 100px;
+  padding-bottom: 110px;
 }
 
 .day-group {
-  margin-bottom: 18px;
+  margin: 0 16px 16px;
+  border-radius: var(--radius-row);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
 }
 
 .day-label {
-  padding: 0 16px 6px;
-  font-size: 13px;
+  padding: 0 2px 8px;
+  margin: 0 16px 0;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
 }
 
 .expense-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  padding: 12px 14px;
+  background: var(--glass-row);
+  border-bottom: 1px solid var(--glass-border);
   touch-action: pan-y;
   will-change: transform;
 }
 
+.expense-row:last-child {
+  border-bottom: none;
+}
+
 .expense-row:active {
-  background: var(--bg);
+  background: var(--glass-fill);
   transition: background 0.1s ease-out;
 }
 
 .expense-icon {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   border-radius: 10px;
-  background: var(--border);
+  background: var(--glass-fill);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 15px;
+  color: var(--text-secondary);
 }
 
 .expense-info {
@@ -194,7 +417,7 @@ body {
 }
 
 .expense-merchant {
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -207,16 +430,17 @@ body {
 }
 
 .expense-amount {
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 600;
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .needs-review-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--warning);
   flex-shrink: 0;
 }
 
@@ -227,32 +451,7 @@ body {
   font-size: 14px;
 }
 
-/* ── Botón flotante de alta manual ──────────────────────────────────── */
-
-.fab {
-  position: fixed;
-  right: 20px;
-  bottom: calc(24px + env(safe-area-inset-bottom));
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: none;
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-size: 28px;
-  font-weight: 300;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 30;
-  transition: transform 0.2s var(--spring-bounce);
-}
-
-.fab:active {
-  transform: scale(0.92);
-}
-
-/* ── Tab bar inferior ───────────────────────────────────────────────── */
+/* ── Tab bar inferior — cristal ───────────────────────────────────────── */
 
 .tabbar {
   position: fixed;
@@ -262,13 +461,14 @@ body {
   z-index: 20;
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);
-  background: var(--surface-translucent);
+  background: var(--glass-fill);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--glass-border);
 }
 
 .tabbar button {
+  position: relative;
   flex: 1;
   border: none;
   background: transparent;
@@ -279,7 +479,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
 }
 
 .tabbar button.active {
@@ -287,7 +487,7 @@ body {
 }
 
 .tabbar .tab-icon {
-  font-size: 20px;
+  font-size: 19px;
 }
 
 .tabbar .review-badge {
@@ -306,13 +506,13 @@ body {
   justify-content: center;
 }
 
-/* ── Pantalla de detalle (overlay deslizante) ───────────────────────── */
+/* ── Sheets (detalle / alta manual / revisión) ───────────────────────── */
 
 .sheet {
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: var(--bg);
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
   transform: translateX(100%);
   transition: transform 0.38s var(--spring-settle);
   overflow-y: auto;
@@ -333,15 +533,41 @@ body {
 .sheet-header {
   position: sticky;
   top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 8px;
   height: calc(52px + env(safe-area-inset-top));
   padding: env(safe-area-inset-top) 8px 0;
-  background: var(--surface-translucent);
+  background: var(--glass-fill);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* Alta manual: "esto es nuevo" — header con tinte del acento primario. */
+.sheet-accent .sheet-header {
+  background: color-mix(in srgb, var(--accent) 16%, var(--glass-fill-strong));
+  border-bottom-color: color-mix(in srgb, var(--accent) 35%, var(--glass-border-top));
+}
+
+/* Detalle con needs_review=true: acento ámbar puntual (no todo el header). */
+.sheet-warning .navbar-title::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warning);
+  margin-right: 7px;
+  vertical-align: middle;
+}
+
+/* Cola de revisión: tinte ámbar de fondo en el header completo. */
+.sheet-review .sheet-header {
+  background: color-mix(in srgb, var(--warning) 22%, var(--glass-fill-strong));
+  border-bottom-color: color-mix(in srgb, var(--warning) 42%, var(--glass-border-top));
 }
 
 .back-button {
@@ -353,14 +579,22 @@ body {
   padding: 8px 12px;
 }
 
+.sheet-review .back-button,
+.sheet-review .navbar-title {
+  color: color-mix(in srgb, var(--warning) 70%, var(--text));
+}
+
 .sheet-body {
   padding: 20px 16px 40px;
 }
 
 .field-group {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
+  background: var(--glass-fill);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
+  border-radius: var(--radius-row);
   overflow: hidden;
   margin-bottom: 16px;
 }
@@ -371,7 +605,7 @@ body {
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .field-row:last-child {
@@ -415,8 +649,8 @@ body {
   display: inline-block;
   padding: 3px 10px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 107, 53, 0.15);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--warning) 18%, transparent);
+  color: var(--warning);
   font-size: 12px;
   font-weight: 600;
 }
@@ -425,7 +659,7 @@ body {
   width: 100%;
   padding: 14px;
   border: none;
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-row);
   background: var(--accent);
   color: var(--accent-contrast);
   font-size: 16px;
@@ -447,8 +681,8 @@ body {
   flex: 1;
   padding: 8px;
   border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-fill);
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
@@ -456,16 +690,47 @@ body {
 
 .review-actions button.confirm {
   border-color: transparent;
-  background: var(--accent);
-  color: var(--accent-contrast);
+  background: var(--warning);
+  color: var(--warning-contrast);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .sheet,
   .total-card,
+  .segmented-thumb,
   .segmented button,
-  .fab,
+  .quick-action,
+  .theme-toggle,
   .primary-button {
     transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-fill: #f2eefa;
+    --glass-fill-strong: #ffffff;
+    --glass-row: #f7f4fc;
+  }
+  :root:not([data-theme="light"]) {
+    --glass-fill: #201a30;
+    --glass-fill-strong: #2a2340;
+    --glass-row: #1c1728;
+  }
+  :root[data-theme="dark"] {
+    --glass-fill: #201a30;
+    --glass-fill-strong: #2a2340;
+    --glass-row: #1c1728;
+  }
+  .navbar,
+  .total-card,
+  .quick-action .circle,
+  .tabbar,
+  .sheet-header,
+  .field-group,
+  .segmented,
+  .segmented-thumb {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }

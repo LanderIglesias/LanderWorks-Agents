@@ -1,0 +1,6 @@
+{
+  "files": ["backend/agents/expense_tracker/static/index.html"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

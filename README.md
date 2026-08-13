@@ -244,6 +244,11 @@ Add to `%APPDATA%\Claude\claude_desktop_config.json`:
 }
 ```
 
+Para desarrollo local: tras clonar el repo, ejecuta 
+`npx impeccable install --providers=claude,github --scope=project --force` 
+y luego `/impeccable init` dentro de Claude Code, para reinstalar la skill 
+de diseño (no está versionada en el repo, se trata como dependencia).
+
 ---
 
 ## Environment variables

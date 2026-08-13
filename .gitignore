@@ -28,3 +28,7 @@ Thumbs.db
 
 .serena/
 graphify-out/
+.claude/settings.local.json
+.claude/skills/
+.github/skills/
+.github/agents/

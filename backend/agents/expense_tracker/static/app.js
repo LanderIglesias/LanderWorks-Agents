@@ -2,14 +2,15 @@
 (() => {
   const API = "/expense-tracker";
   const TOKEN_KEY = "expense_tracker_token";
+  const THEME_KEY = "expense_tracker_theme";
   const CATEGORY_ICONS = {
-    comida: "🍽️",
-    transporte: "🚗",
-    suscripciones: "🔁",
-    ocio: "🎬",
-    salud: "💊",
-    hogar: "🏠",
-    otros: "📦",
+    comida: "icon-food",
+    transporte: "icon-transport",
+    suscripciones: "icon-repeat",
+    ocio: "icon-play",
+    salud: "icon-cross",
+    hogar: "icon-home",
+    otros: "icon-box",
   };
 
   const state = {
@@ -36,7 +37,45 @@
     lockToken: $("#lock-token"),
     lockSave: $("#lock-save"),
     lockError: $("#lock-error"),
+    themeToggle: $("#theme-toggle"),
+    themeToggleIcon: $("#theme-toggle-icon"),
+    granularityThumb: $("#granularity-thumb"),
+    quickReview: $("#quick-review"),
+    quickReviewBadge: $("#quick-review-badge"),
   };
+
+  // ── Tema claro/oscuro manual ──────────────────────────────────────────
+  //
+  // Independiente de prefers-color-scheme del sistema: una vez el usuario
+  // elige, se guarda en localStorage y gana siempre (ver app.css, los
+  // tokens bajo :root[data-theme="dark"] pisan a los de la media query).
+
+  function effectiveTheme() {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  function applyTheme(theme) {
+    if (theme) {
+      document.documentElement.dataset.theme = theme;
+    } else {
+      delete document.documentElement.dataset.theme;
+    }
+    // El icono muestra la acción (a qué modo se pasaría al tocar), no el
+    // estado actual — convención habitual de botón de toggle.
+    const current = theme || effectiveTheme();
+    const nextIcon = current === "dark" ? "#icon-sun" : "#icon-moon";
+    el.themeToggleIcon.querySelector("use").setAttribute("href", nextIcon);
+  }
+
+  applyTheme(localStorage.getItem(THEME_KEY));
+
+  el.themeToggle.addEventListener("click", () => {
+    const next = effectiveTheme() === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  });
 
   // ── Clave de acceso ──────────────────────────────────────────────────
   //
@@ -142,8 +181,11 @@
   async function loadReviewQueue() {
     const res = await authFetch(`${API}/expenses/review`);
     state.reviewQueue = await res.json();
-    el.reviewBadge.hidden = state.reviewQueue.length === 0;
-    el.reviewBadge.textContent = state.reviewQueue.length;
+    const count = state.reviewQueue.length;
+    el.reviewBadge.hidden = count === 0;
+    el.reviewBadge.textContent = count;
+    el.quickReviewBadge.hidden = count === 0;
+    el.quickReviewBadge.textContent = count;
     renderReviewList();
   }
 
@@ -178,10 +220,10 @@
   }
 
   function expenseRowHtml(e) {
-    const icon = CATEGORY_ICONS[e.category] || "•";
+    const icon = CATEGORY_ICONS[e.category] || "icon-box";
     return `
       <div class="expense-row" data-expense-id="${e.id}">
-        <div class="expense-icon">${icon}</div>
+        <div class="expense-icon"><svg class="icon"><use href="#${icon}" /></svg></div>
         <div class="expense-info">
           <div class="expense-merchant">${escapeHtml(e.merchant || "Sin identificar")}</div>
           <div class="expense-category">${e.category || "Sin categorizar"}</div>
@@ -247,11 +289,14 @@
 
   // ── Selector día / mes / año ─────────────────────────────────────────
 
+  const granularityButtons = Array.from(el.granularitySwitch.querySelectorAll("button[data-granularity]"));
+
   el.granularitySwitch.addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-granularity]");
     if (!btn) return;
-    el.granularitySwitch.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+    granularityButtons.forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
+    el.granularityThumb.style.transform = `translateX(${granularityButtons.indexOf(btn) * 100}%)`;
     state.granularity = btn.dataset.granularity;
     loadExpenses();
   });
@@ -270,6 +315,7 @@
     $("#detail-source").textContent = e.merged_source ? `${e.source} + ${e.merged_source}` : e.source;
     $("#detail-date").textContent = new Date(e.occurred_at).toLocaleString("es-ES");
     $("#detail-review-row").hidden = !e.needs_review;
+    el.viewDetail.classList.toggle("sheet-warning", !!e.needs_review);
 
     const rawGroup = $("#detail-raw-group");
     if (e.raw_text) {
@@ -328,14 +374,18 @@
 
   // ── Tabs ─────────────────────────────────────────────────────────────
 
+  function openReview() {
+    loadReviewQueue();
+    openSheet(el.viewReview);
+  }
+
   document.querySelectorAll(".tabbar button[data-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      if (btn.dataset.tab === "review") {
-        loadReviewQueue();
-        openSheet(el.viewReview);
-      }
+      if (btn.dataset.tab === "review") openReview();
     });
   });
+
+  el.quickReview.addEventListener("click", openReview);
 
   document.querySelectorAll("[data-close]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -419,6 +469,15 @@
   [el.viewDetail, el.viewReview, el.viewAdd].forEach(attachSwipeToClose);
 
   // ── Init ─────────────────────────────────────────────────────────────
+
+  const initialGranularityIndex = granularityButtons.findIndex((b) => b.classList.contains("active"));
+  if (initialGranularityIndex > 0) {
+    el.granularityThumb.style.transition = "none";
+    el.granularityThumb.style.transform = `translateX(${initialGranularityIndex * 100}%)`;
+    requestAnimationFrame(() => {
+      el.granularityThumb.style.transition = "";
+    });
+  }
 
   if (getToken()) {
     loadExpenses();
