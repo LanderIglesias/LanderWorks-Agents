@@ -87,6 +87,26 @@ finish review, the verdict, and DESIGN.md.
     <symbol id="icon-moon" viewBox="0 0 24 24">
       <path d="M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z" />
     </symbol>
+    <symbol id="icon-chart" viewBox="0 0 24 24">
+      <path d="M4 20V10M12 20V4M20 20v-6" />
+      <path d="M3 20h18" />
+    </symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24">
+      <path d="M15 5 8 12l7 7" />
+    </symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24">
+      <path d="M9 5l7 7-7 7" />
+    </symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24">
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="M20 20l-4.8-4.8" />
+    </symbol>
+    <symbol id="icon-arrow-up" viewBox="0 0 24 24">
+      <path d="M12 19V5M6 11l6-6 6 6" />
+    </symbol>
+    <symbol id="icon-arrow-down" viewBox="0 0 24 24">
+      <path d="M12 5v14M6 13l6 6 6-6" />
+    </symbol>
   </svg>
 
   <div id="app">
@@ -112,6 +132,9 @@ finish review, the verdict, and DESIGN.md.
     <!-- ── Pantalla principal ─────────────────────────────────────────── -->
     <div id="view-main">
       <header class="navbar">
+        <button class="search-toggle" id="search-toggle" aria-label="Buscar gastos">
+          <svg class="icon"><use href="#icon-search" /></svg>
+        </button>
         <span class="navbar-title">Gastos</span>
         <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
           <svg class="icon" id="theme-toggle-icon"><use href="#icon-moon" /></svg>
@@ -119,33 +142,48 @@ finish review, the verdict, and DESIGN.md.
       </header>
 
       <div class="list-scroll">
-        <div class="segmented" id="granularity-switch">
-          <div class="segmented-thumb" id="granularity-thumb"></div>
-          <button data-granularity="day">Día</button>
-          <button data-granularity="month" class="active">Mes</button>
-          <button data-granularity="year">Año</button>
+        <div id="normal-controls">
+          <div class="segmented" id="granularity-switch">
+            <div class="segmented-thumb" id="granularity-thumb"></div>
+            <button data-granularity="day">Día</button>
+            <button data-granularity="month" class="active">Mes</button>
+            <button data-granularity="year">Año</button>
+          </div>
+
+          <div class="total-card" id="total-card">
+            <div class="amount-row">
+              <div class="amount" id="total-amount">—</div>
+              <span class="comparison-badge" id="comparison-badge" hidden>
+                <svg class="icon" id="comparison-icon"><use href="#icon-arrow-down" /></svg>
+                <span id="comparison-pct"></span>
+              </span>
+            </div>
+            <div class="meta" id="total-meta">Cargando…</div>
+          </div>
+
+          <div class="quick-actions">
+            <button class="quick-action primary" id="fab-add" aria-label="Añadir gasto manual">
+              <span class="circle"><svg class="icon"><use href="#icon-plus" /></svg></span>
+              <span class="label">Añadir</span>
+            </button>
+            <button class="quick-action" id="quick-review" aria-label="Ver revisión">
+              <span class="circle">
+                <svg class="icon"><use href="#icon-alert" /></svg>
+                <span class="badge" id="quick-review-badge" hidden>0</span>
+              </span>
+              <span class="label">Revisión</span>
+            </button>
+          </div>
         </div>
 
-        <div class="total-card" id="total-card">
-          <div class="amount" id="total-amount">—</div>
-          <div class="meta" id="total-meta">Cargando…</div>
-        </div>
-
-        <div class="quick-actions">
-          <button class="quick-action primary" id="fab-add" aria-label="Añadir gasto manual">
-            <span class="circle"><svg class="icon"><use href="#icon-plus" /></svg></span>
-            <span class="label">Añadir</span>
-          </button>
-          <button class="quick-action" id="quick-review" aria-label="Ver revisión">
-            <span class="circle">
-              <svg class="icon"><use href="#icon-alert" /></svg>
-              <span class="badge" id="quick-review-badge" hidden>0</span>
-            </span>
-            <span class="label">Revisión</span>
-          </button>
+        <div class="results-bar" id="results-bar" hidden>
+          <span id="results-count"></span>
+          <button id="clear-search">Limpiar filtros</button>
         </div>
 
         <div id="expense-list"></div>
+
+        <button class="load-more" id="load-more" hidden>Cargar más</button>
       </div>
 
       <nav class="tabbar">
@@ -158,6 +196,10 @@ finish review, the verdict, and DESIGN.md.
           <span>Revisión</span>
           <span class="review-badge" id="review-badge" hidden>0</span>
         </button>
+        <button data-tab="budgets">
+          <span class="tab-icon"><svg class="icon"><use href="#icon-chart" /></svg></span>
+          <span>Presupuestos</span>
+        </button>
       </nav>
     </div>
 
@@ -168,6 +210,83 @@ finish review, the verdict, and DESIGN.md.
         <span class="navbar-title">Revisión</span>
       </div>
       <div class="sheet-body" id="review-list"></div>
+    </div>
+
+    <!-- ── Presupuestos — 7 categorías, ajustables mes a mes ────────────── -->
+    <div class="sheet" id="view-budgets">
+      <div class="sheet-header">
+        <button class="back-button" data-close="budgets">Cerrar</button>
+        <div class="month-nav">
+          <button class="month-nav-arrow" id="budgets-prev-month" aria-label="Mes anterior">
+            <svg class="icon"><use href="#icon-chevron-left" /></svg>
+          </button>
+          <span class="month-nav-label" id="budgets-month-label">Agosto 2026</span>
+          <button class="month-nav-arrow" id="budgets-next-month" aria-label="Mes siguiente">
+            <svg class="icon"><use href="#icon-chevron-right" /></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sheet-body">
+        <div id="budgets-list"></div>
+        <div class="recurring-section">
+          <div class="recurring-section-title">Recurrentes detectados</div>
+          <div id="recurring-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Búsqueda y filtros — neutra, utilidad, no creación ni alerta ─── -->
+    <div class="sheet" id="view-search">
+      <div class="sheet-header">
+        <button class="back-button" data-close="search">Cerrar</button>
+        <span class="navbar-title">Buscar</span>
+      </div>
+      <div class="sheet-body">
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Comercio</span>
+            <input id="search-query" type="text" placeholder="Ej. Netflix" />
+          </div>
+          <div class="field-row">
+            <span class="field-label">Categoría</span>
+            <select id="search-category">
+              <option value="">Todas</option>
+              <option value="comida">Comida</option>
+              <option value="transporte">Transporte</option>
+              <option value="suscripciones">Suscripciones</option>
+              <option value="ocio">Ocio</option>
+              <option value="salud">Salud</option>
+              <option value="hogar">Hogar</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Desde</span>
+            <input id="search-date-from" type="date" />
+          </div>
+          <div class="field-row">
+            <span class="field-label">Hasta</span>
+            <input id="search-date-to" type="date" />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-row">
+            <span class="field-label">Importe mín. (€)</span>
+            <input id="search-amount-min" type="number" step="0.01" inputmode="decimal" placeholder="0" />
+          </div>
+          <div class="field-row">
+            <span class="field-label">Importe máx. (€)</span>
+            <input id="search-amount-max" type="number" step="0.01" inputmode="decimal" placeholder="—" />
+          </div>
+        </div>
+
+        <button class="secondary-button" id="search-submit">Buscar</button>
+        <p id="search-error" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
+      </div>
     </div>
 
     <!-- ── Detalle de gasto — neutro; acento ámbar si needs_review ──────── -->

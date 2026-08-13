@@ -43,6 +43,27 @@ class ExpensePatch(BaseModel):
     needs_review: bool | None = None
 
 
+class BudgetSetIn(BaseModel):
+    """Body de PUT /budgets/{category}. limit_amount None o 0 = quitar el límite."""
+
+    limit_amount: float | None = None
+
+
+class BudgetOut(BaseModel):
+    """Una de las 7 categorías, con su límite (si hay) y el gasto real del mes.
+
+    `spent` y `remaining` son calculados en engine.get_budgets_for_month,
+    nunca almacenados — ver ese docstring para por qué needs_review=True
+    queda excluido de `spent`.
+    """
+
+    category: str
+    month: str
+    limit_amount: float | None
+    spent: float
+    remaining: float | None
+
+
 class ExpenseOut(BaseModel):
     id: int
     source: Source

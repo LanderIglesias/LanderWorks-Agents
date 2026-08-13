@@ -25,7 +25,14 @@ from sqlalchemy.orm import Session
 
 from . import engine
 from .database import get_db
-from .schemas import ExpenseOut, ExpensePatch, ManualExpenseIn, WebhookExpenseIn
+from .schemas import (
+    BudgetOut,
+    BudgetSetIn,
+    ExpenseOut,
+    ExpensePatch,
+    ManualExpenseIn,
+    WebhookExpenseIn,
+)
 from .security import verify_app_token, verify_webhook_signature
 
 load_dotenv()
@@ -109,6 +116,64 @@ def review_queue(db: Session = Depends(get_db)):
     return engine.list_review_queue(db)
 
 
+# Registrado ANTES de /expenses/{expense_id} a propósito — igual que
+# /expenses/review arriba: si fuera después, FastAPI intentaría convertir
+# "search" al tipo int de expense_id y devolvería 422 en vez de llegar
+# aquí (Starlette resuelve rutas en orden de registro, no compara
+# especificidad).
+@router.get("/expenses/search", dependencies=[Depends(verify_app_token)])
+def search_expenses(
+    query: str | None = None,
+    category: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    amount_min: float | None = None,
+    amount_max: float | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+):
+    try:
+        result = engine.search_expenses(
+            db,
+            query=query,
+            category=category,
+            date_from=date_from,
+            date_to=date_to,
+            amount_min=amount_min,
+            amount_max=amount_max,
+            limit=limit,
+            offset=offset,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+    return {
+        "total": result["total"],
+        "expenses": [ExpenseOut.model_validate(e) for e in result["expenses"]],
+    }
+
+
+# Registrado ANTES de /expenses/{expense_id} por el mismo motivo que
+# /expenses/search y /expenses/review de arriba.
+@router.get("/expenses/comparison", dependencies=[Depends(verify_app_token)])
+def get_comparison(month: str | None = None, db: Session = Depends(get_db)):
+    from datetime import date as date_cls
+
+    month = month or date_cls.today().strftime("%Y-%m")
+    try:
+        return engine.get_month_comparison(db, month)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+
+# Registrado ANTES de /expenses/{expense_id} por el mismo motivo que las
+# demás rutas literales de /expenses/* de arriba.
+@router.get("/expenses/recurring", dependencies=[Depends(verify_app_token)])
+def list_recurring(db: Session = Depends(get_db)):
+    return engine.detect_recurring(db)
+
+
 @router.get(
     "/expenses/{expense_id}", response_model=ExpenseOut, dependencies=[Depends(verify_app_token)]
 )
@@ -132,6 +197,35 @@ def patch_expense(expense_id: int, patch: ExpensePatch, db: Session = Depends(ge
 @router.post("/expenses", response_model=ExpenseOut, dependencies=[Depends(verify_app_token)])
 def create_manual_expense(payload: ManualExpenseIn, db: Session = Depends(get_db)):
     return engine.create_manual_expense(db, payload)
+
+
+@router.get("/budgets", response_model=list[BudgetOut], dependencies=[Depends(verify_app_token)])
+def list_budgets(month: str | None = None, db: Session = Depends(get_db)):
+    from datetime import date as date_cls
+
+    month = month or date_cls.today().strftime("%Y-%m")
+    try:
+        return engine.get_budgets_for_month(db, month)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+
+@router.put(
+    "/budgets/{category}", response_model=BudgetOut, dependencies=[Depends(verify_app_token)]
+)
+def upsert_budget(
+    category: str, payload: BudgetSetIn, month: str | None = None, db: Session = Depends(get_db)
+):
+    from datetime import date as date_cls
+
+    month = month or date_cls.today().strftime("%Y-%m")
+    try:
+        engine.set_budget(db, category, month, payload.limit_amount)
+        budgets = engine.get_budgets_for_month(db, month)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+    return next(b for b in budgets if b.category == category)
 
 
 @router.get("/demo")

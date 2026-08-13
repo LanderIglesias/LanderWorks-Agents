@@ -12,6 +12,33 @@
     hogar: "icon-home",
     otros: "icon-box",
   };
+  const CATEGORY_LABELS = {
+    comida: "Comida",
+    transporte: "Transporte",
+    suscripciones: "Suscripciones",
+    ocio: "Ocio",
+    salud: "Salud",
+    hogar: "Hogar",
+    otros: "Otros",
+  };
+  const MONTH_LABELS = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+  ];
+  // "otros" se queda fuera a propósito — cajón de sastre sin identidad de
+  // color propia, ver el comentario junto a los tokens --cat-* en app.css.
+  const CATEGORIES_WITH_COLOR = new Set([
+    "comida",
+    "transporte",
+    "suscripciones",
+    "ocio",
+    "salud",
+    "hogar",
+  ]);
+
+  function categoryIconClass(category) {
+    return CATEGORIES_WITH_COLOR.has(category) ? `category-icon cat-${category}` : "";
+  }
 
   const state = {
     granularity: "month",
@@ -19,7 +46,16 @@
     expenses: [],
     reviewQueue: [],
     currentDetailId: null,
+    budgetMonth: new Date().toISOString().slice(0, 7),
+    budgets: [],
+    previousMonthByCategory: {},
+    editingCategory: null,
+    searchActive: false,
+    searchParams: null,
+    searchResults: [],
+    searchTotal: 0,
   };
+  const SEARCH_PAGE_SIZE = 50;
 
   const $ = (sel) => document.querySelector(sel);
   const el = {
@@ -42,6 +78,30 @@
     granularityThumb: $("#granularity-thumb"),
     quickReview: $("#quick-review"),
     quickReviewBadge: $("#quick-review-badge"),
+    viewBudgets: $("#view-budgets"),
+    budgetsList: $("#budgets-list"),
+    recurringList: $("#recurring-list"),
+    budgetsMonthLabel: $("#budgets-month-label"),
+    budgetsPrevMonth: $("#budgets-prev-month"),
+    budgetsNextMonth: $("#budgets-next-month"),
+    comparisonBadge: $("#comparison-badge"),
+    comparisonIcon: $("#comparison-icon"),
+    comparisonPct: $("#comparison-pct"),
+    searchToggle: $("#search-toggle"),
+    viewSearch: $("#view-search"),
+    searchQuery: $("#search-query"),
+    searchCategory: $("#search-category"),
+    searchDateFrom: $("#search-date-from"),
+    searchDateTo: $("#search-date-to"),
+    searchAmountMin: $("#search-amount-min"),
+    searchAmountMax: $("#search-amount-max"),
+    searchSubmit: $("#search-submit"),
+    searchError: $("#search-error"),
+    normalControls: $("#normal-controls"),
+    resultsBar: $("#results-bar"),
+    resultsCount: $("#results-count"),
+    clearSearch: $("#clear-search"),
+    loadMore: $("#load-more"),
   };
 
   // ── Tema claro/oscuro manual ──────────────────────────────────────────
@@ -176,6 +236,36 @@
     el.totalAmount.textContent = formatAmount(data.total);
     el.totalMeta.textContent = `${data.count} transacción${data.count === 1 ? "" : "es"}`;
     renderExpenseList();
+
+    // La comparativa mes a mes solo tiene sentido en la vista "Mes" — en
+    // día/año no hay un "mes anterior" claro con el que compararse.
+    if (state.granularity === "month") {
+      const month = state.date.slice(0, 7);
+      const compRes = await authFetch(`${API}/expenses/comparison?month=${month}`);
+      const comparison = await compRes.json();
+      renderComparisonBadge(comparison.variacion_pct);
+    } else {
+      el.comparisonBadge.hidden = true;
+    }
+  }
+
+  // Umbral de "esto merece un aviso": subir el gasto no es automáticamente
+  // malo (puede ser una compra planeada), así que solo una subida por
+  // encima de este umbral se marca en ámbar — una subida moderada se
+  // queda en gris neutro, sin juicio de valor.
+  const COMPARISON_ALERT_THRESHOLD_PCT = 20;
+
+  function renderComparisonBadge(variacionPct) {
+    if (variacionPct === null || variacionPct === undefined) {
+      el.comparisonBadge.hidden = true;
+      return;
+    }
+    const isDown = variacionPct < 0;
+    el.comparisonBadge.hidden = false;
+    el.comparisonBadge.classList.toggle("down", isDown);
+    el.comparisonBadge.classList.toggle("up-alert", !isDown && variacionPct > COMPARISON_ALERT_THRESHOLD_PCT);
+    el.comparisonIcon.querySelector("use").setAttribute("href", isDown ? "#icon-arrow-down" : "#icon-arrow-up");
+    el.comparisonPct.textContent = `${Math.abs(variacionPct).toFixed(0)}%`;
   }
 
   async function loadReviewQueue() {
@@ -189,25 +279,318 @@
     renderReviewList();
   }
 
+  // ── Búsqueda y filtros ───────────────────────────────────────────────
+
+  function buildSearchParams(offset) {
+    const params = new URLSearchParams();
+    const query = el.searchQuery.value.trim();
+    if (query) params.set("query", query);
+    if (el.searchCategory.value) params.set("category", el.searchCategory.value);
+    if (el.searchDateFrom.value) params.set("date_from", el.searchDateFrom.value);
+    if (el.searchDateTo.value) params.set("date_to", el.searchDateTo.value);
+    if (el.searchAmountMin.value) params.set("amount_min", el.searchAmountMin.value);
+    if (el.searchAmountMax.value) params.set("amount_max", el.searchAmountMax.value);
+    params.set("limit", SEARCH_PAGE_SIZE);
+    params.set("offset", offset || 0);
+    return params;
+  }
+
+  async function runSearch() {
+    el.searchError.hidden = true;
+    const params = buildSearchParams(0);
+    const res = await authFetch(`${API}/expenses/search?${params.toString()}`);
+
+    if (res.status === 422) {
+      const data = await res.json();
+      const message = Array.isArray(data.detail)
+        ? data.detail.map((d) => d.msg).join(", ")
+        : data.detail;
+      el.searchError.textContent = message || "Filtros inválidos.";
+      el.searchError.hidden = false;
+      return;
+    }
+
+    const data = await res.json();
+    state.searchActive = true;
+    state.searchParams = params;
+    state.searchResults = data.expenses;
+    state.searchTotal = data.total;
+    closeSheet(el.viewSearch);
+    enterSearchMode();
+  }
+
+  async function loadMoreResults() {
+    const params = new URLSearchParams(state.searchParams);
+    params.set("offset", state.searchResults.length);
+    const res = await authFetch(`${API}/expenses/search?${params.toString()}`);
+    const data = await res.json();
+    state.searchResults = state.searchResults.concat(data.expenses);
+    renderSearchResults();
+  }
+
+  function enterSearchMode() {
+    el.normalControls.hidden = true;
+    el.resultsBar.hidden = false;
+    renderSearchResults();
+  }
+
+  function exitSearchMode() {
+    state.searchActive = false;
+    state.searchResults = [];
+    state.searchParams = null;
+    el.normalControls.hidden = false;
+    el.resultsBar.hidden = true;
+    el.loadMore.hidden = true;
+    loadExpenses();
+  }
+
+  function renderSearchResults() {
+    const count = state.searchTotal;
+    el.resultsCount.textContent = `${count} resultado${count === 1 ? "" : "s"}`;
+    renderExpenseList(state.searchResults, "Sin resultados con estos filtros.");
+    el.loadMore.hidden = state.searchResults.length >= state.searchTotal;
+  }
+
+  // Tras editar/confirmar un gasto hay que refrescar la vista que esté
+  // realmente en pantalla — si no, editar un gasto mientras se ven
+  // resultados de búsqueda volvería silenciosamente a la lista normal
+  // (loadExpenses reemplazaría el DOM) sin restaurar normal-controls ni
+  // ocultar la barra de resultados, dejando la UI inconsistente.
+  async function refreshExpenseView() {
+    if (state.searchActive) {
+      const params = new URLSearchParams(state.searchParams);
+      params.set("offset", 0);
+      params.set("limit", Math.max(state.searchResults.length, SEARCH_PAGE_SIZE));
+      const res = await authFetch(`${API}/expenses/search?${params.toString()}`);
+      const data = await res.json();
+      state.searchResults = data.expenses;
+      state.searchTotal = data.total;
+      renderSearchResults();
+    } else {
+      await loadExpenses();
+    }
+  }
+
+  el.searchToggle.addEventListener("click", () => {
+    el.searchError.hidden = true;
+    openSheet(el.viewSearch);
+  });
+
+  el.searchSubmit.addEventListener("click", runSearch);
+  el.clearSearch.addEventListener("click", exitSearchMode);
+  el.loadMore.addEventListener("click", loadMoreResults);
+
+  // ── Presupuestos ─────────────────────────────────────────────────────
+
+  function monthLabel(monthStr) {
+    const [year, month] = monthStr.split("-").map(Number);
+    return `${MONTH_LABELS[month - 1]} ${year}`;
+  }
+
+  function shiftMonth(monthStr, delta) {
+    const [year, month] = monthStr.split("-").map(Number);
+    const d = new Date(year, month - 1 + delta, 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  async function loadBudgets() {
+    el.budgetsMonthLabel.textContent = monthLabel(state.budgetMonth);
+    const [budgetsRes, comparisonRes, recurringRes] = await Promise.all([
+      authFetch(`${API}/budgets?month=${state.budgetMonth}`),
+      authFetch(`${API}/expenses/comparison?month=${state.budgetMonth}`),
+      authFetch(`${API}/expenses/recurring`),
+    ]);
+    state.budgets = await budgetsRes.json();
+    const comparison = await comparisonRes.json();
+    state.previousMonthByCategory = Object.fromEntries(
+      comparison.por_categoria.map((c) => [c.category, c.anterior])
+    );
+    state.editingCategory = null;
+    renderBudgets();
+    renderRecurring(await recurringRes.json());
+  }
+
+  function renderRecurring(items) {
+    if (items.length === 0) {
+      el.recurringList.innerHTML = `<div class="empty-state">Aún no hay suficiente historial para detectar recurrentes — necesitas 3 meses de datos.</div>`;
+      return;
+    }
+
+    const totalEstimate = items.reduce((sum, r) => sum + r.total_monthly_estimate, 0);
+    const rows = items
+      .map((r) => {
+        const amounts = r.occurrences.map((o) => o.amount);
+        const min = Math.min(...amounts);
+        const max = Math.max(...amounts);
+        const amountText =
+          min === max ? `${formatAmount(r.amount_avg)} cada mes` : `${formatAmount(min)} - ${formatAmount(max)}`;
+        // El backend no devuelve categoría por grupo recurrente (podría
+        // ni tener una única categoría consistente) — icono genérico de
+        // "recurrente" con el color de suscripciones, ya que en la
+        // práctica el 99% de lo detectado aquí SON suscripciones. Ver
+        // spec: fallback explícitamente permitido si no aplica categoría.
+        return `
+          <div class="recurring-row">
+            <div class="recurring-icon category-icon cat-suscripciones"><svg class="icon"><use href="#icon-repeat" /></svg></div>
+            <div class="recurring-info">
+              <span class="recurring-name">${escapeHtml(r.merchant_representative)}</span>
+            </div>
+            <span class="recurring-amount">${amountText}</span>
+          </div>`;
+      })
+      .join("");
+
+    el.recurringList.innerHTML = `
+      ${rows}
+      <div class="recurring-total">
+        <span>Total mensual estimado</span>
+        <span>${formatAmount(totalEstimate)}</span>
+      </div>`;
+  }
+
+  function budgetBarState(spent, limitAmount) {
+    if (limitAmount === null || limitAmount === undefined) return "";
+    const ratio = limitAmount > 0 ? spent / limitAmount : spent > 0 ? 1 : 0;
+    if (ratio > 1) return "over";
+    if (ratio >= 0.8) return "warning";
+    return "";
+  }
+
+  function renderBudgets() {
+    el.budgetsList.innerHTML = state.budgets.map(budgetCardHtml).join("");
+
+    el.budgetsList.querySelectorAll("[data-budget-category]").forEach((card) => {
+      card.addEventListener("click", (e) => {
+        if (e.target.closest(".budget-edit-row")) return;
+        const category = card.dataset.budgetCategory;
+        state.editingCategory = state.editingCategory === category ? null : category;
+        renderBudgets();
+        if (state.editingCategory) {
+          const input = el.budgetsList.querySelector(`[data-limit-input="${category}"]`);
+          input?.focus();
+        }
+      });
+    });
+
+    el.budgetsList.querySelectorAll("[data-save-category]").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const category = btn.dataset.saveCategory;
+        const input = el.budgetsList.querySelector(`[data-limit-input="${category}"]`);
+        await saveBudget(category, input.value ? Number(input.value) : null);
+      });
+    });
+
+    el.budgetsList.querySelectorAll("[data-clear-category]").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        await saveBudget(btn.dataset.clearCategory, null);
+      });
+    });
+  }
+
+  async function saveBudget(category, limitAmount) {
+    await authFetch(`${API}/budgets/${category}?month=${state.budgetMonth}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ limit_amount: limitAmount }),
+    });
+    await loadBudgets();
+  }
+
+  function budgetCardHtml(b) {
+    const icon = CATEGORY_ICONS[b.category] || "icon-box";
+    const barState = budgetBarState(b.spent, b.limit_amount);
+    const pct = b.limit_amount ? Math.min(100, Math.round((b.spent / b.limit_amount) * 100)) : 0;
+    const metaText =
+      b.limit_amount === null || b.limit_amount === undefined
+        ? `${formatAmount(b.spent)} gastado, sin límite`
+        : `${formatAmount(b.spent)} de ${formatAmount(b.limit_amount)}`;
+    const editing = state.editingCategory === b.category;
+    const previous = state.previousMonthByCategory[b.category];
+    // Solo el dato de referencia, sin barra ni gráfico adicional — ver
+    // spec. previous puede ser 0 (categoría sin gasto el mes pasado);
+    // se muestra igual, es información real, no un hueco que ocultar.
+    const comparisonText =
+      previous === undefined ? "" : `<div class="budget-comparison">${formatAmount(previous)} el mes pasado</div>`;
+
+    // Excedido en texto explícito, no solo color/tinte de la tarjeta —
+    // accesibilidad para daltonismo rojo-verde (ver spec).
+    const exceededText =
+      barState === "over" ? `<div class="budget-exceeded">Excedido en ${formatAmount(b.spent - b.limit_amount)}</div>` : "";
+
+    // Sin límite fijado, sin barra — una barra sin objetivo no comunica
+    // nada real, ver spec.
+    const barHtml =
+      b.limit_amount === null || b.limit_amount === undefined
+        ? ""
+        : `<div class="budget-bar"><div class="budget-bar-fill ${barState}" style="transform: scaleX(${pct / 100})"></div></div>`;
+
+    return `
+      <div class="budget-card ${barState === "over" ? "over" : ""}" data-budget-category="${b.category}">
+        <div class="budget-card-head">
+          <div class="budget-icon ${categoryIconClass(b.category)}"><svg class="icon"><use href="#${icon}" /></svg></div>
+          <div class="budget-name">${CATEGORY_LABELS[b.category] || b.category}</div>
+        </div>
+        ${barHtml}
+        <div class="budget-meta ${barState === "over" ? "over" : ""}">${metaText}</div>
+        ${exceededText}
+        ${comparisonText}
+        ${
+          editing
+            ? `<div class="budget-edit-row">
+                <input
+                  type="number"
+                  step="0.01"
+                  inputmode="decimal"
+                  placeholder="Límite (€)"
+                  value="${b.limit_amount ?? ""}"
+                  data-limit-input="${b.category}"
+                />
+                <button data-save-category="${b.category}">Guardar</button>
+                ${
+                  b.limit_amount
+                    ? `<button class="clear" data-clear-category="${b.category}">Quitar</button>`
+                    : ""
+                }
+              </div>`
+            : ""
+        }
+      </div>`;
+  }
+
+  el.budgetsPrevMonth.addEventListener("click", () => {
+    state.budgetMonth = shiftMonth(state.budgetMonth, -1);
+    loadBudgets();
+  });
+
+  el.budgetsNextMonth.addEventListener("click", () => {
+    state.budgetMonth = shiftMonth(state.budgetMonth, 1);
+    loadBudgets();
+  });
+
   // ── Render ───────────────────────────────────────────────────────────
 
-  function renderExpenseList() {
-    if (state.expenses.length === 0) {
-      el.expenseList.innerHTML = `<div class="empty-state">Sin gastos en este periodo.</div>`;
+  function renderExpenseList(items, emptyText) {
+    items = items || state.expenses;
+    emptyText = emptyText || "Sin gastos en este periodo.";
+
+    if (items.length === 0) {
+      el.expenseList.innerHTML = `<div class="empty-state">${emptyText}</div>`;
       return;
     }
 
     const groups = new Map();
-    for (const e of state.expenses) {
+    for (const e of items) {
       const key = e.occurred_at.slice(0, 10);
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(e);
     }
 
     let html = "";
-    for (const [dateKey, items] of groups) {
+    for (const [dateKey, dayItems] of groups) {
       html += `<div class="day-group"><div class="day-label">${dayLabel(dateKey)}</div>`;
-      for (const e of items) {
+      for (const e of dayItems) {
         html += expenseRowHtml(e);
       }
       html += `</div>`;
@@ -223,7 +606,7 @@
     const icon = CATEGORY_ICONS[e.category] || "icon-box";
     return `
       <div class="expense-row" data-expense-id="${e.id}">
-        <div class="expense-icon"><svg class="icon"><use href="#${icon}" /></svg></div>
+        <div class="expense-icon ${categoryIconClass(e.category)}"><svg class="icon"><use href="#${icon}" /></svg></div>
         <div class="expense-info">
           <div class="expense-merchant">${escapeHtml(e.merchant || "Sin identificar")}</div>
           <div class="expense-category">${e.category || "Sin categorizar"}</div>
@@ -272,7 +655,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ category, needs_review: false }),
         });
-        await Promise.all([loadReviewQueue(), loadExpenses()]);
+        await Promise.all([loadReviewQueue(), refreshExpenseView()]);
       });
     });
 
@@ -340,7 +723,7 @@
       }),
     });
     closeSheet(el.viewDetail);
-    await Promise.all([loadExpenses(), loadReviewQueue()]);
+    await Promise.all([refreshExpenseView(), loadReviewQueue()]);
   });
 
   // ── Alta manual ──────────────────────────────────────────────────────
@@ -369,7 +752,7 @@
       }),
     });
     closeSheet(el.viewAdd);
-    await loadExpenses();
+    await refreshExpenseView();
   });
 
   // ── Tabs ─────────────────────────────────────────────────────────────
@@ -379,9 +762,15 @@
     openSheet(el.viewReview);
   }
 
+  function openBudgets() {
+    loadBudgets();
+    openSheet(el.viewBudgets);
+  }
+
   document.querySelectorAll(".tabbar button[data-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (btn.dataset.tab === "review") openReview();
+      if (btn.dataset.tab === "budgets") openBudgets();
     });
   });
 
@@ -389,7 +778,13 @@
 
   document.querySelectorAll("[data-close]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const target = { review: el.viewReview, detail: el.viewDetail, add: el.viewAdd }[btn.dataset.close];
+      const target = {
+        review: el.viewReview,
+        detail: el.viewDetail,
+        add: el.viewAdd,
+        budgets: el.viewBudgets,
+        search: el.viewSearch,
+      }[btn.dataset.close];
       closeSheet(target);
     });
   });
@@ -466,7 +861,7 @@
     node.addEventListener("pointercancel", finish);
   }
 
-  [el.viewDetail, el.viewReview, el.viewAdd].forEach(attachSwipeToClose);
+  [el.viewDetail, el.viewReview, el.viewAdd, el.viewBudgets, el.viewSearch].forEach(attachSwipeToClose);
 
   // ── Init ─────────────────────────────────────────────────────────────
 

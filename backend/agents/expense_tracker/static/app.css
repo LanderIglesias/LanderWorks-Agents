@@ -36,6 +36,36 @@
   --warning: #b8720a;
   --warning-contrast: #ffffff;
   --danger: #d9483a;
+  /* Semántico (como --warning/--danger), no un segundo acento de marca:
+     solo para "ha bajado el gasto respecto al mes anterior" en el
+     indicador de comparativa. */
+  --positive: #1f8a53;
+  /* --danger es demasiado próximo en luminancia al fondo ya teñido de
+     --danger de .budget-card.over (rojo sobre rosa-tintado) — ratio real
+     ~3.35:1, por debajo de AA. Este tono, más oscuro y saturado, es
+     específicamente para texto sobre esa superficie ya teñida. */
+  --danger-on-tint: #8f2318;
+
+  /* Color cualitativo por categoría — un sistema de codificación
+     distinto del acento de marca, deliberadamente fuera de las 4 franjas
+     de tono ya reservadas semánticamente (coral=creación, ámbar=aviso,
+     positive=verde, danger=rojo) para que un icono de categoría nunca se
+     lea como "esto está en aviso" o "esto es una acción". "otros" se
+     queda neutro (--text-secondary) a propósito: es el cajón de sastre,
+     no necesita identidad propia. */
+  --cat-comida: #c94570;
+  --cat-transporte: #3d6fd4;
+  --cat-suscripciones: #8a4fd4;
+  --cat-ocio: #b347b8;
+  --cat-salud: #1f9e8a;
+  --cat-hogar: #5c5cd6;
+
+  /* Para que los controles nativos del navegador (el icono de
+     <input type="date">, la barra de scroll) se rendericen en el
+     esquema correcto en vez del claro por defecto del sistema — sin
+     esto el icono de calendario nativo desentona fuerte en modo
+     oscuro (ver Do's and Don'ts en DESIGN.md). */
+  color-scheme: light;
 
   --radius-card: 20px;
   --radius-row: 14px;
@@ -54,6 +84,7 @@
     --bg-bottom: #0a0a0f;
     --halo-color: 168, 116, 255;
     --halo-opacity: 0.3;
+    color-scheme: dark;
 
     --glass-fill: rgba(255, 255, 255, 0.08);
     --glass-fill-strong: rgba(255, 255, 255, 0.14);
@@ -71,6 +102,18 @@
     --warning: #ffb340;
     --warning-contrast: #2b1a05;
     --danger: #ff6b6b;
+    --positive: #34c98f;
+    /* Más claro que --danger: sobre el fondo teñido de .budget-card.over
+       (rojo oscuro sobre rojo oscuro) el --danger base cae justo en el
+       límite de AA; este tono lo despega con margen. */
+    --danger-on-tint: #ffb3b3;
+
+    --cat-comida: #ff8fb8;
+    --cat-transporte: #7ea6ff;
+    --cat-suscripciones: #b98aff;
+    --cat-ocio: #e08aef;
+    --cat-salud: #4fd9c0;
+    --cat-hogar: #9a9aff;
   }
 }
 
@@ -80,6 +123,7 @@
   --bg-bottom: #0a0a0f;
   --halo-color: 168, 116, 255;
   --halo-opacity: 0.3;
+  color-scheme: dark;
 
   --glass-fill: rgba(255, 255, 255, 0.08);
   --glass-fill-strong: rgba(255, 255, 255, 0.14);
@@ -97,6 +141,15 @@
   --warning: #ffb340;
   --warning-contrast: #2b1a05;
   --danger: #ff6b6b;
+  --positive: #34c98f;
+  --danger-on-tint: #ffb3b3;
+
+  --cat-comida: #ff8fb8;
+  --cat-transporte: #7ea6ff;
+  --cat-suscripciones: #b98aff;
+  --cat-ocio: #e08aef;
+  --cat-salud: #4fd9c0;
+  --cat-hogar: #9a9aff;
 }
 
 * {
@@ -109,7 +162,17 @@
 html,
 body {
   height: 100%;
+  min-height: 100dvh;
   overscroll-behavior-y: none;
+  /* Red de seguridad para PWA standalone en iOS: #app ya pinta este mismo
+     degradado, pero un rebote elástico del scroll, el redondeo de
+     100dvh, o el área segura de viewport-fit=cover pueden asomar un
+     resquicio de html/body por debajo de #app. Sin esto, ese resquicio
+     se pinta con el blanco por defecto del navegador — la barra blanca
+     bajo el tabbar reportada en el iPhone real. Mismo degradado en los
+     dos sitios, nunca un color plano de "por si acaso", para que el
+     resquicio (si aparece) sea invisible en vez de solo "menos blanco". */
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
 }
 
 body {
@@ -124,6 +187,7 @@ body {
 #app {
   position: relative;
   height: 100dvh;
+  min-height: 100dvh;
   overflow: hidden;
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
 }
@@ -176,9 +240,9 @@ body {
   letter-spacing: -0.01em;
 }
 
-.theme-toggle {
+.theme-toggle,
+.search-toggle {
   position: absolute;
-  right: 12px;
   top: calc(env(safe-area-inset-top) + 8px);
   width: 34px;
   height: 34px;
@@ -194,7 +258,16 @@ body {
   transition: transform 0.2s var(--spring-bounce);
 }
 
-.theme-toggle:active {
+.theme-toggle {
+  right: 12px;
+}
+
+.search-toggle {
+  left: 12px;
+}
+
+.theme-toggle:active,
+.search-toggle:active {
   transform: scale(0.9);
 }
 
@@ -262,12 +335,50 @@ body {
   transition: transform 0.35s var(--spring-settle), opacity 0.35s var(--spring-settle);
 }
 
+.amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .total-card .amount {
   font-size: 34px;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Indicador de comparativa mes a mes — sutil a propósito. Gastar más
+   no es automáticamente "malo" (puede ser una compra planeada), así que
+   solo el rojo/ámbar de "aviso" se reserva para subidas por encima del
+   umbral; una subida moderada queda en gris neutro, no en rojo. ── */
+
+.comparison-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 8px 3px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-fill-strong);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.comparison-badge .icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.5;
+}
+
+.comparison-badge.down {
+  color: var(--positive);
+}
+
+.comparison-badge.up-alert {
+  color: var(--warning);
 }
 
 .total-card .meta {
@@ -361,6 +472,67 @@ body {
   padding-bottom: 110px;
 }
 
+/* ── Barra de resultados de búsqueda ─────────────────────────────────── */
+
+/* [hidden] del navegador y una clase que fija su propio `display` empatan
+   en especificidad — sin este override explícito la regla de la clase
+   gana y el elemento se queda visible pese a hidden=true. Cubre todos
+   los elementos del archivo que combinan un `display` propio con
+   toggles de `hidden` por JS, no solo los de hoy: el mismo bug ya
+   afectaba en silencio a los badges y a detail-review-row. */
+.results-bar[hidden],
+.load-more[hidden],
+.quick-action .circle .badge[hidden],
+.tabbar .review-badge[hidden],
+.field-row[hidden],
+.comparison-badge[hidden] {
+  display: none;
+}
+
+.results-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 16px 14px;
+  padding: 10px 14px;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-row);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.results-bar #results-count {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.results-bar button {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.load-more {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 4px 16px 20px;
+  padding: 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-row);
+  background: var(--glass-fill);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 0.15s var(--spring-bounce);
+}
+
+.load-more:active {
+  transform: scale(0.98);
+}
+
 .day-group {
   margin: 0 16px 16px;
   border-radius: var(--radius-row);
@@ -409,6 +581,38 @@ body {
   justify-content: center;
   font-size: 15px;
   color: var(--text-secondary);
+}
+
+/* Color por categoría — mismo tratamiento (stroke + fondo teñido al 20%)
+   compartido por cualquier icono de categoría en la app: fila de la
+   lista/búsqueda (.expense-icon), tarjeta de presupuesto (.budget-icon) y
+   fila de recurrentes (.recurring-icon), todas llevan además
+   .category-icon.cat-<categoría> para que esta única regla las cubra a
+   las tres. "otros" y categorías sin asignar se quedan en el gris neutro
+   de arriba — es el cajón de sastre, no necesita identidad propia. */
+.category-icon.cat-comida {
+  color: var(--cat-comida);
+  background: color-mix(in srgb, var(--cat-comida) 20%, var(--glass-fill));
+}
+.category-icon.cat-transporte {
+  color: var(--cat-transporte);
+  background: color-mix(in srgb, var(--cat-transporte) 20%, var(--glass-fill));
+}
+.category-icon.cat-suscripciones {
+  color: var(--cat-suscripciones);
+  background: color-mix(in srgb, var(--cat-suscripciones) 20%, var(--glass-fill));
+}
+.category-icon.cat-ocio {
+  color: var(--cat-ocio);
+  background: color-mix(in srgb, var(--cat-ocio) 20%, var(--glass-fill));
+}
+.category-icon.cat-salud {
+  color: var(--cat-salud);
+  background: color-mix(in srgb, var(--cat-salud) 20%, var(--glass-fill));
+}
+.category-icon.cat-hogar {
+  color: var(--cat-hogar);
+  background: color-mix(in srgb, var(--cat-hogar) 20%, var(--glass-fill));
 }
 
 .expense-info {
@@ -584,6 +788,41 @@ body {
   color: color-mix(in srgb, var(--warning) 70%, var(--text));
 }
 
+/* ── Selector de mes (pantalla de presupuestos) ──────────────────────── */
+
+.month-nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.month-nav-arrow {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: transform 0.15s var(--spring-bounce);
+}
+
+.month-nav-arrow:active {
+  transform: scale(0.85);
+}
+
+.month-nav-label {
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 130px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 .sheet-body {
   padding: 20px 16px 40px;
 }
@@ -629,6 +868,17 @@ body {
   font-family: inherit;
 }
 
+/* `color-scheme` (arriba) ya le dice al navegador que dibuje el icono
+   nativo del selector de fecha en el esquema correcto (claro/oscuro) —
+   en Chromium/WebKit eso solo basta para que el propio glifo cambie de
+   color. Solo le bajamos la opacidad para que no compita en peso visual
+   con el resto de iconos, más apagados por diseño. No lo sustituimos por
+   un date picker a medida: el control nativo de iOS ya se siente propio
+   de la plataforma, que es justo lo que persigue esta dirección. */
+.field-row input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.65;
+}
+
 .field-row input:focus,
 .field-row select:focus {
   outline: 2px solid var(--accent);
@@ -667,6 +917,28 @@ body {
   transition: transform 0.15s var(--spring-bounce);
 }
 
+/* Buscar es una consulta, no una creación — no comparte el coral sólido
+   reservado para "esto es nuevo" (ver .primary-button / Añadir). Cristal
+   estándar con el texto en el color de acento en vez de fondo sólido. */
+.secondary-button {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
+  border-radius: var(--radius-row);
+  background: var(--glass-fill);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.15s var(--spring-bounce);
+}
+
+.secondary-button:active {
+  transform: scale(0.98);
+}
+
 .primary-button:active {
   transform: scale(0.98);
 }
@@ -694,6 +966,252 @@ body {
   color: var(--warning-contrast);
 }
 
+/* ── Presupuestos por categoría ───────────────────────────────────────
+   Mismo lenguaje de cristal que el resto de tarjetas fijas: cada
+   categoría es una superficie con blur, no una fila plana de lista, así
+   que el blur pesado aquí es intencional (son 7 tarjetas fijas dentro de
+   una sheet, no una lista larga que haga scroll con cientos de filas). */
+
+.budget-card {
+  background: var(--glass-fill);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
+  border-radius: var(--radius-row);
+  padding: 14px;
+  margin-bottom: 12px;
+  transition: transform 0.15s var(--spring-bounce), background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.budget-card:active {
+  transform: scale(0.98);
+}
+
+/* Superado: tratamiento a nivel de tarjeta completa, no solo la barra —
+   para que destaque en el escaneo visual de toda la pantalla, no solo si
+   el usuario mira cada barra con atención. */
+.budget-card.over {
+  background: color-mix(in srgb, var(--danger) 14%, var(--glass-fill));
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--glass-border));
+}
+
+.budget-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.budget-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--glass-fill-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.budget-name {
+  flex: 1;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.budget-bar {
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-border);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.budget-bar-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  /* --positive por defecto, NO --accent: el coral queda reservado en
+     exclusiva para acciones de creación (Añadir, botones "+") — una
+     barra de progreso normal no es una de esas acciones, y compartir el
+     color confundía "esto vas bien" con "esto es nuevo". */
+  background: var(--positive);
+  transform-origin: left;
+  /* scaleX (compositor-only), no width — animar width fuerza layout
+     thrash en cada frame; transform es la propiedad que apple-design
+     recomienda para todo lo animado en esta app (ver spring-settle en el
+     resto del archivo). */
+  transition: transform 0.5s var(--spring-settle), background-color 0.3s ease;
+}
+
+.budget-bar-fill.warning {
+  background: var(--warning);
+}
+
+.budget-bar-fill.over {
+  background: var(--danger);
+}
+
+.budget-meta {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-meta.over {
+  /* --danger-on-tint, no --danger: el rojo base pierde contraste sobre
+     el propio fondo teñido de rojo de .budget-card.over. */
+  color: var(--danger-on-tint);
+  font-weight: 600;
+}
+
+/* Excedido explícito en texto (no solo el color de la tarjeta): quien
+   no distingue rojo/verde no debe depender del tinte para saber que se
+   ha pasado del límite. Mismo nivel tipográfico que .budget-comparison
+   para no añadir peso visual — es un dato de apoyo, no el titular. */
+.budget-exceeded {
+  margin-top: 3px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--danger-on-tint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Solo el dato de referencia — sin barra ni gráfico adicional. */
+.budget-comparison {
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.budget-edit-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.budget-edit-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-fill-strong);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.budget-edit-row input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.budget-edit-row button {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.budget-edit-row button.clear {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+}
+
+/* ── Recurrentes detectados — una tarjeta de cristal con la lista, no
+   7 tarjetas más ni un gráfico adicional. ── */
+
+.recurring-section {
+  background: var(--glass-fill);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  margin-top: 4px;
+}
+
+.recurring-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+
+.recurring-section .empty-state {
+  padding: 4px 0;
+  text-align: left;
+  font-size: 13px;
+}
+
+.recurring-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.recurring-row:last-of-type {
+  border-bottom: none;
+}
+
+/* Mismo patrón de fila que la lista principal (icono + texto), no texto
+   suelto — ver .expense-icon. */
+.recurring-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: var(--glass-fill-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.recurring-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.recurring-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.recurring-amount {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.recurring-total {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sheet,
   .total-card,
@@ -701,7 +1219,13 @@ body {
   .segmented button,
   .quick-action,
   .theme-toggle,
-  .primary-button {
+  .primary-button,
+  .budget-card,
+  .budget-bar-fill,
+  .month-nav-arrow,
+  .search-toggle,
+  .load-more,
+  .secondary-button {
     transition-duration: 0.01ms !important;
   }
 }
@@ -729,7 +1253,9 @@ body {
   .sheet-header,
   .field-group,
   .segmented,
-  .segmented-thumb {
+  .segmented-thumb,
+  .budget-card,
+  .secondary-button {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
