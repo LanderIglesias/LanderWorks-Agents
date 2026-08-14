@@ -78,10 +78,19 @@ def _webhook_headers(timestamp: str) -> dict:
 
 
 def test_webhook_unmatched_bank_email_returns_200_with_null_amount(client):
-    """El banco cambió la redacción y el regex no matchea nada."""
+    """El banco cambió la redacción y el regex específico no matchea nada.
+
+    raw_text lleva "pago" + un importe en formato "EUR" (evidencia de
+    transacción real que exige engine.looks_like_transaction) pero no la
+    frase exacta "importe de X EUR" que espera _BANK_AMOUNT_RE — así seguimos
+    cubriendo el bug original (parseo fallido -> needs_review, no un 500)
+    sin que el filtro de mensajes no transaccionales lo descarte antes de
+    llegar al parser.
+    """
     payload = {
         "source": "email_bank",
-        "raw_text": "Se ha realizado un movimiento con su tarjeta. Consulte el detalle en la app.",
+        "raw_text": "Se ha registrado un pago con su tarjeta por 15,00 EUR en un comercio. "
+        "Consulte el detalle en la app.",
         "occurred_at": "2026-08-11T09:00:00",
     }
     body = json.dumps(payload)

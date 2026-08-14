@@ -31,6 +31,7 @@ from .schemas import (
     ExpenseOut,
     ExpensePatch,
     ManualExpenseIn,
+    ResetAllIn,
     WebhookExpenseIn,
 )
 from .security import verify_app_token, verify_webhook_signature
@@ -74,19 +75,24 @@ def setup_rate_limiting(app) -> None:
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-@router.post(
-    "/webhook/expense", response_model=ExpenseOut, dependencies=[Depends(verify_webhook_signature)]
-)
+@router.post("/webhook/expense", dependencies=[Depends(verify_webhook_signature)])
 @limiter.limit("20/minute")
 def webhook_expense(request: Request, payload: WebhookExpenseIn, db: Session = Depends(get_db)):
     # `request: Request` no se usa para parsear el payload (FastAPI lo
     # inyecta normalmente vía `payload`) — slowapi's @limiter.limit lo
     # requiere en la firma para poder aplicar el rate limit sobre esta ruta.
+    #
+    # Sin response_model=ExpenseOut a propósito: engine.ingest_webhook
+    # puede devolver un dict {"status": "ignored", ...} cuando descarta un
+    # código de verificación en vez de un Expense — forzar ExpenseOut aquí
+    # rompería esa respuesta (200, no un gasto real que serializar).
     try:
-        expense = engine.ingest_webhook(db, payload)
+        result = engine.ingest_webhook(db, payload)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
-    return expense
+    if isinstance(result, dict):
+        return result
+    return ExpenseOut.model_validate(result)
 
 
 @router.get("/expenses", dependencies=[Depends(verify_app_token)])
@@ -174,6 +180,19 @@ def list_recurring(db: Session = Depends(get_db)):
     return engine.detect_recurring(db)
 
 
+# Registrado ANTES de /expenses/{expense_id} por el mismo motivo que las
+# demás rutas literales de /expenses/* de arriba (aunque aquí no colisiona
+# por método — reset-all es POST y {expense_id} solo expone GET/PATCH/
+# DELETE — se mantiene aquí por consistencia con el resto de rutas
+# literales).
+@router.post("/expenses/reset-all", dependencies=[Depends(verify_app_token)])
+def reset_all_expenses(payload: ResetAllIn, db: Session = Depends(get_db)):
+    if payload.confirm != "BORRAR":
+        raise HTTPException(status_code=400, detail="confirm debe ser exactamente 'BORRAR'")
+    engine.reset_all_expenses(db)
+    return {"status": "ok"}
+
+
 @router.get(
     "/expenses/{expense_id}", response_model=ExpenseOut, dependencies=[Depends(verify_app_token)]
 )
@@ -192,6 +211,14 @@ def patch_expense(expense_id: int, patch: ExpensePatch, db: Session = Depends(ge
     if expense is None:
         raise HTTPException(status_code=404, detail="Expense not found")
     return expense
+
+
+@router.delete("/expenses/{expense_id}", dependencies=[Depends(verify_app_token)])
+def delete_expense(expense_id: int, db: Session = Depends(get_db)):
+    deleted = engine.delete_expense(db, expense_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    return {"status": "ok"}
 
 
 @router.post("/expenses", response_model=ExpenseOut, dependencies=[Depends(verify_app_token)])

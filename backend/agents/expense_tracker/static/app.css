@@ -241,7 +241,8 @@ body {
 }
 
 .theme-toggle,
-.search-toggle {
+.search-toggle,
+.settings-toggle {
   position: absolute;
   top: calc(env(safe-area-inset-top) + 8px);
   width: 34px;
@@ -262,12 +263,19 @@ body {
   right: 12px;
 }
 
+/* Junto al toggle de tema, no en la navegación principal ni accesible
+   por accidente — el reset destructivo vive detrás de esta hoja. */
+.settings-toggle {
+  right: 54px;
+}
+
 .search-toggle {
   left: 12px;
 }
 
 .theme-toggle:active,
-.search-toggle:active {
+.search-toggle:active,
+.settings-toggle:active {
   transform: scale(0.9);
 }
 
@@ -714,7 +722,18 @@ body {
 
 .sheet {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Extiende el fondo por debajo del borde "seguro" en vez de solo
+     pintarlo hasta ahí: cada hoja es un overlay fixed independiente de
+     #app (no hereda su tratamiento), y el mismo redondeo de altura de
+     viewport / rebote elástico en iOS que exponía un resquicio bajo
+     #app puede exponer uno aquí también. padding-bottom aparta el
+     contenido real del área del home indicator sin dejar hueco en el
+     fondo. */
+  bottom: calc(-1 * env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: 40;
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
   transform: translateX(100%);
@@ -740,6 +759,10 @@ body {
   z-index: 1;
   display: flex;
   align-items: center;
+  /* El título centrado, igual que "Gastos" en la navbar principal — el
+     back-button se saca del flujo (position: absolute, abajo) para que
+     no empuje el título hacia la izquierda. */
+  justify-content: center;
   gap: 8px;
   height: calc(52px + env(safe-area-inset-top));
   padding: env(safe-area-inset-top) 8px 0;
@@ -775,15 +798,27 @@ body {
 }
 
 .back-button {
+  /* Posicionado fuera del flujo para que el título quede centrado en la
+     cabecera (ver .sheet-header) sin depender de que "Cerrar"/"Atrás"/
+     "Cancelar" midan lo mismo. */
+  position: absolute;
+  left: 4px;
+  top: calc(env(safe-area-inset-top) + 26px);
+  transform: translateY(-50%);
   border: none;
   background: transparent;
+  /* Siempre el mismo acento neutro, sin excepción — es una señal de
+     navegación (volver/cerrar), no una acción de creación ni de aviso;
+     no debe variar de color entre hojas (ver .sheet-review más abajo,
+     que ya no lo sobreescribe). */
   color: var(--accent);
   font-size: 16px;
   font-weight: 500;
   padding: 8px 12px;
 }
 
-.sheet-review .back-button,
+/* Solo el título — el back-button mantiene siempre var(--accent), ver
+   comentario en .back-button. */
 .sheet-review .navbar-title {
   color: color-mix(in srgb, var(--warning) 70%, var(--text));
 }
@@ -943,6 +978,55 @@ body {
   transform: scale(0.98);
 }
 
+/* ── Ajustes: zona destructiva ────────────────────────────────────────
+   Tinte rojo de superficie, igual patrón que .budget-card.over, para que
+   se lea como "cuidado" incluso antes de leer el texto. */
+.danger-zone {
+  padding: 16px;
+  background: color-mix(in srgb, var(--danger) 10%, var(--glass-fill));
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--glass-border));
+  border-radius: var(--radius-row);
+}
+
+.danger-zone-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.danger-zone-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.danger-zone .field-group {
+  margin-bottom: 14px;
+}
+
+.danger-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-row);
+  background: var(--danger);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  transition: transform 0.15s var(--spring-bounce), opacity 0.2s ease;
+}
+
+.danger-button:active {
+  transform: scale(0.98);
+}
+
+/* Deshabilitado hasta que el texto escrito coincida exactamente con
+   "BORRAR" — la fricción es intencional, ver spec. */
+.danger-button:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 .review-actions {
   display: flex;
   gap: 8px;
@@ -964,6 +1048,17 @@ body {
   border-color: transparent;
   background: var(--warning);
   color: var(--warning-contrast);
+}
+
+/* Rechazar/eliminar: irreversible, pero UN gasto — no lleva el peso de
+   fondo sólido de .confirm, solo el texto en rojo, coherente con cómo el
+   resto de la app reserva el relleno sólido para la acción principal de
+   la tarjeta. */
+.review-actions button.reject {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--glass-border));
+  color: var(--danger);
+  flex: 0 0 auto;
+  padding: 8px 12px;
 }
 
 /* ── Presupuestos por categoría ───────────────────────────────────────

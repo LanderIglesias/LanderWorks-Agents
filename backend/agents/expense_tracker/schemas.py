@@ -49,6 +49,14 @@ class BudgetSetIn(BaseModel):
     limit_amount: float | None = None
 
 
+class ResetAllIn(BaseModel):
+    """Body de POST /expenses/reset-all. `confirm` debe ser exactamente
+    "BORRAR" — es la salvaguarda contra un borrado accidental de todo el
+    historial, no una validación de forma."""
+
+    confirm: str
+
+
 class BudgetOut(BaseModel):
     """Una de las 7 categorías, con su límite (si hay) y el gasto real del mes.
 

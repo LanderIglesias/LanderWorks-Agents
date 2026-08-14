@@ -107,6 +107,10 @@ finish review, the verdict, and DESIGN.md.
     <symbol id="icon-arrow-down" viewBox="0 0 24 24">
       <path d="M12 5v14M6 13l6 6 6-6" />
     </symbol>
+    <symbol id="icon-settings" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </symbol>
   </svg>
 
   <div id="app">
@@ -136,6 +140,9 @@ finish review, the verdict, and DESIGN.md.
           <svg class="icon"><use href="#icon-search" /></svg>
         </button>
         <span class="navbar-title">Gastos</span>
+        <button class="settings-toggle" id="settings-toggle" aria-label="Ajustes">
+          <svg class="icon"><use href="#icon-settings" /></svg>
+        </button>
         <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
           <svg class="icon" id="theme-toggle-icon"><use href="#icon-moon" /></svg>
         </button>
@@ -378,6 +385,34 @@ finish review, the verdict, and DESIGN.md.
           </div>
         </div>
         <button class="primary-button" id="add-save">Guardar gasto</button>
+      </div>
+    </div>
+
+    <!-- ── Ajustes — solo el reset destructivo por ahora ────────────────── -->
+    <div class="sheet" id="view-settings">
+      <div class="sheet-header">
+        <button class="back-button" data-close="settings">Cerrar</button>
+        <span class="navbar-title">Ajustes</span>
+      </div>
+      <div class="sheet-body">
+        <div class="danger-zone">
+          <div class="danger-zone-title">Borrar todos los gastos</div>
+          <p class="danger-zone-text">
+            Elimina permanentemente TODOS los gastos guardados. Los presupuestos no se
+            ven afectados. Esta acción no se puede deshacer.
+          </p>
+          <div class="field-group">
+            <div class="field-row">
+              <span class="field-label">Escribe BORRAR</span>
+              <input id="reset-confirm-input" type="text" placeholder="BORRAR" autocomplete="off" autocapitalize="off" />
+            </div>
+          </div>
+          <button class="danger-button" id="reset-confirm-btn" disabled>Borrar todos los gastos</button>
+          <p id="reset-error" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
+          <p id="reset-success" style="margin-top: 12px; color: var(--positive); font-size: 13px" hidden>
+            Todos los gastos se han borrado.
+          </p>
+        </div>
       </div>
     </div>
   </div>

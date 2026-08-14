@@ -102,6 +102,12 @@
     resultsCount: $("#results-count"),
     clearSearch: $("#clear-search"),
     loadMore: $("#load-more"),
+    settingsToggle: $("#settings-toggle"),
+    viewSettings: $("#view-settings"),
+    resetConfirmInput: $("#reset-confirm-input"),
+    resetConfirmBtn: $("#reset-confirm-btn"),
+    resetError: $("#reset-error"),
+    resetSuccess: $("#reset-success"),
   };
 
   // ── Tema claro/oscuro manual ──────────────────────────────────────────
@@ -640,6 +646,7 @@
         <div class="review-actions" style="padding: 10px 14px 14px">
           <button class="confirm" data-confirm-id="${e.id}">Confirmar</button>
           <button data-open-id="${e.id}">Ver detalle</button>
+          <button class="reject" data-reject-id="${e.id}">Rechazar</button>
         </div>
       </div>`
       )
@@ -661,6 +668,15 @@
 
     el.reviewList.querySelectorAll("[data-open-id]").forEach((btn) => {
       btn.addEventListener("click", () => openDetail(Number(btn.dataset.openId)));
+    });
+
+    el.reviewList.querySelectorAll("[data-reject-id]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = Number(btn.dataset.rejectId);
+        if (!confirm("¿Rechazar y eliminar este gasto? No se puede deshacer.")) return;
+        await authFetch(`${API}/expenses/${id}`, { method: "DELETE" });
+        await Promise.all([loadReviewQueue(), refreshExpenseView()]);
+      });
     });
   }
 
@@ -784,9 +800,46 @@
         add: el.viewAdd,
         budgets: el.viewBudgets,
         search: el.viewSearch,
+        settings: el.viewSettings,
       }[btn.dataset.close];
       closeSheet(target);
     });
+  });
+
+  // ── Ajustes: reset destructivo ──────────────────────────────────────
+  //
+  // Fricción intencional: el botón solo se activa cuando el texto escrito
+  // coincide EXACTAMENTE con "BORRAR" (no una confirmación sí/no).
+
+  el.settingsToggle.addEventListener("click", () => {
+    el.resetConfirmInput.value = "";
+    el.resetConfirmBtn.disabled = true;
+    el.resetError.hidden = true;
+    el.resetSuccess.hidden = true;
+    openSheet(el.viewSettings);
+  });
+
+  el.resetConfirmInput.addEventListener("input", () => {
+    el.resetConfirmBtn.disabled = el.resetConfirmInput.value !== "BORRAR";
+  });
+
+  el.resetConfirmBtn.addEventListener("click", async () => {
+    el.resetError.hidden = true;
+    el.resetSuccess.hidden = true;
+    const res = await authFetch(`${API}/expenses/reset-all`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirm: el.resetConfirmInput.value }),
+    });
+    if (!res.ok) {
+      el.resetError.textContent = "No se ha podido completar el borrado.";
+      el.resetError.hidden = false;
+      return;
+    }
+    el.resetSuccess.hidden = false;
+    el.resetConfirmInput.value = "";
+    el.resetConfirmBtn.disabled = true;
+    await Promise.all([refreshExpenseView(), loadReviewQueue()]);
   });
 
   // ── Apertura/cierre de sheets + swipe-to-close con momentum ─────────
@@ -861,7 +914,9 @@
     node.addEventListener("pointercancel", finish);
   }
 
-  [el.viewDetail, el.viewReview, el.viewAdd, el.viewBudgets, el.viewSearch].forEach(attachSwipeToClose);
+  [el.viewDetail, el.viewReview, el.viewAdd, el.viewBudgets, el.viewSearch, el.viewSettings].forEach(
+    attachSwipeToClose
+  );
 
   // ── Init ─────────────────────────────────────────────────────────────
 

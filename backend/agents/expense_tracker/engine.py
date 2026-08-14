@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from difflib import SequenceMatcher
 
 from sqlalchemy import func, or_, select
@@ -40,10 +40,89 @@ _DEDUP_COUNTERPART = {
 }
 
 
+# ── Filtros de mensajes no guardables (source=email_bank) ────────────────
+#
+# Laboral Kutxa manda avisos de movimiento por el mismo remitente/canal
+# que códigos de inicio de sesión (OTP — dato de autenticación sensible,
+# nunca debe persistir) y otros SMS no transaccionales. Dos filtros
+# independientes, ambos motivos válidos de descarte:
+#
+# 1. is_verification_code: lista negra ACOTADA, solo para el caso más
+#    específico y más sensible (un OTP) — se evalúa primero porque un
+#    mensaje que matchea esto nunca debe guardarse pase lo que pase.
+# 2. looks_like_transaction: lista blanca para todo lo demás — el
+#    comportamiento por defecto ante cualquier mensaje no reconocido es
+#    descartar, no persistir "por si acaso".
+
+
+_OTP_KEYWORD_RE = re.compile(
+    r"\b("
+    r"c[oó]digo|verificaci[oó]n|verification\s*code|otp|"
+    r"clave\s+de\s+acceso|inicio\s+de\s+sesi[oó]n|login\s*code|"
+    r"no\s+compartas|do\s+not\s+share"
+    r")\b",
+    re.IGNORECASE,
+)
+_OTP_DIGIT_CODE_RE = re.compile(r"\b\d{4,8}\b")
+
+
+def is_verification_code(raw_text: str | None) -> bool:
+    """True si `raw_text` tiene pinta de ser un código de verificación
+    (OTP) del banco — una palabra clave típica de OTP más un código
+    numérico suelto de 4-8 dígitos."""
+    if not raw_text or not raw_text.strip():
+        return False
+    if not _OTP_KEYWORD_RE.search(raw_text):
+        return False
+    return bool(_OTP_DIGIT_CODE_RE.search(raw_text))
+
+
+# "pago" o "cobro" (no cualquier palabra de movimiento) Y "EUR" en texto
+# (no el símbolo €) asociado a un número con formato de importe, en
+# cualquier orden — "34,18 EUR", "EUR 34,18". Ambas señales son
+# obligatorias: el formato real de los SMS de Laboral Kutxa las incluye
+# siempre, así que exigir las dos no arriesga falsos negativos sobre el
+# formato real, y exigir solo una sería demasiado laxo (un número con EUR
+# sin "pago"/"cobro" no basta por sí solo como evidencia).
+_PAGO_COBRO_RE = re.compile(r"\b(pago|cobro)\b", re.IGNORECASE)
+_EUR_AMOUNT_RE = re.compile(
+    r"\d{1,3}(?:[.\s]\d{3})*[.,]\d{2}\s*EUR\b|\bEUR\s*\d{1,3}(?:[.\s]\d{3})*[.,]\d{2}",
+    re.IGNORECASE,
+)
+
+
+def looks_like_transaction(raw_text: str | None) -> bool:
+    """True SOLO si `raw_text` contiene "pago"/"cobro" Y un importe en
+    formato "EUR" (texto) — ver comentario de arriba."""
+    if not raw_text or not raw_text.strip():
+        return False
+    return bool(_PAGO_COBRO_RE.search(raw_text)) and bool(_EUR_AMOUNT_RE.search(raw_text))
+
+
+def _log_discarded(payload: WebhookExpenseIn, reason: str) -> None:
+    # Nunca el contenido del mensaje en el log — solo la constancia de que
+    # se descartó, cuándo y por qué, para poder confirmar que el filtro
+    # funciona sin persistir el propio dato (potencialmente sensible).
+    logger.info(
+        "[ExpenseTracker] discarded inbound message: reason=%s source=%s timestamp=%s",
+        reason,
+        payload.source.value,
+        datetime.now(UTC).isoformat(),
+    )
+
+
 # ── Webhook ──────────────────────────────────────────────────────────────
 
 
-def ingest_webhook(db: Session, payload: WebhookExpenseIn) -> Expense:
+def ingest_webhook(db: Session, payload: WebhookExpenseIn) -> Expense | dict:
+    if payload.source == Source.EMAIL_BANK:
+        if is_verification_code(payload.raw_text):
+            _log_discarded(payload, "verification_code_detected")
+            return {"status": "ignored", "reason": "verification_code_detected"}
+        if not looks_like_transaction(payload.raw_text):
+            _log_discarded(payload, "not_a_transaction")
+            return {"status": "ignored", "reason": "not_a_transaction"}
+
     if payload.source == Source.WALLET:
         merchant, amount, raw_text, parse_failed = _resolve_wallet(payload)
     elif payload.source in (Source.EMAIL_BANK, Source.EMAIL_PAYPAL):
@@ -303,6 +382,24 @@ def update_expense(db: Session, expense_id: int, patch: ExpensePatch) -> Expense
     db.commit()
     db.refresh(expense)
     return expense
+
+
+def delete_expense(db: Session, expense_id: int) -> bool:
+    """Borra la fila (DELETE real, no soft-delete). True si existía."""
+    expense = db.get(Expense, expense_id)
+    if expense is None:
+        return False
+    db.delete(expense)
+    db.commit()
+    return True
+
+
+def reset_all_expenses(db: Session) -> None:
+    """Borra TODAS las filas de expenses. Budgets no se tocan — la
+    salvaguarda de confirmación vive en la capa de API (verify_app_token +
+    el campo `confirm`), esto asume que ya se validó."""
+    db.query(Expense).delete()
+    db.commit()
 
 
 def list_review_queue(db: Session) -> list[Expense]:
