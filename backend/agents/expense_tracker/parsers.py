@@ -31,10 +31,23 @@ class ParsedExpense:
 
 # ── Laboral Kutxa (postamail@laboralkutxa.com) ──────────────────────────
 #
-# Formato típico de aviso de movimiento con tarjeta:
-#   "Movimiento con tarjeta ...1234 en MERCADONA por importe de 23,45 EUR"
-# El importe usa coma decimal (formato español); el comercio es todo lo que
-# hay entre "en" y "por importe de".
+# Dos formatos soportados:
+#
+# 1. "importe de X EUR" / "en X por importe" — el formato asumido
+#    originalmente, nunca confirmado contra un mensaje real. Se mantiene
+#    por si acaso, pero no hay evidencia de que el banco lo use así.
+#
+# 2. El SMS real confirmado en producción (16/08/2026), formato distinto
+#    por completo:
+#      "16/08 07:49 pago 1,60eur tarjeta 450827******6010 en EasyPark
+#       Espana S.L.U.e. Para bloquear tarjeta envia BLK al 217377"
+#    Importe pegado a "eur" sin espacio ("1,60eur"), y el comercio va
+#    entre "en" y el pie fijo antifraude "Para bloquear tarjeta envia BLK
+#    al <número>" — ese pie parece constante en los SMS transaccionales
+#    de Laboral Kutxa, así que se usa como límite derecho de la captura.
+#    "pago"/"cobro" (mismas palabras que engine.looks_like_transaction)
+#    aparecen justo antes del importe, pero no hace falta anclarse ahí:
+#    "en ... Para bloquear" ya delimita el comercio sin ambigüedad.
 
 _BANK_AMOUNT_RE = re.compile(
     r"importe\s+de\s+([\d.]+,\d{2})\s*(?:EUR|€)",
@@ -45,31 +58,55 @@ _BANK_MERCHANT_RE = re.compile(
     re.IGNORECASE,
 )
 
+_BANK_SMS_AMOUNT_RE = re.compile(
+    r"(\d{1,3}(?:\.\d{3})*,\d{2})\s*eur\b",
+    re.IGNORECASE,
+)
+_BANK_SMS_MERCHANT_RE = re.compile(
+    r"\ben\s+(.+?)\s+para\s+bloquear\b",
+    re.IGNORECASE,
+)
+
+# Corta el comercio capturado en el primer sufijo de forma jurídica o país
+# que aparezca — "EasyPark Espana S.L.U.e." -> "EasyPark". Distinta de
+# _MERCHANT_SUFFIX_PATTERNS (engine.py, usada por _normalize_merchant para
+# COMPARAR similitud entre nombres ya cortos): aquí se necesita CORTAR una
+# cadena más larga con ruido detrás (el país, la forma jurídica completa
+# con puntos sueltos tipo "S.L.U.e."), no solo limpiar un nombre aislado
+# para comparar — por eso una lista separada en vez de reutilizar esa.
+_MERCHANT_TRAILING_NOISE_RE = re.compile(
+    r"\s+(?:espa[nñ]a|s\.?a\.?|s\.?l\.?u?\.?|inc\.?|ltd\.?|llc|corp\.?)(?=[\s.]|$).*",
+    re.IGNORECASE | re.DOTALL,
+)
+
 
 def parse_bank_email(raw_text: str | None) -> ParsedExpense | None:
-    """Parsea un email de aviso de movimiento de Laboral Kutxa.
+    """Parsea un aviso de movimiento de Laboral Kutxa (email o SMS).
 
-    Devuelve None (nunca lanza) si raw_text es vacío/None o si alguno de
-    los dos regex no encuentra match — p. ej. porque el banco cambió la
-    redacción de la plantilla del email.
+    Devuelve None (nunca lanza) si raw_text es vacío/None o si ningún
+    formato conocido encuentra match — p. ej. porque el banco cambió la
+    redacción de la plantilla.
     """
     if not raw_text or not raw_text.strip():
         return None
 
     amount_match = _BANK_AMOUNT_RE.search(raw_text)
     merchant_match = _BANK_MERCHANT_RE.search(raw_text)
-    if not amount_match or not merchant_match:
-        return None
+    if amount_match and merchant_match:
+        amount = _parse_spanish_decimal(amount_match.group(1))
+        merchant = merchant_match.group(1).strip()
+        if amount is not None and merchant:
+            return ParsedExpense(merchant=merchant, amount=amount)
 
-    amount = _parse_spanish_decimal(amount_match.group(1))
-    if amount is None:
-        return None
+    sms_amount_match = _BANK_SMS_AMOUNT_RE.search(raw_text)
+    sms_merchant_match = _BANK_SMS_MERCHANT_RE.search(raw_text)
+    if sms_amount_match and sms_merchant_match:
+        amount = _parse_spanish_decimal(sms_amount_match.group(1))
+        merchant = _MERCHANT_TRAILING_NOISE_RE.sub("", sms_merchant_match.group(1)).strip()
+        if amount is not None and merchant:
+            return ParsedExpense(merchant=merchant, amount=amount)
 
-    merchant = merchant_match.group(1).strip()
-    if not merchant:
-        return None
-
-    return ParsedExpense(merchant=merchant, amount=amount)
+    return None
 
 
 # ── PayPal ───────────────────────────────────────────────────────────────

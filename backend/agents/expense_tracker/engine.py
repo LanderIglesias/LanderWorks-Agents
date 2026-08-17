@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from . import categorizer
 from .categorizer import CATEGORIES, CONFIDENCE_THRESHOLD
-from .database import Budget, Expense, Source
+from .database import Budget, DiscardedMessage, Expense, Source
 from .parsers import parse_bank_email, parse_paypal_email
 from .schemas import BudgetOut, ExpensePatch, ManualExpenseIn, WebhookExpenseIn
 
@@ -99,16 +99,25 @@ def looks_like_transaction(raw_text: str | None) -> bool:
     return bool(_PAGO_COBRO_RE.search(raw_text)) and bool(_EUR_AMOUNT_RE.search(raw_text))
 
 
-def _log_discarded(payload: WebhookExpenseIn, reason: str) -> None:
-    # Nunca el contenido del mensaje en el log — solo la constancia de que
-    # se descartó, cuándo y por qué, para poder confirmar que el filtro
-    # funciona sin persistir el propio dato (potencialmente sensible).
+def _discard(db: Session, payload: WebhookExpenseIn, reason: str) -> None:
+    """Registra un descarte — en el log de stdout (efímero, se pierde en
+    cada redeploy) Y en `discarded_messages` (persistente en Postgres, la
+    auditoría real). Ninguno de los dos guarda el contenido del mensaje,
+    solo el hecho, el motivo y el momento.
+
+    `reason` es el valor corto de la tabla ("verification_code" |
+    "not_a_transaction"), distinto del `reason` más descriptivo que
+    devuelve la respuesta HTTP del webhook — son dos contratos separados,
+    uno de esquema de BD y otro de API ya establecido.
+    """
     logger.info(
         "[ExpenseTracker] discarded inbound message: reason=%s source=%s timestamp=%s",
         reason,
         payload.source.value,
         datetime.now(UTC).isoformat(),
     )
+    db.add(DiscardedMessage(source=payload.source, reason=reason))
+    db.commit()
 
 
 # ── Webhook ──────────────────────────────────────────────────────────────
@@ -117,10 +126,10 @@ def _log_discarded(payload: WebhookExpenseIn, reason: str) -> None:
 def ingest_webhook(db: Session, payload: WebhookExpenseIn) -> Expense | dict:
     if payload.source == Source.EMAIL_BANK:
         if is_verification_code(payload.raw_text):
-            _log_discarded(payload, "verification_code_detected")
+            _discard(db, payload, "verification_code")
             return {"status": "ignored", "reason": "verification_code_detected"}
         if not looks_like_transaction(payload.raw_text):
-            _log_discarded(payload, "not_a_transaction")
+            _discard(db, payload, "not_a_transaction")
             return {"status": "ignored", "reason": "not_a_transaction"}
 
     if payload.source == Source.WALLET:
@@ -400,6 +409,18 @@ def reset_all_expenses(db: Session) -> None:
     el campo `confirm`), esto asume que ya se validó."""
     db.query(Expense).delete()
     db.commit()
+
+
+def list_discarded_messages(db: Session, since: date | None = None) -> list[DiscardedMessage]:
+    """Historial de mensajes descartados por los filtros de ingest_webhook
+    (auditoría persistente, ver DiscardedMessage). `since` filtra por
+    fecha de descarte >= ese día (inclusive); None devuelve todo."""
+    query = db.query(DiscardedMessage)
+    if since is not None:
+        query = query.filter(
+            DiscardedMessage.discarded_at >= datetime.combine(since, datetime.min.time())
+        )
+    return query.order_by(DiscardedMessage.discarded_at.desc()).all()
 
 
 def list_review_queue(db: Session) -> list[Expense]:

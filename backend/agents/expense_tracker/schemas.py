@@ -72,6 +72,19 @@ class BudgetOut(BaseModel):
     remaining: float | None
 
 
+class DiscardedMessageOut(BaseModel):
+    """Una fila de auditoría de DiscardedMessage — nunca lleva raw_text,
+    el modelo de BD no lo tiene en absoluto."""
+
+    id: int
+    source: Source
+    reason: str
+    discarded_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class ExpenseOut(BaseModel):
     id: int
     source: Source

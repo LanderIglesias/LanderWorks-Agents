@@ -99,6 +99,31 @@ class Expense(Base):
     )
 
 
+class DiscardedMessage(Base):
+    """Registro de auditoría de un mensaje descartado por los filtros de
+    ingest_webhook (OTP o "no parece una transacción") — separada de
+    `expenses` porque NO es un gasto, es la constancia de que algo se
+    descartó.
+
+    NUNCA guarda raw_text ni ningún contenido del mensaje — igual que el
+    log de stdout que sustituye/complementa, solo el hecho, el motivo y
+    el momento. Persistente en Postgres a propósito: el log de stdout del
+    contenedor se pierde en cada redeploy, justo cuando más se necesita
+    poder auditar un descarte.
+    """
+
+    __tablename__ = "discarded_messages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    source = Column(SourceEnum, nullable=False)
+    reason = Column(String(50), nullable=False)  # "verification_code" | "not_a_transaction"
+
+    discarded_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    __table_args__ = (Index("ix_discarded_messages_discarded_at", "discarded_at"),)
+
+
 class Budget(Base):
     """Límite de gasto de una categoría en un mes concreto.
 

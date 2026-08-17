@@ -35,6 +35,49 @@ def test_parse_bank_email_thousands_separator():
     assert result.amount == 1234.56
 
 
+def test_parse_bank_sms_real_production_format():
+    # Texto EXACTO capturado en producción (source=email_bank,
+    # needs_review=True hasta este ajuste) el 16/08/2026 — sin alterar ni
+    # un carácter. Formato real de SMS de Laboral Kutxa, distinto del
+    # "importe de X EUR" originalmente asumido y nunca confirmado.
+    raw_text = (
+        "16/08 07:49 pago 1,60eur tarjeta 450827******6010 en EasyPark "
+        "Espana S.L.U.e. Para bloquear tarjeta envia BLK al 217377"
+    )
+
+    result = parse_bank_email(raw_text)
+
+    assert result is not None
+    assert result.merchant == "EasyPark"
+    assert result.amount == 1.60
+
+
+def test_parse_bank_sms_generalizes_to_thousands_amount_and_different_legal_suffix():
+    raw_text = (
+        "18/08 08:15 pago 1.234,56eur tarjeta 450827******6010 en EL CORTE "
+        "INGLES S.A. Para bloquear tarjeta envia BLK al 217377"
+    )
+
+    result = parse_bank_email(raw_text)
+
+    assert result is not None
+    assert result.merchant == "EL CORTE INGLES"
+    assert result.amount == 1234.56
+
+
+def test_parse_bank_sms_generalizes_to_cobro_and_merchant_without_legal_suffix():
+    raw_text = (
+        "17/08 12:03 cobro 9,99eur tarjeta 450827******6010 en NETFLIX.COM "
+        "Para bloquear tarjeta envia BLK al 217377"
+    )
+
+    result = parse_bank_email(raw_text)
+
+    assert result is not None
+    assert result.merchant == "NETFLIX.COM"
+    assert result.amount == 9.99
+
+
 def test_parse_bank_email_unexpected_shape_returns_none():
     # El banco cambió la redacción: ya no dice "por importe de".
     raw_text = "Se ha realizado un cargo de 23,45 EUR en MERCADONA con su tarjeta."

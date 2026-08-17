@@ -242,6 +242,37 @@ uvicorn backend.main:app --reload --port 8000
 Para instalar en iPhone: abre la URL pública en Safari → compartir →
 **"Añadir a pantalla de inicio"**.
 
+## Despliegue
+
+Servidor: EC2, `/home/ubuntu/LanderWorks-Agents`, `docker-compose.prod.yml`
+(servicio `expense_tracker_api`, puerto 8002).
+
+**Antes de CUALQUIER rebuild, siempre primero:**
+
+```bash
+docker system prune -f
+```
+
+y solo entonces:
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Este paso **no es opcional en este servidor concreto**: el disco es de
+6,8GB compartidos entre el sistema operativo, el proceso nativo de Lead
+Capture Agent, los datos de Postgres de `expense_tracker_db_prod` (volumen
+persistente) y las imágenes/capas de Docker. Cada `--build` deja detrás
+capas intermedias y cachés de compilación (el `Dockerfile.prod` instala
+`gcc`/`libpq-dev` y compila dependencias Python) que no se limpian solas
+— unos pocos rebuilds seguidos sin purgar bastan para agotar el disco, lo
+que puede tirar Postgres o cualquier otro servicio del host, no solo el
+build en curso. `docker system prune -f` es seguro de ejecutar siempre
+antes de un rebuild: borra imágenes/contenedores/redes/caché de build sin
+usar, pero nunca vuelca volúmenes con nombre (los datos de Postgres viven
+en `expense_tracker_postgres_data_prod`, un volumen con nombre, así que
+sobreviven al prune).
+
 ## Tests
 
 ```bash

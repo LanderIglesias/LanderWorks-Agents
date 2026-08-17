@@ -28,6 +28,7 @@ from .database import get_db
 from .schemas import (
     BudgetOut,
     BudgetSetIn,
+    DiscardedMessageOut,
     ExpenseOut,
     ExpensePatch,
     ManualExpenseIn,
@@ -191,6 +192,27 @@ def reset_all_expenses(payload: ResetAllIn, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="confirm debe ser exactamente 'BORRAR'")
     engine.reset_all_expenses(db)
     return {"status": "ok"}
+
+
+# Registrado ANTES de /expenses/{expense_id} por el mismo motivo que las
+# demás rutas literales de /expenses/* de arriba.
+@router.get(
+    "/expenses/discarded",
+    response_model=list[DiscardedMessageOut],
+    dependencies=[Depends(verify_app_token)],
+)
+def list_discarded_messages(since: str | None = None, db: Session = Depends(get_db)):
+    from datetime import date as date_cls
+
+    since_date = None
+    if since is not None:
+        try:
+            since_date = date_cls.fromisoformat(since)
+        except ValueError as e:
+            raise HTTPException(
+                status_code=422, detail=f"since inválida: {since!r} (usa YYYY-MM-DD)"
+            ) from e
+    return engine.list_discarded_messages(db, since=since_date)
 
 
 @router.get(

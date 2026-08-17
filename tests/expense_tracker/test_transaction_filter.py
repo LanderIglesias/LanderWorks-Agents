@@ -24,9 +24,10 @@ from sqlalchemy.pool import StaticPool
 
 from backend.agents.expense_tracker import api as et_api
 from backend.agents.expense_tracker import engine as et_engine
-from backend.agents.expense_tracker.database import Base, Expense, get_db
+from backend.agents.expense_tracker.database import Base, DiscardedMessage, Expense, get_db
 
 WEBHOOK_SECRET = "test-webhook-secret"
+APP_TOKEN = "test-app-token"
 
 test_engine = create_engine(
     "sqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool
@@ -45,6 +46,7 @@ def _override_get_db():
 @pytest.fixture(autouse=True)
 def _env(monkeypatch):
     monkeypatch.setenv("EXPENSE_TRACKER_WEBHOOK_SECRET", WEBHOOK_SECRET)
+    monkeypatch.setenv("EXPENSE_TRACKER_APP_TOKEN", APP_TOKEN)
     monkeypatch.setattr(
         et_engine.categorizer,
         "categorize",
@@ -196,3 +198,66 @@ def test_webhook_verification_code_ignored_by_otp_detector_not_transaction_filte
         assert db.query(Expense).count() == 0
     finally:
         db.close()
+
+
+# ── Auditoría persistente de descartes (DiscardedMessage) ────────────────
+
+
+def test_verification_code_discard_creates_audit_row_without_raw_text(client):
+    raw_text = "Tu código de verificación es 483920. No compartas este código con nadie."
+    _post_webhook(client, raw_text)
+
+    db = TestingSessionLocal()
+    try:
+        rows = db.query(DiscardedMessage).all()
+        assert len(rows) == 1
+        assert rows[0].source.value == "email_bank"
+        assert rows[0].reason == "verification_code"
+        assert rows[0].discarded_at is not None
+        # DiscardedMessage no tiene columna raw_text en absoluto.
+        assert not hasattr(rows[0], "raw_text")
+    finally:
+        db.close()
+
+
+def test_not_a_transaction_discard_creates_audit_row_without_raw_text(client):
+    raw_text = "Descubre las ventajas de tu nueva tarjeta Laboral Kutxa. Más info en la app."
+    _post_webhook(client, raw_text)
+
+    db = TestingSessionLocal()
+    try:
+        rows = db.query(DiscardedMessage).all()
+        assert len(rows) == 1
+        assert rows[0].source.value == "email_bank"
+        assert rows[0].reason == "not_a_transaction"
+        assert not hasattr(rows[0], "raw_text")
+    finally:
+        db.close()
+
+
+def test_discarded_messages_endpoint_lists_both_discard_reasons(client):
+    _post_webhook(client, "Tu código de verificación es 483920. No compartas este código.")
+    _post_webhook(client, "Descubre las ventajas de tu nueva tarjeta Laboral Kutxa.")
+    # Un mensaje real NO debe aparecer en el historial de descartes.
+    _post_webhook(client, "Ha realizado un pago de 34,18 EUR en MERCADONA con su tarjeta.")
+
+    response = client.get(
+        "/expense-tracker/expenses/discarded", headers={"Authorization": "Bearer wrong-token"}
+    )
+    assert response.status_code == 401  # token de app equivocado en este test a propósito
+
+    response = client.get(
+        "/expense-tracker/expenses/discarded", headers={"Authorization": f"Bearer {APP_TOKEN}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 2
+    reasons = {row["reason"] for row in data}
+    assert reasons == {"verification_code", "not_a_transaction"}
+    for row in data:
+        assert "raw_text" not in row
+
+
+def test_discarded_messages_requires_app_token(client):
+    response = client.get("/expense-tracker/expenses/discarded")
+    assert response.status_code == 401
