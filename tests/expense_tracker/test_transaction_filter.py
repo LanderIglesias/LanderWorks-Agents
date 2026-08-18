@@ -200,6 +200,24 @@ def test_webhook_verification_code_ignored_by_otp_detector_not_transaction_filte
         db.close()
 
 
+# ── Regresión: orden de rutas en api.py ──────────────────────────────────
+#
+# Mismo patrón de bug ya visto antes con /expenses/search y
+# /expenses/review: si /expenses/discarded se registra DESPUÉS de
+# /expenses/{expense_id} en api.py, FastAPI intenta convertir "discarded"
+# al tipo int de expense_id y responde 422 ("int_parsing") en vez de
+# llegar a esta ruta. Llama al TestClient real, sin query params, para
+# que este test falle si alguna vez se reordena por accidente.
+
+
+def test_discarded_endpoint_route_not_shadowed_by_expense_id(client):
+    response = client.get(
+        "/expense-tracker/expenses/discarded", headers={"Authorization": f"Bearer {APP_TOKEN}"}
+    )
+    assert response.status_code == 200
+    assert response.json() == []
+
+
 # ── Auditoría persistente de descartes (DiscardedMessage) ────────────────
 
 

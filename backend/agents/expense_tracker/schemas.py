@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from .database import Source
+from .parsers import parse_amount_string
 
 
 class WebhookExpenseIn(BaseModel):
@@ -15,13 +16,34 @@ class WebhookExpenseIn(BaseModel):
     - source=wallet trae merchant/amount ya estructurados desde el Atajo.
     - source=email_bank / email_paypal traen solo raw_text; el resto se
       rellena en engine.ingest_webhook() vía parsers.py.
+
+    `amount` acepta str ADEMÁS de float: la variable "Importe" que manda
+    el Atajo de Transacción de Wallet llega con formato de moneda ("46,98
+    €", confirmado en producción), no como float puro — sin esto, Pydantic
+    rechazaba la petición entera con 422 antes de que ingest_webhook
+    llegara siquiera a intentar guardar el gasto (bug real: al menos dos
+    compras, KFC y Mercadona, se perdieron así, sin quedar ni needs_review).
     """
 
     source: Source
     raw_text: str | None = None
     merchant: str | None = None
-    amount: float | None = None
+    amount: str | float | None = None
     occurred_at: datetime
+
+    @field_validator("amount", mode="before")
+    @classmethod
+    def _normalize_amount(cls, value):
+        if value is None or isinstance(value, float | int):
+            return value
+        parsed = parse_amount_string(value)
+        if parsed is None:
+            # Sigue siendo una entrada inválida real si esto pasa (no
+            # "12.99", no "46,98 €", sino algo irreconocible) — se deja
+            # que la validación normal de Pydantic la rechace con 422 en
+            # vez de silenciarla como None.
+            raise ValueError(f"amount inválido: {value!r}")
+        return parsed
 
 
 class ManualExpenseIn(BaseModel):

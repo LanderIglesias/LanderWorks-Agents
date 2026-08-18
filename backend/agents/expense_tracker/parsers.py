@@ -163,6 +163,36 @@ def _parse_spanish_decimal(value: str) -> float | None:
         return None
 
 
+_CURRENCY_MARKER_RE = re.compile(r"eur\b", re.IGNORECASE)
+
+
+def parse_amount_string(value: str) -> float | None:
+    """Limpia un string de importe con símbolo/texto de moneda y lo
+    convierte a float — "46,98 €", "3,50€", "12.99" -> 46.98 / 3.5 / 12.99.
+    None si tras la limpieza no queda un número interpretable.
+
+    Compartida entre WebhookExpenseIn (schemas.py — el "Importe" que manda
+    el Atajo de Wallet llega así, no como float puro, ver el bug real que
+    esto corrige) y cualquier otro sitio que necesite la misma limpieza,
+    para no reimplementarla dos veces.
+
+    Reutiliza _parse_spanish_decimal para el caso con coma decimal (no
+    duplica el intercambio "." de miles / "," decimal); si no hay coma se
+    asume que ya es un float "normal" en punto decimal.
+    """
+    if not value:
+        return None
+    cleaned = _CURRENCY_MARKER_RE.sub("", value).replace("€", "").strip()
+    if not cleaned:
+        return None
+    if "," in cleaned:
+        return _parse_spanish_decimal(cleaned)
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
 def _parse_english_decimal(value: str) -> float | None:
     try:
         return float(value)
