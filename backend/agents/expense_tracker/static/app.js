@@ -924,6 +924,37 @@
     attachSwipeToClose
   );
 
+  // ── Altura real de viewport (bug de WebKit en carga en frío) ─────────
+  //
+  // Confirmado en dispositivo (iPhone 16 Pro, iOS 26.6.1): en la carga en
+  // frío, Safari no calcula bien la altura real del viewport ni
+  // safe-area-inset-bottom hasta que ocurre un recálculo de layout real
+  // (desaparece al rotar y volver) — 100dvh por sí solo no basta porque
+  // el bug está en el propio cálculo de WebKit, no en qué unidad CSS se
+  // usa. Se fuerza el recálculo desde JS: --real-vh se escribe con
+  // window.visualViewport.height (más fiable que innerHeight en iOS) y
+  // #app la usa como altura en cuanto está disponible, con 100dvh como
+  // valor inicial mientras tanto (ver app.css).
+  function syncRealViewportHeight() {
+    const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    document.documentElement.style.setProperty("--real-vh", `${height}px`);
+  }
+
+  syncRealViewportHeight();
+  document.addEventListener("DOMContentLoaded", syncRealViewportHeight);
+  window.addEventListener("pageshow", syncRealViewportHeight);
+  window.addEventListener("resize", syncRealViewportHeight);
+  window.addEventListener("orientationchange", syncRealViewportHeight);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", syncRealViewportHeight);
+    window.visualViewport.addEventListener("scroll", syncRealViewportHeight);
+  }
+  // El bug de WebKit a veces necesita un tick extra después del primer
+  // paint para que visualViewport.height ya sea el valor correcto — los
+  // listeners de arriba no bastan si el propio primer valor que reportan
+  // ya viene mal.
+  setTimeout(syncRealViewportHeight, 120);
+
   // ── Init ─────────────────────────────────────────────────────────────
 
   const initialGranularityIndex = granularityButtons.findIndex((b) => b.classList.contains("active"));

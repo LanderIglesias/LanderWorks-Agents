@@ -170,6 +170,12 @@
 html,
 body {
   height: 100%;
+  /* min-height: 100vh primero, 100dvh justo después — el navegador usa
+     la última declaración que entienda. dvh ya cubre cualquier iOS
+     remotamente moderno, pero esto evita quedarse sin altura mínima
+     alguna en un motor sin soporte (donde la línea de dvh se ignora
+     entera y no queda nada por debajo). */
+  min-height: 100vh;
   min-height: 100dvh;
   overscroll-behavior-y: none;
   /* Red de seguridad para PWA standalone en iOS: #app ya pinta este mismo
@@ -194,7 +200,15 @@ body {
 
 #app {
   position: relative;
+  height: 100vh;
   height: 100dvh;
+  /* --real-vh la escribe app.js con window.visualViewport.height —
+     bug conocido de WebKit en carga en frío donde 100dvh por sí solo no
+     basta (ver comentario de syncRealViewportHeight en app.js). 100dvh
+     de arriba es el valor inicial mientras JS aún no ha corrido; en
+     cuanto --real-vh existe, la sobrescribe. */
+  height: var(--real-vh, 100dvh);
+  min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
@@ -482,6 +496,7 @@ body {
 .list-scroll {
   position: relative;
   z-index: 1;
+  height: calc(100vh - 52px - env(safe-area-inset-top));
   height: calc(100dvh - 52px - env(safe-area-inset-top));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
