@@ -51,9 +51,19 @@ class Source(str, enum.Enum):
     EMAIL_BANK = "email_bank"
     EMAIL_PAYPAL = "email_paypal"
     MANUAL = "manual"
+    BIZUM = "bizum"
 
 
 SourceEnum = Enum(Source, name="expense_source")
+
+# "bizum" es un valor válido de Expense.category (columna String(50) sin
+# enum real a nivel de BD) para dinero RECIBIDO, no un gasto — se guarda
+# con amount negativo (ver engine.ingest_webhook) para que reste del
+# total en vez de sumar. Deliberadamente FUERA de categorizer.CATEGORIES
+# (las 7 categorías de Presupuestos): engine.get_budgets_for_month itera
+# solo esa lista, así que las filas "bizum" quedan excluidas de
+# Presupuestos automáticamente, sin ninguna comprobación especial.
+BIZUM_CATEGORY = "bizum"
 
 
 class Expense(Base):

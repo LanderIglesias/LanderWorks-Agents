@@ -59,6 +59,12 @@
   --cat-ocio: #b347b8;
   --cat-salud: #1f9e8a;
   --cat-hogar: #5c5cd6;
+  /* Bizum: cian, hueco entre --cat-salud (teal) y --cat-transporte (azul)
+     — no se reutiliza --positive aquí a propósito, ver .expense-amount.
+     positive más abajo: el verde queda para el IMPORTE (semántico,
+     "dinero entrando"), el icono lleva su propio color cualitativo como
+     el resto de categorías. */
+  --cat-bizum: #1f8fae;
 
   /* Para que los controles nativos del navegador (el icono de
      <input type="date">, la barra de scroll) se rendericen en el
@@ -114,6 +120,7 @@
     --cat-ocio: #e08aef;
     --cat-salud: #4fd9c0;
     --cat-hogar: #9a9aff;
+    --cat-bizum: #6fd6ee;
   }
 }
 
@@ -150,6 +157,7 @@
   --cat-ocio: #e08aef;
   --cat-salud: #4fd9c0;
   --cat-hogar: #9a9aff;
+  --cat-bizum: #6fd6ee;
 }
 
 * {
@@ -622,6 +630,10 @@ body {
   color: var(--cat-hogar);
   background: color-mix(in srgb, var(--cat-hogar) 20%, var(--glass-fill));
 }
+.category-icon.cat-bizum {
+  color: var(--cat-bizum);
+  background: color-mix(in srgb, var(--cat-bizum) 20%, var(--glass-fill));
+}
 
 .expense-info {
   flex: 1;
@@ -646,6 +658,15 @@ body {
   font-weight: 600;
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
+}
+
+/* Bizum recibido: el importe ya se guarda en negativo (el propio signo
+   "-" lo pone Intl.NumberFormat), pero además en --positive para que sea
+   obvio de un vistazo que es dinero ENTRANDO, no un gasto — mismo verde
+   semántico que usa el resto de la app para "esto va bien" (ver
+   .comparison-badge.down), no el color cualitativo del icono. */
+.expense-amount.positive {
+  color: var(--positive);
 }
 
 .needs-review-dot {

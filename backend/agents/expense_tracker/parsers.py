@@ -152,6 +152,54 @@ def parse_paypal_email(raw_text: str | None) -> ParsedExpense | None:
     return ParsedExpense(merchant=merchant, amount=amount)
 
 
+# ── Bizum ────────────────────────────────────────────────────────────────
+#
+# Formato real confirmado:
+#   "Has recibido un BIZUM de 9.50 EUR de SONIA por Mercadona"
+# El importe va justo tras "BIZUM de" (nota: punto decimal aquí, no coma,
+# a diferencia del SMS del banco); el nombre de quien envía va entre "EUR
+# de" y el siguiente "por" — anclado a "EUR de" en vez de solo "de" para
+# no confundirse con el "de" del propio importe ("BIZUM DE 9.50 EUR").
+# El "por <concepto>" es opcional: si no aparece, el nombre se captura
+# hasta el final de la cadena.
+
+_BIZUM_AMOUNT_RE = re.compile(
+    r"bizum\s+de\s+(\d{1,3}(?:\.\d{3})*[.,]\d{2})\s*eur",
+    re.IGNORECASE,
+)
+_BIZUM_SENDER_RE = re.compile(
+    r"eur\s+de\s+(.+?)(?:\s+por\b|$)",
+    re.IGNORECASE,
+)
+
+
+def parse_bizum_sms(raw_text: str | None) -> ParsedExpense | None:
+    """Parsea un SMS de Bizum recibido. `merchant` en el resultado es en
+    realidad el nombre de quien envía el dinero (ver engine.ingest_webhook,
+    que además invierte el signo del importe antes de guardar).
+
+    Igual que el resto de parsers: None ante formato inesperado o texto
+    vacío, nunca una excepción sin controlar.
+    """
+    if not raw_text or not raw_text.strip():
+        return None
+
+    amount_match = _BIZUM_AMOUNT_RE.search(raw_text)
+    sender_match = _BIZUM_SENDER_RE.search(raw_text)
+    if not amount_match or not sender_match:
+        return None
+
+    amount = parse_amount_string(amount_match.group(1))
+    if amount is None:
+        return None
+
+    sender = sender_match.group(1).strip()
+    if not sender:
+        return None
+
+    return ParsedExpense(merchant=sender, amount=amount)
+
+
 # ── Helpers de formato numérico ──────────────────────────────────────────
 
 

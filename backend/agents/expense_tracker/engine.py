@@ -15,8 +15,8 @@ from sqlalchemy.orm import Session
 
 from . import categorizer
 from .categorizer import CATEGORIES, CONFIDENCE_THRESHOLD
-from .database import Budget, DiscardedMessage, Expense, Source
-from .parsers import parse_bank_email, parse_paypal_email
+from .database import BIZUM_CATEGORY, Budget, DiscardedMessage, Expense, Source
+from .parsers import parse_bank_email, parse_bizum_sms, parse_paypal_email
 from .schemas import BudgetOut, ExpensePatch, ManualExpenseIn, WebhookExpenseIn
 
 logger = logging.getLogger(__name__)
@@ -132,6 +132,9 @@ def ingest_webhook(db: Session, payload: WebhookExpenseIn) -> Expense | dict:
             _discard(db, payload, "not_a_transaction")
             return {"status": "ignored", "reason": "not_a_transaction"}
 
+    if payload.source == Source.BIZUM:
+        return _ingest_bizum(db, payload)
+
     if payload.source == Source.WALLET:
         merchant, amount, raw_text, parse_failed = _resolve_wallet(payload)
     elif payload.source in (Source.EMAIL_BANK, Source.EMAIL_PAYPAL):
@@ -180,6 +183,46 @@ def ingest_webhook(db: Session, payload: WebhookExpenseIn) -> Expense | dict:
             needs_review=result["confidence"] < CONFIDENCE_THRESHOLD,
         )
 
+    db.add(expense)
+    db.commit()
+    db.refresh(expense)
+    return expense
+
+
+def _ingest_bizum(db: Session, payload: WebhookExpenseIn) -> Expense:
+    """Bizum recibido — categoría fija "bizum", sin categorizador de IA
+    (no tiene sentido categorizar dinero entrante), amount SIEMPRE
+    negativo para que reste del total en vez de sumar.
+
+    needs_review solo depende de si el parseo tuvo éxito, no está fijo a
+    False incondicionalmente: si el SMS no matchea el formato esperado
+    (el banco puede cambiar la redacción, igual que con parse_bank_email),
+    amount/merchant quedan sin confirmar y hace falta poder encontrar esa
+    fila en la cola de Revisión para corregirla a mano — guardarla como
+    "ya revisada" con datos nulos la perdería silenciosamente, el mismo
+    fallo de fondo que ya se corrigió para el resto de fuentes.
+    """
+    parsed = parse_bizum_sms(payload.raw_text)
+    if parsed is None:
+        expense = Expense(
+            source=payload.source,
+            merchant=None,
+            amount=None,
+            raw_text=payload.raw_text,
+            occurred_at=payload.occurred_at,
+            needs_review=True,
+        )
+    else:
+        expense = Expense(
+            source=payload.source,
+            merchant=parsed.merchant,
+            amount=-abs(round(parsed.amount, 2)),
+            category=BIZUM_CATEGORY,
+            category_confidence=1.0,
+            raw_text=payload.raw_text,
+            occurred_at=payload.occurred_at,
+            needs_review=False,
+        )
     db.add(expense)
     db.commit()
     db.refresh(expense)

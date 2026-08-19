@@ -11,6 +11,10 @@
     salud: "icon-cross",
     hogar: "icon-home",
     otros: "icon-box",
+    // Dinero entrando, no un gasto — reutiliza el icono de flecha ya
+    // existente (mismo que el indicador "bajó" de la comparativa) en vez
+    // de añadir un SVG nuevo solo para esto.
+    bizum: "icon-arrow-down",
   };
   const CATEGORY_LABELS = {
     comida: "Comida",
@@ -20,6 +24,7 @@
     salud: "Salud",
     hogar: "Hogar",
     otros: "Otros",
+    bizum: "Bizum",
   };
   const MONTH_LABELS = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -34,6 +39,7 @@
     "ocio",
     "salud",
     "hogar",
+    "bizum",
   ]);
 
   function categoryIconClass(category) {
@@ -618,7 +624,7 @@
           <div class="expense-category">${e.category || "Sin categorizar"}</div>
         </div>
         ${e.needs_review ? '<span class="needs-review-dot"></span>' : ""}
-        <div class="expense-amount">${formatAmount(e.amount)}</div>
+        <div class="expense-amount ${e.category === "bizum" ? "positive" : ""}">${formatAmount(e.amount)}</div>
       </div>`;
   }
 
