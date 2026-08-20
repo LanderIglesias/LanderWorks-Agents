@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <!-- Sin maximum-scale=1: bloqueaba el pinch-zoom Y, junto con una rampa
+       tipográfica en px puro, el cambio de tamaño de texto del sistema
+       tampoco movía nada — las dos únicas vías de agrandar texto en iOS
+       quedaban cerradas a la vez (WCAG 1.4.4). -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Gastos</title>
   <meta name="theme-color" content="#fdfcff" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)" />
@@ -11,6 +15,7 @@
   <meta name="apple-mobile-web-app-title" content="Gastos" />
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="icon" href="icons/icon-180.png" />
   <link rel="stylesheet" href="app.css" />
 </head>
 <body>
@@ -111,6 +116,15 @@ finish review, the verdict, and DESIGN.md.
       <circle cx="12" cy="12" r="3" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24">
+      <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+      <path d="M3.5 9.5h17" />
+      <path d="M8 3v4M16 3v4" />
+    </symbol>
+    <symbol id="icon-pin" viewBox="0 0 24 24">
+      <path d="M12 21s-6.5-5.8-6.5-11A6.5 6.5 0 0 1 18.5 10c0 5.2-6.5 11-6.5 11z" />
+      <circle cx="12" cy="10" r="2.2" />
+    </symbol>
   </svg>
 
   <div id="app">
@@ -121,13 +135,13 @@ finish review, the verdict, and DESIGN.md.
           Introduce tu clave de acceso para ver tus gastos.
         </p>
         <div class="field-group">
-          <div class="field-row">
+          <label class="field-row">
             <span class="field-label">Clave</span>
             <input id="lock-token" type="password" placeholder="••••••••" autocomplete="off" />
-          </div>
+          </label>
         </div>
         <button class="primary-button" id="lock-save">Entrar</button>
-        <p id="lock-error" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden>
+        <p id="lock-error" role="alert" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden>
           Clave incorrecta.
         </p>
       </div>
@@ -137,18 +151,18 @@ finish review, the verdict, and DESIGN.md.
     <div id="view-main">
       <header class="navbar">
         <button class="search-toggle" id="search-toggle" aria-label="Buscar gastos">
-          <svg class="icon"><use href="#icon-search" /></svg>
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-search" /></svg>
         </button>
-        <span class="navbar-title">Gastos</span>
+        <h1 class="navbar-title">Gastos</h1>
         <button class="settings-toggle" id="settings-toggle" aria-label="Ajustes">
-          <svg class="icon"><use href="#icon-settings" /></svg>
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-settings" /></svg>
         </button>
         <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
-          <svg class="icon" id="theme-toggle-icon"><use href="#icon-moon" /></svg>
+          <svg class="icon" id="theme-toggle-icon" aria-hidden="true" focusable="false"><use href="#icon-moon" /></svg>
         </button>
       </header>
 
-      <div class="list-scroll">
+      <main class="list-scroll">
         <div id="normal-controls">
           <div class="segmented" id="granularity-switch">
             <div class="segmented-thumb" id="granularity-thumb"></div>
@@ -161,75 +175,79 @@ finish review, the verdict, and DESIGN.md.
             <div class="amount-row">
               <div class="amount" id="total-amount">—</div>
               <span class="comparison-badge" id="comparison-badge" hidden>
-                <svg class="icon" id="comparison-icon"><use href="#icon-arrow-down" /></svg>
+                <svg class="icon" id="comparison-icon" aria-hidden="true" focusable="false"><use href="#icon-arrow-down" /></svg>
                 <span id="comparison-pct"></span>
               </span>
             </div>
-            <div class="meta" id="total-meta">Cargando…</div>
+            <div class="meta" id="total-meta" role="status">Cargando…</div>
           </div>
 
           <div class="quick-actions">
             <button class="quick-action primary" id="fab-add" aria-label="Añadir gasto manual">
-              <span class="circle"><svg class="icon"><use href="#icon-plus" /></svg></span>
-              <span class="label">Añadir</span>
+              <span class="circle"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-plus" /></svg></span>
+              <span class="label" aria-hidden="true">Añadir</span>
             </button>
             <button class="quick-action" id="quick-review" aria-label="Ver revisión">
               <span class="circle">
-                <svg class="icon"><use href="#icon-alert" /></svg>
+                <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-alert" /></svg>
                 <span class="badge" id="quick-review-badge" hidden>0</span>
               </span>
-              <span class="label">Revisión</span>
+              <span class="label" aria-hidden="true">Revisión</span>
             </button>
           </div>
         </div>
 
         <div class="results-bar" id="results-bar" hidden>
-          <span id="results-count"></span>
+          <span id="results-count" role="status"></span>
           <button id="clear-search">Limpiar filtros</button>
         </div>
 
         <div id="expense-list"></div>
 
         <button class="load-more" id="load-more" hidden>Cargar más</button>
-      </div>
+      </main>
 
       <nav class="tabbar">
-        <button class="active" data-tab="main">
-          <span class="tab-icon"><svg class="icon"><use href="#icon-list" /></svg></span>
+        <button class="active" data-tab="main" aria-current="page">
+          <span class="tab-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-list" /></svg></span>
           <span>Gastos</span>
         </button>
         <button data-tab="review" style="position: relative">
-          <span class="tab-icon"><svg class="icon"><use href="#icon-alert" /></svg></span>
+          <span class="tab-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-alert" /></svg></span>
           <span>Revisión</span>
           <span class="review-badge" id="review-badge" hidden>0</span>
         </button>
         <button data-tab="budgets">
-          <span class="tab-icon"><svg class="icon"><use href="#icon-chart" /></svg></span>
+          <span class="tab-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-chart" /></svg></span>
           <span>Presupuestos</span>
+        </button>
+        <button data-tab="calendar">
+          <span class="tab-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-calendar" /></svg></span>
+          <span>Calendario</span>
         </button>
       </nav>
     </div>
 
     <!-- ── Cola de revisión — tinte ámbar de fondo en el header ─────────── -->
-    <div class="sheet sheet-review" id="view-review">
+    <div class="sheet sheet-review" id="view-review" role="dialog" aria-modal="true" aria-labelledby="review-title">
       <div class="sheet-header">
         <button class="back-button" data-close="review">Cerrar</button>
-        <span class="navbar-title">Revisión</span>
+        <h1 class="navbar-title" id="review-title">Revisión</h1>
       </div>
       <div class="sheet-body" id="review-list"></div>
     </div>
 
     <!-- ── Presupuestos — 7 categorías, ajustables mes a mes ────────────── -->
-    <div class="sheet" id="view-budgets">
+    <div class="sheet" id="view-budgets" role="dialog" aria-modal="true" aria-label="Presupuestos">
       <div class="sheet-header">
         <button class="back-button" data-close="budgets">Cerrar</button>
         <div class="month-nav">
           <button class="month-nav-arrow" id="budgets-prev-month" aria-label="Mes anterior">
-            <svg class="icon"><use href="#icon-chevron-left" /></svg>
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-chevron-left" /></svg>
           </button>
-          <span class="month-nav-label" id="budgets-month-label">Agosto 2026</span>
+          <span class="month-nav-label" id="budgets-month-label" role="status">Agosto 2026</span>
           <button class="month-nav-arrow" id="budgets-next-month" aria-label="Mes siguiente">
-            <svg class="icon"><use href="#icon-chevron-right" /></svg>
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-chevron-right" /></svg>
           </button>
         </div>
       </div>
@@ -242,19 +260,73 @@ finish review, the verdict, and DESIGN.md.
       </div>
     </div>
 
+    <!-- ── Calendario — gastos por día + notas puntuales/recurrentes ────── -->
+    <div class="sheet" id="view-calendar" role="dialog" aria-modal="true" aria-label="Calendario">
+      <div class="sheet-header">
+        <button class="back-button" data-close="calendar">Cerrar</button>
+        <div class="month-nav">
+          <button class="month-nav-arrow" id="calendar-prev-month" aria-label="Mes anterior">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-chevron-left" /></svg>
+          </button>
+          <span class="month-nav-label" id="calendar-month-label" role="status">Agosto 2026</span>
+          <button class="month-nav-arrow" id="calendar-next-month" aria-label="Mes siguiente">
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-chevron-right" /></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sheet-body">
+        <div class="calendar-weekdays">
+          <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── Detalle de un día del calendario ─────────────────────────────── -->
+    <div class="sheet" id="view-calendar-day" role="dialog" aria-modal="true" aria-labelledby="calendar-day-title">
+      <div class="sheet-header">
+        <button class="back-button" data-close="calendar-day">Cerrar</button>
+        <h1 class="navbar-title" id="calendar-day-title">Día</h1>
+      </div>
+      <div class="sheet-body">
+        <div id="calendar-day-expenses"></div>
+
+        <div class="calendar-notes-section">
+          <div class="calendar-notes-title">Notas</div>
+          <div id="calendar-day-notes"></div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-row">
+            <span class="field-label">Nota nueva</span>
+            <input id="calendar-note-text" type="text" placeholder="Ej. Pago alquiler" />
+          </label>
+          <label class="field-row">
+            <span class="field-label">Repetición</span>
+            <select id="calendar-note-type">
+              <option value="punctual">Solo este día</option>
+              <option value="recurring">Cada mes (mismo día)</option>
+            </select>
+          </label>
+        </div>
+        <button class="primary-button" id="calendar-note-save">Añadir nota</button>
+        <p id="calendar-note-error" role="alert" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
+      </div>
+    </div>
+
     <!-- ── Búsqueda y filtros — neutra, utilidad, no creación ni alerta ─── -->
-    <div class="sheet" id="view-search">
+    <div class="sheet" id="view-search" role="dialog" aria-modal="true" aria-labelledby="search-title">
       <div class="sheet-header">
         <button class="back-button" data-close="search">Cerrar</button>
-        <span class="navbar-title">Buscar</span>
+        <h1 class="navbar-title" id="search-title">Buscar</h1>
       </div>
       <div class="sheet-body">
         <div class="field-group">
-          <div class="field-row">
+          <label class="field-row">
             <span class="field-label">Comercio</span>
             <input id="search-query" type="text" placeholder="Ej. Netflix" />
-          </div>
-          <div class="field-row">
+          </label>
+          <label class="field-row">
             <span class="field-label">Categoría</span>
             <select id="search-category">
               <option value="">Todas</option>
@@ -266,53 +338,53 @@ finish review, the verdict, and DESIGN.md.
               <option value="hogar">Hogar</option>
               <option value="otros">Otros</option>
             </select>
-          </div>
+          </label>
         </div>
 
         <div class="field-group">
-          <div class="field-row">
+          <label class="field-row">
             <span class="field-label">Desde</span>
             <input id="search-date-from" type="date" />
-          </div>
-          <div class="field-row">
+          </label>
+          <label class="field-row">
             <span class="field-label">Hasta</span>
             <input id="search-date-to" type="date" />
-          </div>
+          </label>
         </div>
 
         <div class="field-group">
-          <div class="field-row">
+          <label class="field-row">
             <span class="field-label">Importe mín. (€)</span>
             <input id="search-amount-min" type="number" step="0.01" inputmode="decimal" placeholder="0" />
-          </div>
-          <div class="field-row">
+          </label>
+          <label class="field-row">
             <span class="field-label">Importe máx. (€)</span>
             <input id="search-amount-max" type="number" step="0.01" inputmode="decimal" placeholder="—" />
-          </div>
+          </label>
         </div>
 
         <button class="secondary-button" id="search-submit">Buscar</button>
-        <p id="search-error" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
+        <p id="search-error" role="alert" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
       </div>
     </div>
 
     <!-- ── Detalle de gasto — neutro; acento ámbar si needs_review ──────── -->
-    <div class="sheet" id="view-detail">
+    <div class="sheet" id="view-detail" role="dialog" aria-modal="true" aria-labelledby="detail-title">
       <div class="sheet-header">
         <button class="back-button" data-close="detail">Atrás</button>
-        <span class="navbar-title" id="detail-title">Gasto</span>
+        <h1 class="navbar-title" id="detail-title">Gasto</h1>
       </div>
       <div class="sheet-body">
         <div class="field-group">
-          <div class="field-row">
+          <label class="field-row">
             <span class="field-label">Comercio</span>
             <input id="detail-merchant" type="text" placeholder="—" />
-          </div>
-          <div class="field-row">
+          </label>
+          <label class="field-row">
             <span class="field-label">Importe (€)</span>
             <input id="detail-amount" type="number" step="0.01" placeholder="0.00" />
-          </div>
-          <div class="field-row">
+          </label>
+          <label class="field-row">
             <span class="field-label">Categoría</span>
             <select id="detail-category">
               <option value="">—</option>
@@ -324,7 +396,7 @@ finish review, the verdict, and DESIGN.md.
               <option value="hogar">Hogar</option>
               <option value="otros">Otros</option>
             </select>
-          </div>
+          </label>
         </div>
 
         <div class="field-group">
@@ -343,30 +415,36 @@ finish review, the verdict, and DESIGN.md.
         </div>
 
         <div class="field-group" id="detail-raw-group" hidden>
-          <div class="raw-text-block" id="detail-raw-text"></div>
+          <details class="raw-disclosure">
+            <summary>Ver mensaje original</summary>
+            <div class="raw-text-block" id="detail-raw-text"></div>
+          </details>
         </div>
 
-        <button class="primary-button" id="detail-save">Guardar cambios</button>
+        <!-- secondary-button, no primary: esto EDITA un gasto que ya existe,
+             no crea uno — el coral sólido queda para "Guardar gasto" en
+             Alta manual (ver DESIGN.md, regla coral=creación). -->
+        <button class="secondary-button" id="detail-save">Guardar cambios</button>
       </div>
     </div>
 
     <!-- ── Alta manual — "esto es nuevo", header con acento coral ───────── -->
-    <div class="sheet sheet-accent" id="view-add">
+    <div class="sheet sheet-accent" id="view-add" role="dialog" aria-modal="true" aria-labelledby="add-title">
       <div class="sheet-header">
         <button class="back-button" data-close="add">Cancelar</button>
-        <span class="navbar-title">Añadir gasto</span>
+        <h1 class="navbar-title" id="add-title">Añadir gasto</h1>
       </div>
       <div class="sheet-body">
         <div class="field-group">
-          <div class="field-row">
+          <label class="field-row">
             <span class="field-label">Comercio</span>
             <input id="add-merchant" type="text" placeholder="Ej. Mercadona" />
-          </div>
-          <div class="field-row">
+          </label>
+          <label class="field-row">
             <span class="field-label">Importe (€)</span>
             <input id="add-amount" type="number" step="0.01" placeholder="0.00" inputmode="decimal" />
-          </div>
-          <div class="field-row">
+          </label>
+          <label class="field-row">
             <span class="field-label">Categoría</span>
             <select id="add-category">
               <option value="">Auto (IA)</option>
@@ -377,22 +455,27 @@ finish review, the verdict, and DESIGN.md.
               <option value="salud">Salud</option>
               <option value="hogar">Hogar</option>
               <option value="otros">Otros</option>
+              <option value="bizum">Bizum</option>
             </select>
-          </div>
-          <div class="field-row">
+          </label>
+          <label class="field-row">
             <span class="field-label">Fecha</span>
             <input id="add-date" type="datetime-local" />
-          </div>
+          </label>
         </div>
+        <p id="add-bizum-hint" class="field-hint" hidden>
+          Se contabilizará como dinero recibido, restando del total — escribe el
+          importe en positivo, el signo se aplica solo.
+        </p>
         <button class="primary-button" id="add-save">Guardar gasto</button>
       </div>
     </div>
 
     <!-- ── Ajustes — solo el reset destructivo por ahora ────────────────── -->
-    <div class="sheet" id="view-settings">
+    <div class="sheet" id="view-settings" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="sheet-header">
         <button class="back-button" data-close="settings">Cerrar</button>
-        <span class="navbar-title">Ajustes</span>
+        <h1 class="navbar-title" id="settings-title">Ajustes</h1>
       </div>
       <div class="sheet-body">
         <div class="danger-zone">
@@ -402,14 +485,14 @@ finish review, the verdict, and DESIGN.md.
             ven afectados. Esta acción no se puede deshacer.
           </p>
           <div class="field-group">
-            <div class="field-row">
+            <label class="field-row">
               <span class="field-label">Escribe BORRAR</span>
               <input id="reset-confirm-input" type="text" placeholder="BORRAR" autocomplete="off" autocapitalize="off" />
-            </div>
+            </label>
           </div>
           <button class="danger-button" id="reset-confirm-btn" disabled>Borrar todos los gastos</button>
-          <p id="reset-error" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
-          <p id="reset-success" style="margin-top: 12px; color: var(--positive); font-size: 13px" hidden>
+          <p id="reset-error" role="alert" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
+          <p id="reset-success" role="status" style="margin-top: 12px; color: var(--positive); font-size: 13px" hidden>
             Todos los gastos se han borrado.
           </p>
         </div>

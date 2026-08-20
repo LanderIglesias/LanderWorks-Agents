@@ -60,11 +60,15 @@
     searchParams: null,
     searchResults: [],
     searchTotal: 0,
+    calendarMonth: new Date().toISOString().slice(0, 7),
+    calendarDays: [],
+    calendarSelectedDate: null,
   };
   const SEARCH_PAGE_SIZE = 50;
 
   const $ = (sel) => document.querySelector(sel);
   const el = {
+    viewMain: $("#view-main"),
     granularitySwitch: $("#granularity-switch"),
     totalAmount: $("#total-amount"),
     totalMeta: $("#total-meta"),
@@ -114,6 +118,21 @@
     resetConfirmBtn: $("#reset-confirm-btn"),
     resetError: $("#reset-error"),
     resetSuccess: $("#reset-success"),
+    addCategory: $("#add-category"),
+    addBizumHint: $("#add-bizum-hint"),
+    viewCalendar: $("#view-calendar"),
+    calendarGrid: $("#calendar-grid"),
+    calendarMonthLabel: $("#calendar-month-label"),
+    calendarPrevMonth: $("#calendar-prev-month"),
+    calendarNextMonth: $("#calendar-next-month"),
+    viewCalendarDay: $("#view-calendar-day"),
+    calendarDayTitle: $("#calendar-day-title"),
+    calendarDayExpenses: $("#calendar-day-expenses"),
+    calendarDayNotes: $("#calendar-day-notes"),
+    calendarNoteText: $("#calendar-note-text"),
+    calendarNoteType: $("#calendar-note-type"),
+    calendarNoteSave: $("#calendar-note-save"),
+    calendarNoteError: $("#calendar-note-error"),
   };
 
   // ── Tema claro/oscuro manual ──────────────────────────────────────────
@@ -472,7 +491,7 @@
     el.budgetsList.innerHTML = state.budgets.map(budgetCardHtml).join("");
 
     el.budgetsList.querySelectorAll("[data-budget-category]").forEach((card) => {
-      card.addEventListener("click", (e) => {
+      const toggle = (e) => {
         if (e.target.closest(".budget-edit-row")) return;
         const category = card.dataset.budgetCategory;
         state.editingCategory = state.editingCategory === category ? null : category;
@@ -480,6 +499,19 @@
         if (state.editingCategory) {
           const input = el.budgetsList.querySelector(`[data-limit-input="${category}"]`);
           input?.focus();
+        }
+      };
+      card.addEventListener("click", toggle);
+      // role="button" no da activación por teclado gratis como un
+      // <button> real — .budget-card se queda como <div> a propósito
+      // (ver comentario en budgetCardHtml: no puede anidar los botones
+      // reales de .budget-edit-row dentro de un <button>), así que
+      // Enter/Espacio hay que cablearlos a mano.
+      card.addEventListener("keydown", (e) => {
+        if (e.target.closest(".budget-edit-row")) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle(e);
         }
       });
     });
@@ -514,11 +546,16 @@
     const icon = CATEGORY_ICONS[b.category] || "icon-box";
     const barState = budgetBarState(b.spent, b.limit_amount);
     const pct = b.limit_amount ? Math.min(100, Math.round((b.spent / b.limit_amount) * 100)) : 0;
-    const metaText =
-      b.limit_amount === null || b.limit_amount === undefined
-        ? `${formatAmount(b.spent)} gastado, sin límite`
-        : `${formatAmount(b.spent)} de ${formatAmount(b.limit_amount)}`;
+    const hasNoLimit = b.limit_amount === null || b.limit_amount === undefined;
+    const metaText = hasNoLimit
+      ? `${formatAmount(b.spent)} gastado, sin límite`
+      : `${formatAmount(b.spent)} de ${formatAmount(b.limit_amount)}`;
     const editing = state.editingCategory === b.category;
+    // Antes no había ninguna pista de que la tarjeta se pudiera tocar
+    // para poner un límite — el toggle ya existía (ver el listener de
+    // click más abajo), pero nada en pantalla lo indicaba.
+    const setLimitHint =
+      hasNoLimit && !editing ? `<div class="budget-set-limit-hint">Toca para poner un límite</div>` : "";
     const previous = state.previousMonthByCategory[b.category];
     // Solo el dato de referencia, sin barra ni gráfico adicional — ver
     // spec. previous puede ser 0 (categoría sin gasto el mes pasado);
@@ -538,16 +575,29 @@
         ? ""
         : `<div class="budget-bar"><div class="budget-bar-fill ${barState}" style="transform: scaleX(${pct / 100})"></div></div>`;
 
+    // .budget-card sigue siendo un <div>, no un <button>: cuando está en
+    // modo edición contiene botones reales (Guardar/Quitar) y anidar
+    // <button> dentro de <button> es HTML inválido. role="button" +
+    // tabindex + el keydown de más abajo le dan el mismo comportamiento
+    // por teclado sin ese problema.
     return `
-      <div class="budget-card ${barState === "over" ? "over" : ""}" data-budget-category="${b.category}">
+      <div
+        class="budget-card ${barState === "over" ? "over" : ""}"
+        data-budget-category="${b.category}"
+        role="button"
+        tabindex="0"
+        aria-expanded="${editing}"
+        aria-label="${CATEGORY_LABELS[b.category] || b.category}, ${metaText}${hasNoLimit ? ", toca para poner un límite" : ""}"
+      >
         <div class="budget-card-head">
-          <div class="budget-icon ${categoryIconClass(b.category)}"><svg class="icon"><use href="#${icon}" /></svg></div>
+          <div class="budget-icon ${categoryIconClass(b.category)}"><svg class="icon" aria-hidden="true" focusable="false"><use href="#${icon}" /></svg></div>
           <div class="budget-name">${CATEGORY_LABELS[b.category] || b.category}</div>
         </div>
         ${barHtml}
         <div class="budget-meta ${barState === "over" ? "over" : ""}">${metaText}</div>
         ${exceededText}
         ${comparisonText}
+        ${setLimitHint}
         ${
           editing
             ? `<div class="budget-edit-row">
@@ -558,6 +608,7 @@
                   placeholder="Límite (€)"
                   value="${b.limit_amount ?? ""}"
                   data-limit-input="${b.category}"
+                  aria-label="Límite mensual para ${CATEGORY_LABELS[b.category] || b.category}"
                 />
                 <button data-save-category="${b.category}">Guardar</button>
                 ${
@@ -579,6 +630,147 @@
   el.budgetsNextMonth.addEventListener("click", () => {
     state.budgetMonth = shiftMonth(state.budgetMonth, 1);
     loadBudgets();
+  });
+
+  // ── Calendario ───────────────────────────────────────────────────────
+
+  async function loadCalendarMonth() {
+    el.calendarMonthLabel.textContent = monthLabel(state.calendarMonth);
+    const res = await authFetch(`${API}/calendar?month=${state.calendarMonth}`);
+    const data = await res.json();
+    state.calendarDays = data.days;
+    renderCalendarGrid();
+  }
+
+  // Semana empezando en lunes (L M X J V S D, ya en el marcado) — hay que
+  // convertir el day-of-week de JS (0=domingo) al offset de columna
+  // correspondiente (0=lunes).
+  function _mondayFirstOffset(jsDay) {
+    return (jsDay + 6) % 7;
+  }
+
+  function renderCalendarGrid() {
+    if (state.calendarDays.length === 0) {
+      el.calendarGrid.innerHTML = "";
+      return;
+    }
+    const firstDate = new Date(`${state.calendarDays[0].date}T00:00:00`);
+    const leadingBlanks = _mondayFirstOffset(firstDate.getDay());
+
+    const cells = [];
+    for (let i = 0; i < leadingBlanks; i++) {
+      cells.push(`<div class="calendar-day-cell calendar-day-empty"></div>`);
+    }
+    for (const day of state.calendarDays) {
+      const dayNum = Number(day.date.slice(-2));
+      const hasExpenses = day.expenses.length > 0;
+      const hasNotes = day.notes.length > 0;
+      // Dinero entrando (Bizum) también en verde aquí — antes se quedaba
+      // en gris terciario aunque ese mismo importe SÍ era verde en la
+      // lista principal (.expense-amount.positive).
+      const totalClass = day.total_day < 0 ? "calendar-day-total positive" : "calendar-day-total";
+      cells.push(`
+        <button
+          class="calendar-day-cell ${hasExpenses ? "has-expenses" : ""}"
+          data-date="${day.date}"
+          aria-label="${dayNum}${hasExpenses ? `, ${formatAmount(day.total_day)}` : ""}${hasNotes ? ", con nota" : ""}"
+        >
+          <span class="calendar-day-number">${dayNum}</span>
+          ${hasExpenses ? `<span class="${totalClass}">${formatAmount(day.total_day)}</span>` : ""}
+          ${hasNotes ? `<svg class="icon calendar-day-pin" aria-hidden="true" focusable="false"><use href="#icon-pin" /></svg>` : ""}
+        </button>`);
+    }
+    el.calendarGrid.innerHTML = cells.join("");
+
+    el.calendarGrid.querySelectorAll("[data-date]").forEach((cell) => {
+      cell.addEventListener("click", () => openCalendarDay(cell.dataset.date));
+    });
+  }
+
+  function openCalendarDay(dateStr) {
+    state.calendarSelectedDate = dateStr;
+    const day = state.calendarDays.find((d) => d.date === dateStr);
+    const d = new Date(`${dateStr}T00:00:00`);
+    el.calendarDayTitle.textContent = `${d.getDate()} de ${MONTH_LABELS[d.getMonth()]}`;
+
+    el.calendarDayExpenses.innerHTML =
+      day.expenses.length === 0
+        ? `<div class="empty-state">Sin gastos este día.</div>`
+        : day.expenses.map(expenseRowHtml).join("");
+    el.calendarDayExpenses.querySelectorAll("[data-expense-id]").forEach((row) => {
+      row.addEventListener("click", () => openDetail(Number(row.dataset.expenseId)));
+    });
+
+    renderCalendarDayNotes(day.notes);
+
+    el.calendarNoteText.value = "";
+    el.calendarNoteType.value = "punctual";
+    el.calendarNoteError.hidden = true;
+
+    openSheet(el.viewCalendarDay);
+  }
+
+  function renderCalendarDayNotes(notes) {
+    if (notes.length === 0) {
+      el.calendarDayNotes.innerHTML = `<div class="empty-state">Sin notas este día.</div>`;
+      return;
+    }
+    el.calendarDayNotes.innerHTML = notes
+      .map(
+        (n) => `
+      <div class="calendar-note-row" data-note-id="${n.id}">
+        <svg class="icon calendar-note-icon"><use href="#icon-pin" /></svg>
+        <span class="calendar-note-text">${escapeHtml(n.text)}</span>
+        ${n.recurring_day ? `<span class="calendar-note-recurring-tag">cada mes</span>` : ""}
+        <button class="calendar-note-delete" data-delete-note-id="${n.id}">Borrar</button>
+      </div>`
+      )
+      .join("");
+
+    el.calendarDayNotes.querySelectorAll("[data-delete-note-id]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = Number(btn.dataset.deleteNoteId);
+        if (!confirm("¿Borrar esta nota? Si es recurrente, desaparece de todos los meses.")) return;
+        await authFetch(`${API}/calendar/notes/${id}`, { method: "DELETE" });
+        await loadCalendarMonth();
+        openCalendarDay(state.calendarSelectedDate);
+      });
+    });
+  }
+
+  el.calendarNoteSave.addEventListener("click", async () => {
+    const text = el.calendarNoteText.value.trim();
+    el.calendarNoteError.hidden = true;
+    if (!text) return;
+
+    const isRecurring = el.calendarNoteType.value === "recurring";
+    const dateStr = state.calendarSelectedDate;
+    const body = isRecurring
+      ? { text, recurring_day: Number(dateStr.slice(-2)) }
+      : { text, note_date: dateStr };
+
+    const res = await authFetch(`${API}/calendar/notes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      el.calendarNoteError.textContent = "No se ha podido guardar la nota.";
+      el.calendarNoteError.hidden = false;
+      return;
+    }
+    await loadCalendarMonth();
+    openCalendarDay(dateStr);
+  });
+
+  el.calendarPrevMonth.addEventListener("click", () => {
+    state.calendarMonth = shiftMonth(state.calendarMonth, -1);
+    loadCalendarMonth();
+  });
+
+  el.calendarNextMonth.addEventListener("click", () => {
+    state.calendarMonth = shiftMonth(state.calendarMonth, 1);
+    loadCalendarMonth();
   });
 
   // ── Render ───────────────────────────────────────────────────────────
@@ -616,47 +808,92 @@
 
   function expenseRowHtml(e) {
     const icon = CATEGORY_ICONS[e.category] || "icon-box";
+    const merchantLabel = e.merchant || "Sin identificar";
+    // <button>, no <div> — antes no era ni siquiera enfocable, así que
+    // abrir el detalle de un gasto era imposible sin puntero. Sin
+    // elementos interactivos anidados dentro (a diferencia de
+    // .budget-card), así que aquí sí es un <button> real.
     return `
-      <div class="expense-row" data-expense-id="${e.id}">
-        <div class="expense-icon ${categoryIconClass(e.category)}"><svg class="icon"><use href="#${icon}" /></svg></div>
+      <button class="expense-row" data-expense-id="${e.id}" aria-label="${escapeHtml(merchantLabel)}, ${e.category || "sin categorizar"}, ${formatAmount(e.amount)}${e.needs_review ? ", pendiente de revisión" : ""}">
+        <div class="expense-icon ${categoryIconClass(e.category)}"><svg class="icon" aria-hidden="true" focusable="false"><use href="#${icon}" /></svg></div>
         <div class="expense-info">
-          <div class="expense-merchant">${escapeHtml(e.merchant || "Sin identificar")}</div>
+          <div class="expense-merchant">${escapeHtml(merchantLabel)}</div>
           <div class="expense-category">${e.category || "Sin categorizar"}</div>
         </div>
         ${e.needs_review ? '<span class="needs-review-dot"></span>' : ""}
         <div class="expense-amount ${e.category === "bizum" ? "positive" : ""}">${formatAmount(e.amount)}</div>
-      </div>`;
+      </button>`;
   }
 
+  // Auditoría: la cola de Revisión antes no mostraba importe ni fecha en
+  // la propia tarjeta — el usuario tenía que decidir "Confirmar" o
+  // "Rechazar" sobre "Sin identificar / —", sin ningún dato real con el
+  // que decidir. Ahora el importe es el elemento principal de la
+  // tarjeta (mismo peso que un dato destacado), con la fecha al lado, y
+  // el texto crudo del mensaje queda disponible como "ver original"
+  // plegable en vez de ser la única fuente del dato.
   function renderReviewList() {
     if (state.reviewQueue.length === 0) {
       el.reviewList.innerHTML = `<div class="empty-state">Nada pendiente de revisión.</div>`;
       return;
     }
     el.reviewList.innerHTML = state.reviewQueue
-      .map(
-        (e) => `
-      <div class="field-group" data-review-id="${e.id}">
-        <div class="field-row">
-          <span class="field-label">${escapeHtml(e.merchant || "Sin identificar")}</span>
-          <span>${formatAmount(e.amount)}</span>
+      .map((e) => {
+        const dateLabel = new Date(e.occurred_at).toLocaleDateString("es-ES", {
+          day: "numeric",
+          month: "short",
+        });
+        const merchantLabel = e.merchant || "Sin identificar";
+        const rawExcerpt = e.raw_text
+          ? `<details class="raw-disclosure">
+               <summary>Ver mensaje original</summary>
+               <div class="raw-text-block">${escapeHtml(e.raw_text)}</div>
+             </details>`
+          : "";
+        return `
+      <div class="field-group review-card" data-review-id="${e.id}">
+        <div class="review-card-head">
+          <span class="review-card-amount">${formatAmount(e.amount)}</span>
+          <span class="review-card-date">${escapeHtml(dateLabel)}</span>
         </div>
         <div class="field-row">
-          <select class="review-category" data-review-id="${e.id}">
+          <span class="field-label">${escapeHtml(merchantLabel)}</span>
+        </div>
+        <label class="field-row">
+          <span class="field-label">Categoría</span>
+          <select
+            class="review-category"
+            data-review-id="${e.id}"
+            aria-label="Categoría de ${escapeHtml(merchantLabel)}"
+          >
             <option value="">Elegir categoría…</option>
             ${Object.keys(CATEGORY_ICONS)
-              .map((c) => `<option value="${c}" ${e.category === c ? "selected" : ""}>${c}</option>`)
+              .map(
+                (c) =>
+                  `<option value="${c}" ${e.category === c ? "selected" : ""}>${CATEGORY_LABELS[c] || c}</option>`
+              )
               .join("")}
           </select>
-        </div>
+        </label>
+        ${rawExcerpt}
         <div class="review-actions" style="padding: 10px 14px 14px">
-          <button class="confirm" data-confirm-id="${e.id}">Confirmar</button>
+          <button class="confirm" data-confirm-id="${e.id}" ${e.category ? "" : "disabled"}>Confirmar</button>
           <button data-open-id="${e.id}">Ver detalle</button>
           <button class="reject" data-reject-id="${e.id}">Rechazar</button>
         </div>
-      </div>`
-      )
+      </div>`;
+      })
       .join("");
+
+    // "Confirmar" solo se activa con categoría elegida — antes disparaba
+    // sin ninguna categoría seleccionada (ver auditoría, prevención de
+    // errores).
+    el.reviewList.querySelectorAll(".review-category").forEach((select) => {
+      select.addEventListener("change", () => {
+        const btn = el.reviewList.querySelector(`[data-confirm-id="${select.dataset.reviewId}"]`);
+        if (btn) btn.disabled = !select.value;
+      });
+    });
 
     el.reviewList.querySelectorAll("[data-confirm-id]").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -755,7 +992,12 @@
     $("#add-amount").value = "";
     $("#add-category").value = "";
     $("#add-date").value = new Date().toISOString().slice(0, 16);
+    el.addBizumHint.hidden = true;
     openSheet(el.viewAdd);
+  });
+
+  el.addCategory.addEventListener("change", () => {
+    el.addBizumHint.hidden = el.addCategory.value !== "bizum";
   });
 
   $("#add-save").addEventListener("click", async () => {
@@ -789,10 +1031,16 @@
     openSheet(el.viewBudgets);
   }
 
+  function openCalendar() {
+    loadCalendarMonth();
+    openSheet(el.viewCalendar);
+  }
+
   document.querySelectorAll(".tabbar button[data-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (btn.dataset.tab === "review") openReview();
       if (btn.dataset.tab === "budgets") openBudgets();
+      if (btn.dataset.tab === "calendar") openCalendar();
     });
   });
 
@@ -807,6 +1055,8 @@
         budgets: el.viewBudgets,
         search: el.viewSearch,
         settings: el.viewSettings,
+        calendar: el.viewCalendar,
+        "calendar-day": el.viewCalendarDay,
       }[btn.dataset.close];
       closeSheet(target);
     });
@@ -855,14 +1105,43 @@
   // volver a su sitio según la VELOCIDAD del gesto, no solo la posición
   // final — igual que un swipe-back nativo de iOS.
 
+  // Antes de esto, cada hoja cerrada seguía "viva" — en el orden de
+  // tabulación, en el árbol de accesibilidad y en el compositor — solo
+  // oculta con transform. Un usuario de teclado que le daba a Tab entraba
+  // en ~28 controles fantasma dentro de hojas invisibles. `inert` (nativo,
+  // soportado en Safari/iOS desde 15.5) saca el contenido inerte del
+  // orden de tabulación y del árbol de accesibilidad de una sola vez, sin
+  // tocar el CSS de transición que ya existía.
+  let openSheetCount = 0;
+  let lastFocusedBeforeSheet = null;
+
   function openSheet(node) {
+    lastFocusedBeforeSheet = document.activeElement;
     node.style.transform = "";
     node.classList.add("open");
+    node.inert = false;
+    openSheetCount += 1;
+    el.viewMain.inert = true;
+    // Mueve el foco dentro de la hoja — antes abrir una hoja no tocaba
+    // el foco en absoluto, así que un usuario de teclado seguía
+    // "dentro" de la pantalla principal, ahora inerte.
+    const backButton = node.querySelector(".back-button");
+    backButton?.focus();
   }
 
   function closeSheet(node) {
     node.classList.remove("open");
     node.style.transform = "";
+    node.inert = true;
+    openSheetCount = Math.max(0, openSheetCount - 1);
+    if (openSheetCount === 0) {
+      el.viewMain.inert = false;
+      // Restaura el foco a quien abrió la hoja — sin esto, al cerrar el
+      // foco cae al <body> y el usuario de teclado "pierde el sitio".
+      if (lastFocusedBeforeSheet && document.contains(lastFocusedBeforeSheet)) {
+        lastFocusedBeforeSheet.focus?.();
+      }
+    }
   }
 
   function attachSwipeToClose(node) {
@@ -879,6 +1158,13 @@
       // Solo iniciamos el gesto cerca del borde izquierdo, como un
       // swipe-back de iOS — evita robar taps en el resto del contenido.
       if (e.clientX > 40) return;
+      // Excepción real, no teórica: la columna izquierda ("L", lunes) de
+      // la cuadrícula del Calendario cae justo en esta franja (celda
+      // centrada en x≈38 con el ancho de un iPhone) — confirmado con un
+      // tap real que se lo comía el gesto de swipe en vez de abrir el
+      // día. Cualquier target tocable dentro de la cuadrícula gana sobre
+      // el gesto de cierre.
+      if (e.target.closest(".calendar-day-cell")) return;
       startX = e.clientX;
       lastX = e.clientX;
       lastT = performance.now();
@@ -920,9 +1206,16 @@
     node.addEventListener("pointercancel", finish);
   }
 
-  [el.viewDetail, el.viewReview, el.viewAdd, el.viewBudgets, el.viewSearch, el.viewSettings].forEach(
-    attachSwipeToClose
-  );
+  [
+    el.viewDetail,
+    el.viewReview,
+    el.viewAdd,
+    el.viewBudgets,
+    el.viewSearch,
+    el.viewSettings,
+    el.viewCalendar,
+    el.viewCalendarDay,
+  ].forEach(attachSwipeToClose);
 
   // ── Altura real de viewport (bug de WebKit en carga en frío) ─────────
   //
@@ -956,6 +1249,13 @@
   setTimeout(syncRealViewportHeight, 120);
 
   // ── Init ─────────────────────────────────────────────────────────────
+
+  // Todas las hojas empiezan inertes — ninguna está abierta al cargar
+  // (la de clave de acceso usa `hidden`, no `.sheet` normal, así que ya
+  // queda fuera del árbol de accesibilidad por su cuenta).
+  document.querySelectorAll(".sheet:not(.lock-screen)").forEach((sheet) => {
+    sheet.inert = true;
+  });
 
   const initialGranularityIndex = granularityButtons.findIndex((b) => b.classList.contains("active"));
   if (initialGranularityIndex > 0) {

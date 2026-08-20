@@ -5,6 +5,7 @@ También agrega los gastos por día/mes/año para GET /expenses.
 
 from __future__ import annotations
 
+import calendar as calendar_module
 import logging
 import re
 from datetime import UTC, date, datetime, timedelta
@@ -15,9 +16,9 @@ from sqlalchemy.orm import Session
 
 from . import categorizer
 from .categorizer import CATEGORIES, CONFIDENCE_THRESHOLD
-from .database import BIZUM_CATEGORY, Budget, DiscardedMessage, Expense, Source
+from .database import BIZUM_CATEGORY, Budget, CalendarNote, DiscardedMessage, Expense, Source
 from .parsers import parse_bank_email, parse_bizum_sms, parse_paypal_email
-from .schemas import BudgetOut, ExpensePatch, ManualExpenseIn, WebhookExpenseIn
+from .schemas import BudgetOut, CalendarNoteIn, ExpensePatch, ManualExpenseIn, WebhookExpenseIn
 
 logger = logging.getLogger(__name__)
 
@@ -393,10 +394,18 @@ def create_manual_expense(db: Session, payload: ManualExpenseIn) -> Expense:
         category, confidence = result["category"], result["confidence"]
         needs_review = confidence < CONFIDENCE_THRESHOLD
 
+    amount = round(payload.amount, 2)
+    if category == BIZUM_CATEGORY:
+        # El usuario escribe el importe en positivo (lo que recibió) —
+        # mismo criterio que _ingest_bizum para la vía automática: se
+        # fuerza negativo aquí, no se le pide que escriba él mismo el
+        # signo, para que reste del total en vez de sumar.
+        amount = -abs(amount)
+
     expense = Expense(
         source=Source.MANUAL,
         merchant=payload.merchant,
-        amount=round(payload.amount, 2),
+        amount=amount,
         currency=payload.currency,
         category=category,
         category_confidence=confidence,
@@ -917,3 +926,74 @@ def _period_bounds(granularity: str, date: str) -> tuple[datetime, datetime]:
         raise ValueError(f"granularity inválida: {granularity!r} (usa day|month|year)")
 
     return start, end
+
+
+# ── Calendario ───────────────────────────────────────────────────────────
+
+
+def _effective_day_for_month(recurring_day: int, days_in_month: int) -> int:
+    """recurring_day=31 en un mes de 30 días (o menos) -> se muestra el
+    ÚLTIMO día del mes, no se salta ni falla. Ver CalendarNote.__doc__."""
+    return min(recurring_day, days_in_month)
+
+
+def get_calendar_month(db: Session, month: str) -> dict:
+    """Vista de calendario de `month`: para cada día, sus gastos (misma
+    agregación que ya usa GET /expenses, reutilizada tal cual — no se
+    duplica la lógica de "qué cuenta como gasto de este día") y las notas
+    aplicables (puntuales que caen justo ese día, recurrentes cuyo día
+    coincide una vez aplicado el clamp de mes corto).
+    """
+    start, _ = _month_bounds(month)  # valida el formato "YYYY-MM"
+    _, days_in_month = calendar_module.monthrange(start.year, start.month)
+
+    all_notes = db.query(CalendarNote).all()
+    punctual_by_day: dict[int, list[CalendarNote]] = {}
+    recurring_by_day: dict[int, list[CalendarNote]] = {}
+    for note in all_notes:
+        if note.note_date is not None:
+            if note.note_date.year == start.year and note.note_date.month == start.month:
+                punctual_by_day.setdefault(note.note_date.day, []).append(note)
+        else:
+            effective_day = _effective_day_for_month(note.recurring_day, days_in_month)
+            recurring_by_day.setdefault(effective_day, []).append(note)
+
+    days = []
+    for day in range(1, days_in_month + 1):
+        date_str = f"{month}-{day:02d}"
+        day_aggregate = aggregate(db, "day", date_str)
+        day_notes = punctual_by_day.get(day, []) + recurring_by_day.get(day, [])
+        days.append(
+            {
+                "date": date_str,
+                "expenses": day_aggregate["expenses"],
+                "notes": day_notes,
+                "total_day": day_aggregate["total"],
+            }
+        )
+
+    return {"month": month, "days": days}
+
+
+def create_calendar_note(db: Session, payload: CalendarNoteIn) -> CalendarNote:
+    note = CalendarNote(
+        text=payload.text,
+        note_date=payload.note_date,
+        recurring_day=payload.recurring_day,
+    )
+    db.add(note)
+    db.commit()
+    db.refresh(note)
+    return note
+
+
+def delete_calendar_note(db: Session, note_id: int) -> bool:
+    """Borra la nota (DELETE real). Para una recurrente, esto la quita de
+    TODOS los meses futuros (y pasados) de golpe — no hay "eliminar solo
+    este mes" en esta primera versión, ver spec. True si existía."""
+    note = db.get(CalendarNote, note_id)
+    if note is None:
+        return False
+    db.delete(note)
+    db.commit()
+    return True

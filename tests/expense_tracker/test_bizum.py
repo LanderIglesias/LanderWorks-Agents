@@ -280,3 +280,43 @@ def test_budgets_never_include_bizum_category(client):
         "otros",
     }
     assert "bizum" not in categories
+
+
+# ── Alta manual de un Bizum (POST /expenses) ─────────────────────────────
+
+
+def _post_manual(client, *, merchant="Sonia", amount, category=None):
+    payload = {
+        "merchant": merchant,
+        "amount": amount,
+        "occurred_at": "2026-08-19T13:45:00",
+        "category": category,
+    }
+    return client.post("/expense-tracker/expenses", json=payload, headers=_auth())
+
+
+def test_manual_bizum_entry_saved_as_negative(client):
+    # El usuario escribe el importe en positivo (lo que recibió) — el
+    # sistema fuerza el signo, no se le pide que escriba él mismo "-9.50".
+    response = _post_manual(client, amount=9.50, category="bizum")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["amount"] == -9.50
+    assert data["category"] == "bizum"
+
+    db = TestingSessionLocal()
+    try:
+        row = db.query(Expense).one()
+        assert float(row.amount) == -9.50
+    finally:
+        db.close()
+
+
+def test_manual_other_category_unaffected_stays_positive(client):
+    response = _post_manual(client, amount=34.18, category="comida")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["amount"] == 34.18
+    assert data["category"] == "comida"

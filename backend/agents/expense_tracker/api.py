@@ -28,6 +28,8 @@ from .database import get_db
 from .schemas import (
     BudgetOut,
     BudgetSetIn,
+    CalendarNoteIn,
+    CalendarNoteOut,
     DiscardedMessageOut,
     ExpenseOut,
     ExpensePatch,
@@ -275,6 +277,45 @@ def upsert_budget(
         raise HTTPException(status_code=422, detail=str(e)) from e
 
     return next(b for b in budgets if b.category == category)
+
+
+@router.get("/calendar", dependencies=[Depends(verify_app_token)])
+def get_calendar(month: str | None = None, db: Session = Depends(get_db)):
+    from datetime import date as date_cls
+
+    month = month or date_cls.today().strftime("%Y-%m")
+    try:
+        result = engine.get_calendar_month(db, month)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+    return {
+        "month": result["month"],
+        "days": [
+            {
+                "date": day["date"],
+                "expenses": [ExpenseOut.model_validate(e) for e in day["expenses"]],
+                "notes": [CalendarNoteOut.model_validate(n) for n in day["notes"]],
+                "total_day": day["total_day"],
+            }
+            for day in result["days"]
+        ],
+    }
+
+
+@router.post(
+    "/calendar/notes", response_model=CalendarNoteOut, dependencies=[Depends(verify_app_token)]
+)
+def create_calendar_note(payload: CalendarNoteIn, db: Session = Depends(get_db)):
+    return engine.create_calendar_note(db, payload)
+
+
+@router.delete("/calendar/notes/{note_id}", dependencies=[Depends(verify_app_token)])
+def delete_calendar_note(note_id: int, db: Session = Depends(get_db)):
+    deleted = engine.delete_calendar_note(db, note_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Calendar note not found")
+    return {"status": "ok"}
 
 
 @router.get("/demo")

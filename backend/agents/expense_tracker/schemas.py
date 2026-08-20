@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 from .database import Source
 from .parsers import parse_amount_string
@@ -102,6 +102,39 @@ class DiscardedMessageOut(BaseModel):
     source: Source
     reason: str
     discarded_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CalendarNoteIn(BaseModel):
+    """Body de POST /calendar/notes. Exactamente uno de note_date /
+    recurring_day debe venir relleno — nunca ambos, nunca ninguno. No se
+    deja ambiguo: se valida aquí, no se asume un valor por defecto."""
+
+    text: str
+    note_date: date | None = None
+    recurring_day: int | None = None
+
+    @model_validator(mode="after")
+    def _exactly_one_date_kind(self):
+        has_date = self.note_date is not None
+        has_recurring = self.recurring_day is not None
+        if has_date == has_recurring:
+            raise ValueError(
+                "especifica exactamente uno de note_date o recurring_day, no ambos ni ninguno"
+            )
+        if has_recurring and not 1 <= self.recurring_day <= 31:
+            raise ValueError("recurring_day debe estar entre 1 y 31")
+        return self
+
+
+class CalendarNoteOut(BaseModel):
+    id: int
+    text: str
+    note_date: date | None
+    recurring_day: int | None
+    created_at: datetime | None
 
     class Config:
         from_attributes = True

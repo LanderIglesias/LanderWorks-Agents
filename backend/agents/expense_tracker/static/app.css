@@ -29,13 +29,34 @@
 
   --text: #1c1230;
   --text-secondary: rgba(28, 18, 48, 0.6);
-  --text-tertiary: rgba(28, 18, 48, 0.4);
+  /* 0.75, no 0.4: a la 0.4 original, CUALQUIER texto que la usara caía
+     por debajo de AA (2.5:1 medido) sobre el propio cristal de la app —
+     no un caso aislado, eran 11 sitios distintos en las dos pantallas
+     (etiquetas de día, pestañas inactivas, calendario, "el mes pasado"…).
+     Sigue siendo el mismo --text tintado a menor alpha, no un gris
+     aparte — solo con más alpha. */
+  --text-tertiary: rgba(28, 18, 48, 0.75);
 
   --accent: #ff6b35;
-  --accent-contrast: #ffffff;
+  /* Tinta oscura, no blanco fijo: blanco sobre #ff6b35 da ~2.83:1 (falla
+     AA) — el tema oscuro ya usa una tinta oscura sobre su coral más claro
+     y pasa de sobra (7.58:1); esto es la misma idea aplicada al claro,
+     que se había quedado con el blanco por defecto. */
+  --accent-contrast: #2b0d00;
+  /* Texto neutro de navegación (Cerrar/Atrás/Cancelar, flechas de mes,
+     "Limpiar filtros") — deliberadamente MÁS OSCURO que --accent, que
+     queda reservado para el relleno sólido de botones de creación. Un
+     texto de navegación no necesita el coral más vivo, y así se lee bien
+     tanto sobre cristal neutro como sobre las cabeceras ya teñidas
+     (ámbar en Revisión, coral en Alta manual). */
+  --accent-text: #c2410c;
   --warning: #b8720a;
-  --warning-contrast: #ffffff;
+  --warning-contrast: #3d2400;
   --danger: #d9483a;
+  /* Tinta de texto sobre superficies rellenas de --danger (badges,
+     .reject, borrar nota) — blanco fijo caía a 2.78:1 en oscuro; esta
+     pasa AA en los dos temas sobre el --danger de cada uno. */
+  --danger-contrast: #ffffff;
   /* Semántico (como --warning/--danger), no un segundo acento de marca:
      solo para "ha bajado el gasto respecto al mes anterior" en el
      indicador de comparativa. */
@@ -76,6 +97,13 @@
   --radius-card: 20px;
   --radius-row: 14px;
   --radius-pill: 999px;
+  /* Los 3 tiles de icono de categoría (lista/presupuesto/recurrentes) y
+     la celda del calendario se llamaban "el mismo componente" pero
+     usaban 3 radios distintos entre sí (9/10/11px) — un solo token. */
+  --radius-tile: 10px;
+  --radius-chip: 8px;
+
+  --shadow-thumb: 0 3px 10px -3px rgba(60, 40, 90, 0.22);
 
   /* Curvas que aproximan un spring critically-damped (damping 1.0) y uno
      con ligero rebote (damping ~0.8) para donde el gesto trae momentum. */
@@ -101,10 +129,16 @@
 
     --text: #f5f3fa;
     --text-secondary: rgba(245, 243, 250, 0.6);
-    --text-tertiary: rgba(245, 243, 250, 0.38);
+    /* 0.55, no 0.38 — mismo motivo que el bloque claro: 0.38 caía a
+       3.3:1, por debajo de AA, en cada sitio que lo usaba. */
+    --text-tertiary: rgba(245, 243, 250, 0.55);
 
     --accent: #ff8a5b;
     --accent-contrast: #241030;
+    /* Más claro que --accent para los mismos usos de navegación que en
+       claro (Cerrar/Atrás/Cancelar, flechas de mes) — el --accent base
+       ya fallaba AA sobre las cabeceras teñidas (3.29–3.93:1). */
+    --accent-text: #ffb08c;
     --warning: #ffb340;
     --warning-contrast: #2b1a05;
     --danger: #ff6b6b;
@@ -113,6 +147,9 @@
        (rojo oscuro sobre rojo oscuro) el --danger base cae justo en el
        límite de AA; este tono lo despega con margen. */
     --danger-on-tint: #ffb3b3;
+    /* Tinta oscura sobre el --danger claro de este tema (badges, .reject,
+       borrar nota) — blanco fijo caía a 2.78:1 aquí. */
+    --danger-contrast: #3d0f0a;
 
     --cat-comida: #ff8fb8;
     --cat-transporte: #7ea6ff;
@@ -121,6 +158,8 @@
     --cat-salud: #4fd9c0;
     --cat-hogar: #9a9aff;
     --cat-bizum: #6fd6ee;
+
+    --shadow-thumb: 0 3px 10px -3px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -141,15 +180,17 @@
 
   --text: #f5f3fa;
   --text-secondary: rgba(245, 243, 250, 0.6);
-  --text-tertiary: rgba(245, 243, 250, 0.38);
+  --text-tertiary: rgba(245, 243, 250, 0.55);
 
   --accent: #ff8a5b;
   --accent-contrast: #241030;
+  --accent-text: #ffb08c;
   --warning: #ffb340;
   --warning-contrast: #2b1a05;
   --danger: #ff6b6b;
   --positive: #34c98f;
   --danger-on-tint: #ffb3b3;
+  --danger-contrast: #3d0f0a;
 
   --cat-comida: #ff8fb8;
   --cat-transporte: #7ea6ff;
@@ -158,6 +199,8 @@
   --cat-salud: #4fd9c0;
   --cat-hogar: #9a9aff;
   --cat-bizum: #6fd6ee;
+
+  --shadow-thumb: 0 3px 10px -3px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -165,6 +208,23 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Único idioma de foco de toda la app — antes solo lo tenían los campos
+   de formulario; el resto de controles (botones circulares, tabbar,
+   segmented, back-button…) se quedaban con el anillo por defecto del
+   navegador, que en oscuro renderiza casi negro sobre un fondo casi
+   negro y es, en la práctica, invisible por teclado. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::placeholder {
+  /* Tokenizado — el gris por defecto del navegador no varía por tema y
+     caía hasta 1.88:1 en la tarjeta de presupuesto superada. */
+  color: var(--text-tertiary);
+  opacity: 1;
 }
 
 html,
@@ -266,9 +326,13 @@ body {
 .search-toggle,
 .settings-toggle {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 8px);
-  width: 34px;
-  height: 34px;
+  /* 44px (antes 34px) — por debajo del mínimo táctil de 44×44, y estaban
+     en las esquinas superiores, la zona más difícil de alcanzar a una
+     mano. El offset vertical se recalcula para seguir centrado en la
+     franja de 52px de la navbar. */
+  top: calc(env(safe-area-inset-top) + 4px);
+  width: 44px;
+  height: 44px;
   border: 1px solid var(--glass-border);
   border-top-color: var(--glass-border-top);
   border-radius: 50%;
@@ -282,17 +346,17 @@ body {
 }
 
 .theme-toggle {
-  right: 12px;
+  right: 8px;
 }
 
 /* Junto al toggle de tema, no en la navegación principal ni accesible
    por accidente — el reset destructivo vive detrás de esta hoja. */
 .settings-toggle {
-  right: 54px;
+  right: 56px;
 }
 
 .search-toggle {
-  left: 12px;
+  left: 8px;
 }
 
 .theme-toggle:active,
@@ -324,7 +388,7 @@ body {
   background: var(--glass-fill-strong);
   border: 1px solid var(--glass-border-top);
   border-radius: var(--radius-pill);
-  box-shadow: 0 3px 10px -3px rgba(0, 0, 0, 0.22);
+  box-shadow: var(--shadow-thumb);
   transition: transform 0.5s var(--spring-settle);
 }
 
@@ -334,7 +398,9 @@ body {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 7px 0;
+  /* 13px verticales, no 7 — el bloque (Día/Mes/Año) medía ~30px de alto,
+     por debajo del mínimo táctil. */
+  padding: 13px 0;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
@@ -473,9 +539,11 @@ body {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  border-radius: 8px;
+  border-radius: var(--radius-chip);
   background: var(--danger);
-  color: white;
+  /* --danger-contrast, no white fijo: blanco sobre el --danger claro del
+     tema oscuro caía a 2.78:1. */
+  color: var(--danger-contrast);
   font-size: 10px;
   font-weight: 700;
   display: flex;
@@ -541,9 +609,12 @@ body {
 .results-bar button {
   border: none;
   background: transparent;
-  color: var(--accent);
+  /* Texto de navegación (limpiar/deshacer), no de creación — ver
+     --accent-text junto a .back-button. */
+  color: var(--accent-text);
   font-size: 13px;
   font-weight: 600;
+  padding: 8px 4px;
 }
 
 .load-more {
@@ -585,11 +656,21 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 12px 14px;
+  border: none;
   background: var(--glass-row);
   border-bottom: 1px solid var(--glass-border);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
   touch-action: pan-y;
-  will-change: transform;
+  /* will-change:transform quitado — no había ninguna animación de
+     transform aplicada a esta fila que lo necesitara; quedaba activo en
+     reposo en cada fila de la lista (promoción a capa de compositor
+     permanente sin motivo, en tensión directa con la razón documentada
+     para no ponerle backdrop-filter a esta misma lista). */
 }
 
 .expense-row:last-child {
@@ -605,7 +686,7 @@ body {
   width: 34px;
   height: 34px;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-tile);
   background: var(--glass-fill);
   display: flex;
   align-items: center;
@@ -745,6 +826,9 @@ body {
 
 .tabbar button.active {
   color: var(--accent);
+  /* Peso, no solo color, para que la pestaña activa no dependa
+     únicamente de distinguir un color de otro. */
+  font-weight: 700;
 }
 
 .tabbar .tab-icon {
@@ -757,9 +841,9 @@ body {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  border-radius: 8px;
+  border-radius: var(--radius-chip);
   background: var(--danger);
-  color: white;
+  color: var(--danger-contrast);
   font-size: 10px;
   font-weight: 700;
   display: flex;
@@ -859,11 +943,16 @@ body {
   /* Siempre el mismo acento neutro, sin excepción — es una señal de
      navegación (volver/cerrar), no una acción de creación ni de aviso;
      no debe variar de color entre hojas (ver .sheet-review más abajo,
-     que ya no lo sobreescribe). */
-  color: var(--accent);
+     que ya no lo sobreescribe). --accent-text, NO --accent: el coral
+     puro queda reservado para el relleno de botones de creación — como
+     texto de navegación fallaba AA sobre las cabeceras ya teñidas
+     (2.17–3.93:1 medido en las 3 variantes de cabecera). */
+  color: var(--accent-text);
   font-size: 16px;
   font-weight: 500;
-  padding: 8px 12px;
+  /* 12px verticales, no 8 — con el font-size/line-height actuales medía
+     ~35px de alto, por debajo del mínimo táctil. */
+  padding: 12px 14px;
 }
 
 /* Solo el título — el back-button mantiene siempre var(--accent), ver
@@ -885,9 +974,13 @@ body {
 .month-nav-arrow {
   border: none;
   background: transparent;
-  color: var(--accent);
-  width: 30px;
-  height: 30px;
+  /* Texto de navegación, no de creación — ver --accent-text junto a
+     .back-button. */
+  color: var(--accent-text);
+  /* 44px, no 30px — único control para cambiar de mes, por debajo del
+     mínimo táctil. */
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -935,6 +1028,21 @@ body {
   border-bottom: none;
 }
 
+/* Texto de ayuda bajo un field-group — tipografía secundaria, mismo
+   nivel que .budget-comparison, para no añadir peso visual a un aviso
+   informativo (no es un error). --text-secondary, NO un color de
+   categoría: --cat-bizum es identidad CUALITATIVA de "esta fila es
+   Bizum", no un color semántico de "esto es informativo" — usarlo aquí
+   añadía un 5º significado semántico no documentado, y además fallaba
+   AA en claro (3.40:1). */
+.field-hint {
+  margin: -8px 0 16px;
+  padding: 0 2px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
 .field-label {
   font-size: 14px;
   color: var(--text-secondary);
@@ -950,6 +1058,14 @@ body {
   font-size: 15px;
   color: var(--text);
   font-family: inherit;
+  /* Altura mínima táctil propia del control — antes solo la fila entera
+     medía 44px+, pero el input/select en sí (lo único realmente
+     enfocable) medía 20-22px, así que ~55% del target visible no
+     respondía al toque. Junto con el <label> que ahora envuelve cada
+     .field-row (ver index.html), tocar en cualquier punto de la fila
+     activa el campo. */
+  min-height: 24px;
+  padding: 4px 0;
 }
 
 /* `color-scheme` (arriba) ya le dice al navegador que dibuje el icono
@@ -1084,8 +1200,9 @@ body {
 
 .review-actions button {
   flex: 1;
-  padding: 8px;
-  border-radius: 10px;
+  /* 11px verticales, no 8 — medían ~34px de alto. */
+  padding: 11px 8px;
+  border-radius: var(--radius-tile);
   border: 1px solid var(--glass-border);
   background: var(--glass-fill);
   font-size: 13px;
@@ -1099,15 +1216,66 @@ body {
   color: var(--warning-contrast);
 }
 
+/* Sin categoría elegida, "Confirmar" no dispara — antes no había ningún
+   guardarraíl. */
+.review-actions button.confirm:disabled {
+  /* No solo tono: opacity + cursor son la señal robusta, el matiz
+     amber-apagado por sí solo es sutil y no debería ser la única pista. */
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Tarjeta de revisión: importe y fecha visibles de entrada ─────────
+   Antes la tarjeta no mostraba ni importe ni fecha — solo "Sin
+   identificar" y un desplegable de categoría, sin ningún dato real con
+   el que decidir Confirmar/Rechazar. */
+.review-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 14px 0;
+  gap: 8px;
+}
+
+.review-card-amount {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.review-card-date {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* Texto crudo del mensaje (SMS/email) como "ver original" plegable, no
+   la única fuente del importe/comercio — usado tanto en el detalle de
+   gasto como en la tarjeta de revisión. */
+.raw-disclosure summary {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--accent-text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.raw-disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
 /* Rechazar/eliminar: irreversible, pero UN gasto — no lleva el peso de
    fondo sólido de .confirm, solo el texto en rojo, coherente con cómo el
    resto de la app reserva el relleno sólido para la acción principal de
    la tarjeta. */
 .review-actions button.reject {
   border-color: color-mix(in srgb, var(--danger) 45%, var(--glass-border));
-  color: var(--danger);
+  /* --danger-on-tint, no --danger: el rojo base caía por debajo de AA
+     como texto (4.19–4.25:1) sobre este fondo de cristal neutro. */
+  color: var(--danger-on-tint);
   flex: 0 0 auto;
-  padding: 8px 12px;
+  padding: 11px 12px;
 }
 
 /* ── Presupuestos por categoría ───────────────────────────────────────
@@ -1151,7 +1319,7 @@ body {
   width: 30px;
   height: 30px;
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: var(--radius-tile);
   background: var(--glass-fill-strong);
   display: flex;
   align-items: center;
@@ -1232,6 +1400,16 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Antes una tarjeta "sin límite" no tenía ninguna pista visual de que
+   tocarla abre el editor de límite — el toggle ya existía, solo faltaba
+   decirlo. --accent-text: es una invitación a actuar, no un dato. */
+.budget-set-limit-hint {
+  margin-top: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
 .budget-edit-row {
   display: flex;
   gap: 8px;
@@ -1243,8 +1421,8 @@ body {
   min-width: 0;
   border: 1px solid var(--glass-border);
   background: var(--glass-fill-strong);
-  border-radius: 10px;
-  padding: 8px 10px;
+  border-radius: var(--radius-tile);
+  padding: 12px 10px;
   font-size: 14px;
   color: var(--text);
   font-family: inherit;
@@ -1257,8 +1435,8 @@ body {
 
 .budget-edit-row button {
   flex-shrink: 0;
-  padding: 8px 14px;
-  border-radius: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-tile);
   border: none;
   background: var(--accent);
   color: var(--accent-contrast);
@@ -1319,7 +1497,7 @@ body {
   width: 30px;
   height: 30px;
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: var(--radius-tile);
   background: var(--glass-fill-strong);
   display: flex;
   align-items: center;
@@ -1356,21 +1534,172 @@ body {
   font-weight: 600;
 }
 
+/* ── Calendario ────────────────────────────────────────────────────────
+   Cuadrícula de 7 columnas — cristal ligero por celda, coherente con el
+   resto (sin blur pesado por celda: son hasta 42 tarjetas a la vez, el
+   mismo motivo por el que .expense-row no lleva backdrop-filter). */
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+
+.calendar-weekdays span {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  /* 5px, no 6 — a 375px de ancho (iPhone SE/13 mini) 6px de hueco dejaba
+     celdas de 43.9px, por debajo del mínimo táctil de 44px. */
+  gap: 5px;
+}
+
+.calendar-day-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: none;
+  border-radius: var(--radius-tile);
+  background: var(--glass-row);
+  color: var(--text);
+  transition: transform 0.15s var(--spring-bounce);
+}
+
+.calendar-day-cell:active {
+  transform: scale(0.92);
+}
+
+.calendar-day-cell.calendar-day-empty {
+  background: transparent;
+  pointer-events: none;
+}
+
+.calendar-day-number {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Indicador de gasto: sombra interior sutil, no un color semántico — un
+   día con gasto no es "bueno" ni "malo" en sí mismo, solo tiene datos.
+   inset box-shadow en vez de border-bottom: un borde recto no sigue el
+   radio de la celda en las esquinas y se veía como un artefacto de
+   render; la sombra interior sí respeta la forma redondeada. */
+.calendar-day-cell.has-expenses {
+  box-shadow: inset 0 -2px 0 0 color-mix(in srgb, var(--text) 30%, transparent);
+}
+
+.calendar-day-total {
+  /* 10px, no 9 — era el texto más pequeño de la app sobre el token de
+     menor contraste; ver --text-tertiary. */
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dinero entrando (Bizum) también en el calendario — antes se quedaba en
+   gris terciario y ese mismo dato SÍ era verde en la lista principal
+   (.expense-amount.positive), dos tratamientos distintos para el mismo
+   concepto. */
+.calendar-day-total.positive {
+  color: var(--positive);
+}
+
+/* Notas: icono de pin, diferenciable a propósito del indicador de gasto
+   (posición e icono distintos, no solo color) — NEUTRO (--text-
+   secondary), no --warning: una nota puntual/recurrente no es
+   "necesita tu atención" en el sentido en que sí lo es needs_review — el
+   ámbar quedaba reservado exclusivamente para eso en el resto de la app
+   y esta era la única excepción. */
+.calendar-day-pin {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  width: 10px;
+  height: 10px;
+  color: var(--text-secondary);
+}
+
+.calendar-notes-section {
+  margin: 20px 0 16px;
+}
+
+.calendar-notes-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+}
+
+.calendar-note-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-row);
+  margin-bottom: 8px;
+}
+
+.calendar-note-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  /* --text-secondary, no --warning — ver comentario en .calendar-day-pin. */
+  color: var(--text-secondary);
+}
+
+.calendar-note-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.calendar-note-recurring-tag {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.calendar-note-delete {
+  border: none;
+  background: transparent;
+  /* --danger-on-tint, no --danger — el rojo base fallaba AA en claro
+     (4.03:1). */
+  color: var(--danger-on-tint);
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  padding: 10px 8px;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sheet,
-  .total-card,
-  .segmented-thumb,
-  .segmented button,
-  .quick-action,
-  .theme-toggle,
-  .primary-button,
-  .budget-card,
-  .budget-bar-fill,
-  .month-nav-arrow,
-  .search-toggle,
-  .load-more,
-  .secondary-button {
+  /* Selector universal, no una lista mantenida a mano: la lista anterior
+     ya se había quedado corta dos veces (se le olvidó `body`, cuya
+     transición de background-color de 0.4s seguía animando bajo
+     reduce-motion) — cualquier componente nuevo que anime algo hereda la
+     protección automáticamente, sin depender de acordarse de añadirlo
+     aquí. */
+  *,
+  *::before,
+  *::after {
     transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
 
@@ -1399,7 +1728,9 @@ body {
   .segmented,
   .segmented-thumb,
   .budget-card,
-  .secondary-button {
+  .secondary-button,
+  .recurring-section,
+  .calendar-note-row {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }

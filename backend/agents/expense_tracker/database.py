@@ -8,7 +8,9 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     Column,
+    Date,
     DateTime,
     Enum,
     Float,
@@ -156,6 +158,48 @@ class Budget(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     __table_args__ = (UniqueConstraint("category", "month", name="uq_budgets_category_month"),)
+
+
+class CalendarNote(Base):
+    """Una nota del Calendario — puntual (fecha exacta) o recurrente
+    mensual (mismo día de cada mes). Exactamente una de las dos
+    (note_date, recurring_day) debe estar rellena, nunca las dos ni
+    ninguna — validado en schemas.CalendarNoteIn (a nivel de API) y
+    reforzado aquí con un CHECK constraint (a nivel de BD, para que no
+    quede una fila ambigua si algo escribe directo sin pasar por la API).
+
+    Meses cortos con recurring_day=31 (o 29/30/31 en febrero, abril...):
+    se muestra el ÚLTIMO día del mes en vez de saltarse el mes o fallar —
+    ver engine.get_calendar_month, que hace el clamp al construir la
+    vista de cada mes. No se guarda un "31 efectivo" distinto por mes;
+    recurring_day guarda siempre el valor original tal como lo escribió
+    el usuario.
+    """
+
+    __tablename__ = "calendar_notes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    text = Column(Text, nullable=False)
+
+    note_date = Column(Date, nullable=True)
+    recurring_day = Column(Integer, nullable=True)
+
+    created_at = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint(
+            "(note_date IS NOT NULL AND recurring_day IS NULL) OR "
+            "(note_date IS NULL AND recurring_day IS NOT NULL)",
+            name="ck_calendar_notes_exactly_one_date_kind",
+        ),
+        CheckConstraint(
+            "recurring_day IS NULL OR (recurring_day >= 1 AND recurring_day <= 31)",
+            name="ck_calendar_notes_recurring_day_range",
+        ),
+        Index("ix_calendar_notes_note_date", "note_date"),
+        Index("ix_calendar_notes_recurring_day", "recurring_day"),
+    )
 
 
 # ── Inicialización ──────────────────────────────────────────────────────────
