@@ -168,6 +168,8 @@ Hybrid: real optical depth from `backdrop-filter` blur (not a shadow standing in
 - **Card lift** (`0 8px 28px -10px rgba(60,40,90,0.16)` light / `0 10px 34px -10px rgba(0,0,0,0.55)` dark): total card, circular action buttons, segmented-control thumb.
 
 ### Named Rules
+**The Touch-Bounce Rule.** `--spring-bounce` (slight overshoot, damping ~0.8) is reserved for direct tactile press feedback only — an element responding to the user's own finger right now: buttons, rows, and cards on `:active`, the segmented-control thumb settling after a drag. `--spring-settle` (critically-damped, no overshoot) is for everything else that moves on its own — sheets opening/closing, content swapping on a period change, a list's staggered entrance, an inline alert popping in. A 2026-08 audit finding flagged the reuse of spring curves generally as "dated bounce easing"; the distinction that survived review is *whose gesture is it*: a repeated overshoot under a finger reads as physical feedback, the same overshoot on something the user didn't touch (an alert appearing on its own) reads as a tic, not a response — so content/state transitions get the non-overshooting curve even though both curves share the "spring" name.
+
 **The Chrome-Only Blur Rule.** `backdrop-filter` is a budgeted effect, not a house style: navbar, total card, segmented control, circular buttons, tab bar, and sheet headers get it; the scrollable expense list never does. This is a performance constraint (Safari/iPhone scroll cost), not a taste preference — do not add blur to a new list or repeating row component without re-confirming the performance budget still allows it.
 
 ## Shapes

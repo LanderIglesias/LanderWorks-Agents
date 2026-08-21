@@ -439,11 +439,53 @@ body {
 }
 
 .total-card .amount {
+  position: relative;
   font-size: 34px;
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
+}
+
+/* Skeleton del importe total mientras carga — un solo elemento pequeño,
+   no una lista larga, así que el shimmer clásico por background-position
+   (más simple que la técnica por transform de .skeleton-shimmer) es
+   coste negligible aquí; ver esa clase para el motivo de por qué la
+   lista SÍ usa la técnica compositor-only. */
+.total-card .amount[data-loading="true"],
+.total-card .meta[data-loading="true"] {
+  color: transparent;
+}
+
+.total-card .amount[data-loading="true"]::after,
+.total-card .meta[data-loading="true"]::after {
+  content: "";
+  position: absolute;
+  border-radius: var(--radius-chip);
+  background: linear-gradient(90deg, var(--glass-row) 25%, var(--glass-fill-strong) 50%, var(--glass-row) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-bg-shimmer 1.4s ease-in-out infinite;
+}
+
+.total-card .amount[data-loading="true"]::after {
+  inset: 4px 35% 4px 0;
+}
+
+.total-card .meta {
+  position: relative;
+}
+
+.total-card .meta[data-loading="true"]::after {
+  inset: 2px 60% 2px 0;
+}
+
+@keyframes skeleton-bg-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ── Indicador de comparativa mes a mes — sutil a propósito. Gastar más
@@ -584,7 +626,8 @@ body {
 .quick-action .circle .badge[hidden],
 .tabbar .review-badge[hidden],
 .field-row[hidden],
-.comparison-badge[hidden] {
+.comparison-badge[hidden],
+.inline-alert[hidden] {
   display: none;
 }
 
@@ -671,6 +714,7 @@ body {
      reposo en cada fila de la lista (promoción a capa de compositor
      permanente sin motivo, en tensión directa con la razón documentada
      para no ponerle backdrop-filter a esta misma lista). */
+  transition: transform 0.15s var(--spring-bounce);
 }
 
 .expense-row:last-child {
@@ -679,7 +723,11 @@ body {
 
 .expense-row:active {
   background: var(--glass-fill);
-  transition: background 0.1s ease-out;
+  /* scale(0.98) en :active, Regla 5 (Interactive UI States) al pie de la
+     letra — antes solo cambiaba el fondo, sin ninguna señal física de
+     "esto se ha pulsado". */
+  transform: scale(0.98);
+  transition: background 0.1s ease-out, transform 0.1s var(--spring-bounce);
 }
 
 .expense-icon {
@@ -870,12 +918,18 @@ body {
   z-index: 40;
   background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
   transform: translateX(100%);
-  transition: transform 0.38s var(--spring-settle);
+  /* opacity, no solo transform: el cristal ahora se MATERIALIZA al abrir
+     (cross-fade + deslizamiento spring), no solo desliza como una losa
+     opaca — mismo principio en las 4 "pestañas" de navegación (tabbar) y
+     en el cambio de Día/Mes/Año más abajo (.content-swap-*). */
+  opacity: 0;
+  transition: transform 0.38s var(--spring-settle), opacity 0.3s ease;
   overflow-y: auto;
 }
 
 .sheet.open {
   transform: translateX(0);
+  opacity: 1;
 }
 
 .sheet.dragging {
@@ -1688,18 +1742,300 @@ body {
   padding: 10px 8px;
 }
 
+/* ── Transición de contenido al cambiar Día/Mes/Año ───────────────────
+   El segmented control ya tenía su propio thumb con spring; el CONTENIDO
+   bajo él (tarjeta de total + lista) se reemplazaba de golpe, sin
+   transición — cross-fade + ligero deslizamiento, mismo lenguaje que las
+   hojas (.sheet, arriba). */
+.content-swap-out {
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.content-swap-in {
+  animation: content-swap-in 0.4s var(--spring-settle);
+}
+
+@keyframes content-swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Entrada escalonada de las filas de gasto ─────────────────────────
+   animation-delay por fila (ver expenseRowHtml en app.js) — cada fila da
+   una pequeña señal de "esto acaba de responder", mismo principio que el
+   conteo ascendente del total. */
+@keyframes row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.row-enter {
+  /* backwards, NO both: con "both" el estado final de la animación
+     (transform: translateY(0)) se queda fijado sobre la propiedad
+     transform de la fila PARA SIEMPRE tras terminar — pisando en
+     silencio el scale(0.98) de :active, que deja de notarse pasados los
+     ~300ms de la entrada. "backwards" evita el parpadeo antes de que
+     empiece (necesario por el animation-delay escalonado) sin dejar
+     ningún valor "fantasma" en transform una vez termina. */
+  animation: row-enter 0.32s var(--spring-settle) backwards;
+}
+
+/* ── Skeleton states — listas (filas, tarjetas de revisión/presupuesto,
+   celdas de calendario) ───────────────────────────────────────────────
+   A diferencia del importe total (arriba, un solo elemento pequeño),
+   aquí puede haber varias decenas de placeholders a la vez — el mismo
+   principio de rendimiento ya documentado para esta app (animar solo
+   transform/opacity, nunca propiedades que fuercen pintado) aplica: el
+   brillo se consigue barriendo un degradado con transform, no animando
+   background-position en cada elemento simultáneamente. */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: var(--glass-row);
+  border-radius: var(--radius-chip);
+}
+
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, var(--glass-fill-strong), transparent);
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-expense-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.skeleton-expense-row:last-child {
+  border-bottom: none;
+}
+
+.skeleton-expense-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-tile);
+}
+
+.skeleton-expense-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-line-wide {
+  width: 60%;
+  height: 12px;
+}
+
+.skeleton-line-narrow {
+  width: 35%;
+  height: 10px;
+}
+
+.skeleton-expense-amount {
+  width: 50px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.skeleton-review-card {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-review-amount {
+  width: 40%;
+  height: 20px;
+}
+
+.skeleton-review-line {
+  width: 70%;
+  height: 13px;
+}
+
+.skeleton-review-line-2 {
+  width: 50%;
+  height: 13px;
+}
+
+.skeleton-budget-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius-tile);
+}
+
+.skeleton-budget-name {
+  flex: 1;
+  height: 14px;
+}
+
+.skeleton-budget-bar {
+  height: 7px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 8px;
+}
+
+.skeleton-budget-meta {
+  width: 55%;
+  height: 12px;
+}
+
+.calendar-day-cell.skeleton-shimmer {
+  background: var(--glass-row);
+}
+
+/* ── Estados vacíos compuestos ─────────────────────────────────────────
+   Mensaje + siguiente acción sugerida, no un hueco en blanco ni una
+   línea de texto suelta — usado donde puede no haber datos: mes/día/año
+   sin gastos, resultados de búsqueda vacíos (ver defaultExpenseEmptyState
+   / searchEmptyState en app.js). */
+.empty-state-composed {
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  color: var(--text-tertiary);
+  font-size: 22px;
+}
+
+.empty-state-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.empty-state-message {
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 260px;
+  margin: 0 auto 18px;
+  line-height: 1.4;
+}
+
+.empty-state-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: transform 0.15s var(--spring-bounce);
+}
+
+.empty-state-action:active {
+  transform: scale(0.96);
+}
+
+/* ── Estados de error/éxito inline en formularios ──────────────────────
+   Antes: texto rojo suelto vía style="" inline (accesible por role=alert
+   desde la auditoría de hoy, pero sin ningún tratamiento visual que lo
+   distinguiera de un campo simplemente vacío). Ahora: icono + superficie
+   teñida + micro-animación de entrada, mismo patrón para los 4 formularios
+   que pueden fallar (clave, búsqueda, nota de calendario, reset). */
+.inline-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-tile);
+  background: color-mix(in srgb, var(--danger) 12%, var(--glass-fill));
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--glass-border));
+  color: var(--danger-on-tint);
+  font-size: 13px;
+  line-height: 1.4;
+  /* --spring-settle, NO --spring-bounce: esto no es respuesta a un toque
+     directo (ver Named Rule de motion en DESIGN.md) — es un mensaje que
+     aparece por sí solo, y el mismo rebote que se siente bien bajo el
+     dedo se sentiría un tic repetido cada vez que el usuario ve un error. */
+  animation: alert-pop 0.25s var(--spring-settle);
+}
+
+.inline-alert .icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.inline-alert-success {
+  background: color-mix(in srgb, var(--positive) 12%, var(--glass-fill));
+  border-color: color-mix(in srgb, var(--positive) 30%, var(--glass-border));
+  color: var(--positive);
+}
+
+@keyframes alert-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Selector universal, no una lista mantenida a mano: la lista anterior
      ya se había quedado corta dos veces (se le olvidó `body`, cuya
      transición de background-color de 0.4s seguía animando bajo
      reduce-motion) — cualquier componente nuevo que anime algo hereda la
      protección automáticamente, sin depender de acordarse de añadirlo
-     aquí. */
+     aquí. animation-delay a 0s además de animation-duration: sin esto,
+     el stagger de .row-enter seguiría "escalonando" CUÁNDO aparece cada
+     fila aunque cada aparición individual sea instantánea. */
   *,
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
   }
 }
 

@@ -49,6 +49,7 @@
   const state = {
     granularity: "month",
     date: new Date().toISOString().slice(0, 10),
+    currentTotal: null,
     expenses: [],
     reviewQueue: [],
     currentDetailId: null,
@@ -70,6 +71,7 @@
   const el = {
     viewMain: $("#view-main"),
     granularitySwitch: $("#granularity-switch"),
+    totalCard: $("#total-card"),
     totalAmount: $("#total-amount"),
     totalMeta: $("#total-meta"),
     expenseList: $("#expense-list"),
@@ -245,6 +247,120 @@
     return eur.format(value);
   }
 
+  // ── Conteo ascendente del importe total ─────────────────────────────
+  //
+  // Interpola el NÚMERO, no el texto — formatAmount() se llama en cada
+  // frame para que el € y los separadores de miles salgan siempre bien
+  // formados, no solo los dígitos finales.
+  function animateAmountText(node, from, to, duration = 550) {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      node.textContent = formatAmount(to);
+      return;
+    }
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cúbico
+      node.textContent = formatAmount(from + (to - from) * eased);
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function showTotalSkeleton() {
+    el.totalAmount.dataset.loading = "true";
+    el.totalMeta.dataset.loading = "true";
+  }
+
+  function hideTotalSkeleton() {
+    delete el.totalAmount.dataset.loading;
+    delete el.totalMeta.dataset.loading;
+  }
+
+  // ── Skeleton con revelado retardado ──────────────────────────────────
+  //
+  // Si la respuesta llega antes de `delay`, el timer se cancela y el
+  // skeleton nunca llega a mostrarse — evita el parpadeo de "flash de
+  // loading" en respuestas rápidas (patrón estándar, no solo para esta
+  // app), mientras sigue cumpliendo "nunca un hueco en blanco" cuando la
+  // carga sí tarda.
+  function withDelayedSkeleton(showFn, hideFn, delay = 150) {
+    const timer = setTimeout(showFn, delay);
+    return {
+      finish() {
+        clearTimeout(timer);
+        hideFn();
+      },
+    };
+  }
+
+  function skeletonExpenseRows(n = 4) {
+    const row = `
+      <div class="skeleton-expense-row" aria-hidden="true">
+        <div class="skeleton-shimmer skeleton-expense-icon"></div>
+        <div class="skeleton-expense-lines">
+          <div class="skeleton-shimmer skeleton-line-wide"></div>
+          <div class="skeleton-shimmer skeleton-line-narrow"></div>
+        </div>
+        <div class="skeleton-shimmer skeleton-expense-amount"></div>
+      </div>`;
+    return `<div class="day-group">${row.repeat(n)}</div>`;
+  }
+
+  function skeletonReviewCards(n = 2) {
+    return Array.from(
+      { length: n },
+      () => `
+      <div class="field-group skeleton-review-card" aria-hidden="true">
+        <div class="skeleton-shimmer skeleton-review-amount"></div>
+        <div class="skeleton-shimmer skeleton-review-line"></div>
+        <div class="skeleton-shimmer skeleton-review-line-2"></div>
+      </div>`
+    ).join("");
+  }
+
+  function skeletonBudgetCards(n = 5) {
+    return Array.from(
+      { length: n },
+      () => `
+      <div class="budget-card skeleton-budget-card" aria-hidden="true">
+        <div class="budget-card-head">
+          <div class="skeleton-shimmer skeleton-budget-icon"></div>
+          <div class="skeleton-shimmer skeleton-budget-name"></div>
+        </div>
+        <div class="skeleton-shimmer skeleton-budget-bar"></div>
+        <div class="skeleton-shimmer skeleton-budget-meta"></div>
+      </div>`
+    ).join("");
+  }
+
+  function skeletonCalendarCells(n = 35) {
+    return Array.from(
+      { length: n },
+      () => `<div class="calendar-day-cell skeleton-shimmer" aria-hidden="true"></div>`
+    ).join("");
+  }
+
+  // ── Transición de contenido al cambiar de periodo ────────────────────
+  //
+  // Cross-fade + ligero deslizamiento (mismo lenguaje que las hojas) al
+  // cambiar Día/Mes/Año — ver .content-swap-* en app.css. reduce-motion
+  // ya está cubierto a nivel de CSS (transition-duration: 0.01ms
+  // !important universal), así que no hace falta repetir el check aquí.
+  function swapContent(regions, fn) {
+    regions.forEach((r) => r.classList.add("content-swap-out"));
+    return Promise.resolve(fn()).then(() => {
+      regions.forEach((r) => {
+        r.classList.remove("content-swap-out");
+        r.classList.add("content-swap-in");
+      });
+      setTimeout(() => {
+        regions.forEach((r) => r.classList.remove("content-swap-in"));
+      }, 400);
+    });
+  }
+
   function dayLabel(dateStr) {
     const d = new Date(dateStr);
     const today = new Date();
@@ -260,11 +376,25 @@
   // ── Carga de datos ───────────────────────────────────────────────────
 
   async function loadExpenses() {
-    el.totalMeta.textContent = "Cargando…";
+    const skeleton = withDelayedSkeleton(
+      () => {
+        showTotalSkeleton();
+        el.expenseList.innerHTML = skeletonExpenseRows();
+      },
+      hideTotalSkeleton
+    );
     const res = await authFetch(`${API}/expenses?granularity=${state.granularity}&date=${state.date}`);
     const data = await res.json();
+    skeleton.finish();
     state.expenses = data.expenses || [];
-    el.totalAmount.textContent = formatAmount(data.total);
+
+    if (data.total === null || data.total === undefined) {
+      el.totalAmount.textContent = "—";
+      state.currentTotal = null;
+    } else {
+      animateAmountText(el.totalAmount, state.currentTotal ?? 0, data.total);
+      state.currentTotal = data.total;
+    }
     el.totalMeta.textContent = `${data.count} transacción${data.count === 1 ? "" : "es"}`;
     renderExpenseList();
 
@@ -300,7 +430,11 @@
   }
 
   async function loadReviewQueue() {
+    const skeleton = withDelayedSkeleton(() => {
+      el.reviewList.innerHTML = skeletonReviewCards();
+    }, () => {});
     const res = await authFetch(`${API}/expenses/review`);
+    skeleton.finish();
     state.reviewQueue = await res.json();
     const count = state.reviewQueue.length;
     el.reviewBadge.hidden = count === 0;
@@ -336,7 +470,7 @@
       const message = Array.isArray(data.detail)
         ? data.detail.map((d) => d.msg).join(", ")
         : data.detail;
-      el.searchError.textContent = message || "Filtros inválidos.";
+      el.searchError.querySelector("span").textContent = message || "Filtros inválidos.";
       el.searchError.hidden = false;
       return;
     }
@@ -378,7 +512,7 @@
   function renderSearchResults() {
     const count = state.searchTotal;
     el.resultsCount.textContent = `${count} resultado${count === 1 ? "" : "s"}`;
-    renderExpenseList(state.searchResults, "Sin resultados con estos filtros.");
+    renderExpenseList(state.searchResults, searchEmptyState());
     el.loadMore.hidden = state.searchResults.length >= state.searchTotal;
   }
 
@@ -426,11 +560,15 @@
 
   async function loadBudgets() {
     el.budgetsMonthLabel.textContent = monthLabel(state.budgetMonth);
+    const skeleton = withDelayedSkeleton(() => {
+      el.budgetsList.innerHTML = skeletonBudgetCards();
+    }, () => {});
     const [budgetsRes, comparisonRes, recurringRes] = await Promise.all([
       authFetch(`${API}/budgets?month=${state.budgetMonth}`),
       authFetch(`${API}/expenses/comparison?month=${state.budgetMonth}`),
       authFetch(`${API}/expenses/recurring`),
     ]);
+    skeleton.finish();
     state.budgets = await budgetsRes.json();
     const comparison = await comparisonRes.json();
     state.previousMonthByCategory = Object.fromEntries(
@@ -547,8 +685,16 @@
     const barState = budgetBarState(b.spent, b.limit_amount);
     const pct = b.limit_amount ? Math.min(100, Math.round((b.spent / b.limit_amount) * 100)) : 0;
     const hasNoLimit = b.limit_amount === null || b.limit_amount === undefined;
+    // Sin gasto aún: mensaje de apoyo en vez del dato "0,00 €" a secas —
+    // mismo principio que los estados vacíos compuestos (defaultExpense
+    // EmptyState/searchEmptyState), adaptado a lo que cabe en una
+    // tarjeta compacta (sin icono/CTA propios, solo el tono del texto).
     const metaText = hasNoLimit
-      ? `${formatAmount(b.spent)} gastado, sin límite`
+      ? b.spent === 0
+        ? "Sin gastos aún este mes"
+        : `${formatAmount(b.spent)} gastado, sin límite`
+      : b.spent === 0
+      ? `Sin gastos aún — límite ${formatAmount(b.limit_amount)}`
       : `${formatAmount(b.spent)} de ${formatAmount(b.limit_amount)}`;
     const editing = state.editingCategory === b.category;
     // Antes no había ninguna pista de que la tarjeta se pudiera tocar
@@ -636,7 +782,11 @@
 
   async function loadCalendarMonth() {
     el.calendarMonthLabel.textContent = monthLabel(state.calendarMonth);
+    const skeleton = withDelayedSkeleton(() => {
+      el.calendarGrid.innerHTML = skeletonCalendarCells();
+    }, () => {});
     const res = await authFetch(`${API}/calendar?month=${state.calendarMonth}`);
+    skeleton.finish();
     const data = await res.json();
     state.calendarDays = data.days;
     renderCalendarGrid();
@@ -755,7 +905,7 @@
       body: JSON.stringify(body),
     });
     if (!res.ok) {
-      el.calendarNoteError.textContent = "No se ha podido guardar la nota.";
+      el.calendarNoteError.querySelector("span").textContent = "No se ha podido guardar la nota.";
       el.calendarNoteError.hidden = false;
       return;
     }
@@ -775,12 +925,50 @@
 
   // ── Render ───────────────────────────────────────────────────────────
 
-  function renderExpenseList(items, emptyText) {
+  // Estado vacío compuesto genérico: icono + título + mensaje de apoyo +
+  // acción sugerida — no un hueco en blanco ni una línea de texto suelta.
+  // `actionLabel` ausente omite el botón (p. ej. si algún día hace falta
+  // un caso sin acción clara).
+  function emptyStateHtml({ icon = "icon-list", title, message, actionLabel }) {
+    return `
+      <div class="empty-state-composed">
+        <div class="empty-state-icon"><svg class="icon" aria-hidden="true" focusable="false"><use href="#${icon}" /></svg></div>
+        <div class="empty-state-title">${escapeHtml(title)}</div>
+        ${message ? `<div class="empty-state-message">${escapeHtml(message)}</div>` : ""}
+        ${actionLabel ? `<button class="empty-state-action" data-empty-action>${escapeHtml(actionLabel)}</button>` : ""}
+      </div>`;
+  }
+
+  function defaultExpenseEmptyState() {
+    const granularityLabel =
+      { day: "este día", month: "este mes", year: "este año" }[state.granularity] || "en este periodo";
+    return {
+      icon: "icon-list",
+      title: `Aún no hay gastos ${granularityLabel}`,
+      message: "Los que añadas o lleguen automáticamente aparecerán aquí.",
+      actionLabel: "Añade el primero",
+      onAction: () => el.fabAdd.click(),
+    };
+  }
+
+  function searchEmptyState() {
+    return {
+      icon: "icon-search",
+      title: "Sin resultados con estos filtros",
+      message: "Prueba a ampliar el rango de fechas o quitar algún filtro.",
+      actionLabel: "Limpiar filtros",
+      onAction: exitSearchMode,
+    };
+  }
+
+  function renderExpenseList(items, emptyConfig) {
     items = items || state.expenses;
-    emptyText = emptyText || "Sin gastos en este periodo.";
 
     if (items.length === 0) {
-      el.expenseList.innerHTML = `<div class="empty-state">${emptyText}</div>`;
+      const cfg = emptyConfig || defaultExpenseEmptyState();
+      el.expenseList.innerHTML = emptyStateHtml(cfg);
+      const actionBtn = el.expenseList.querySelector("[data-empty-action]");
+      if (actionBtn && cfg.onAction) actionBtn.addEventListener("click", cfg.onAction);
       return;
     }
 
@@ -792,10 +980,12 @@
     }
 
     let html = "";
+    let rowIndex = 0;
     for (const [dateKey, dayItems] of groups) {
       html += `<div class="day-group"><div class="day-label">${dayLabel(dateKey)}</div>`;
       for (const e of dayItems) {
-        html += expenseRowHtml(e);
+        html += expenseRowHtml(e, rowIndex);
+        rowIndex++;
       }
       html += `</div>`;
     }
@@ -806,15 +996,19 @@
     });
   }
 
-  function expenseRowHtml(e) {
+  function expenseRowHtml(e, index = 0) {
     const icon = CATEGORY_ICONS[e.category] || "icon-box";
     const merchantLabel = e.merchant || "Sin identificar";
+    // Entrada escalonada corta (ver .row-enter en app.css) — el índice se
+    // limita a 14 para que listas largas no acumulen varios segundos de
+    // retraso en la última fila.
+    const delay = Math.min(index, 14) * 35;
     // <button>, no <div> — antes no era ni siquiera enfocable, así que
     // abrir el detalle de un gasto era imposible sin puntero. Sin
     // elementos interactivos anidados dentro (a diferencia de
     // .budget-card), así que aquí sí es un <button> real.
     return `
-      <button class="expense-row" data-expense-id="${e.id}" aria-label="${escapeHtml(merchantLabel)}, ${e.category || "sin categorizar"}, ${formatAmount(e.amount)}${e.needs_review ? ", pendiente de revisión" : ""}">
+      <button class="expense-row row-enter" style="animation-delay: ${delay}ms" data-expense-id="${e.id}" aria-label="${escapeHtml(merchantLabel)}, ${e.category || "sin categorizar"}, ${formatAmount(e.amount)}${e.needs_review ? ", pendiente de revisión" : ""}">
         <div class="expense-icon ${categoryIconClass(e.category)}"><svg class="icon" aria-hidden="true" focusable="false"><use href="#${icon}" /></svg></div>
         <div class="expense-info">
           <div class="expense-merchant">${escapeHtml(merchantLabel)}</div>
@@ -940,7 +1134,7 @@
     btn.classList.add("active");
     el.granularityThumb.style.transform = `translateX(${granularityButtons.indexOf(btn) * 100}%)`;
     state.granularity = btn.dataset.granularity;
-    loadExpenses();
+    swapContent([el.totalCard, el.expenseList], () => loadExpenses());
   });
 
   // ── Detalle de gasto ─────────────────────────────────────────────────
@@ -1088,7 +1282,7 @@
       body: JSON.stringify({ confirm: el.resetConfirmInput.value }),
     });
     if (!res.ok) {
-      el.resetError.textContent = "No se ha podido completar el borrado.";
+      el.resetError.querySelector("span").textContent = "No se ha podido completar el borrado.";
       el.resetError.hidden = false;
       return;
     }

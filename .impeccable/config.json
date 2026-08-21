@@ -8,6 +8,12 @@
         "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
         "createdAt": "2026-08-13T10:00:29.055Z",
         "reason": "User confirmed cubic-bezier(0.34, 1.56, 0.64, 1) is intentional — momentum tap-feedback spring per apple-design skill, not decorative bounce"
+      },
+      {
+        "rule": "bounce-easing",
+        "value": "var(--spring-settle)",
+        "createdAt": "2026-08-21T09:32:13.485Z",
+        "reason": "User confirmed: --spring-settle is critically-damped (cubic-bezier(0.22,1,0.36,1), no overshoot) -- reserved by DESIGN.md's Touch-Bounce Rule for content/state transitions specifically because it does not bounce. --spring-bounce stays reserved for tactile press feedback and is not exempted."
       }
     ]
   }

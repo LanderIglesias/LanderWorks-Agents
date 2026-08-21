@@ -141,8 +141,9 @@ finish review, the verdict, and DESIGN.md.
           </label>
         </div>
         <button class="primary-button" id="lock-save">Entrar</button>
-        <p id="lock-error" role="alert" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden>
-          Clave incorrecta.
+        <p id="lock-error" class="inline-alert" role="alert" hidden>
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-alert" /></svg>
+          <span>Clave incorrecta.</span>
         </p>
       </div>
     </div>
@@ -310,7 +311,10 @@ finish review, the verdict, and DESIGN.md.
           </label>
         </div>
         <button class="primary-button" id="calendar-note-save">Añadir nota</button>
-        <p id="calendar-note-error" role="alert" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
+        <p id="calendar-note-error" class="inline-alert" role="alert" hidden>
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-alert" /></svg>
+          <span></span>
+        </p>
       </div>
     </div>
 
@@ -364,7 +368,10 @@ finish review, the verdict, and DESIGN.md.
         </div>
 
         <button class="secondary-button" id="search-submit">Buscar</button>
-        <p id="search-error" role="alert" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
+        <p id="search-error" class="inline-alert" role="alert" hidden>
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-alert" /></svg>
+          <span></span>
+        </p>
       </div>
     </div>
 
@@ -491,9 +498,12 @@ finish review, the verdict, and DESIGN.md.
             </label>
           </div>
           <button class="danger-button" id="reset-confirm-btn" disabled>Borrar todos los gastos</button>
-          <p id="reset-error" role="alert" style="margin-top: 12px; color: var(--danger); font-size: 13px" hidden></p>
-          <p id="reset-success" role="status" style="margin-top: 12px; color: var(--positive); font-size: 13px" hidden>
-            Todos los gastos se han borrado.
+          <p id="reset-error" class="inline-alert" role="alert" hidden>
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#icon-alert" /></svg>
+            <span></span>
+          </p>
+          <p id="reset-success" class="inline-alert inline-alert-success" role="status" hidden>
+            <span>Todos los gastos se han borrado.</span>
           </p>
         </div>
       </div>
