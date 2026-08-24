@@ -1109,7 +1109,14 @@ body {
   border: none;
   background: transparent;
   text-align: right;
-  font-size: 15px;
+  /* 16px real, no 15 — cualquier campo por debajo de 16px dispara el
+     zoom automático de iOS Safari al enfocar, y con maximum-scale=1
+     quitado (a propósito, ver auditoría de accesibilidad) ese zoom ya
+     no tiene nada que lo bloquee. El zoom no se deshace bien al cerrar
+     el teclado, dejando la pantalla ampliada — bug real reportado en
+     dispositivo. No es negociable por campo: 16px es el mínimo, no una
+     preferencia visual. */
+  font-size: 16px;
   color: var(--text);
   font-family: inherit;
   /* Altura mínima táctil propia del control — antes solo la fila entera
@@ -1229,7 +1236,12 @@ body {
   border: none;
   border-radius: var(--radius-row);
   background: var(--danger);
-  color: white;
+  /* --danger-contrast, no white fijo: se había quedado sin el mismo fix
+     ya aplicado a badges/tabbar (ver .quick-action .circle .badge y
+     .tabbar .review-badge) — en oscuro, blanco fijo sobre el --danger
+     claro de ese tema cae a 2.78:1, el mismo fallo ya documentado en
+     esos otros sitios. */
+  color: var(--danger-contrast);
   font-size: 16px;
   font-weight: 600;
   transition: transform 0.15s var(--spring-bounce), opacity 0.2s ease;
@@ -1477,7 +1489,10 @@ body {
   background: var(--glass-fill-strong);
   border-radius: var(--radius-tile);
   padding: 12px 10px;
-  font-size: 14px;
+  /* 16px real, no 14 — mismo motivo que .field-row input, ver ese
+     comentario: por debajo de 16px, iOS Safari hace zoom automático al
+     enfocar y no lo deshace bien al cerrar el teclado. */
+  font-size: 16px;
   color: var(--text);
   font-family: inherit;
 }
