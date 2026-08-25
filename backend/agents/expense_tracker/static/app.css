@@ -20,11 +20,27 @@
   --halo-color: 255, 138, 91; /* coral, para el halo tras navbar/tarjetas */
   --halo-opacity: 0.14;
 
-  --glass-fill: rgba(255, 255, 255, 0.55);
-  --glass-fill-strong: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(24, 12, 46, 0.08);
+  /* Cristal claro con tinte violeta oscuro, NO blanco: blanco-sobre-
+     blanco (el fondo de este tema ya es casi blanco) se compone hacia
+     blanco sin importar la opacidad — a 0.55 el resultado medía apenas
+     1.08:1 de diferencia de luminancia contra el fondo (prácticamente
+     "el mismo blanco continuo"), muy por debajo del 1.21:1 real que sí
+     logra el tema oscuro con blanco-sobre-negro a una opacidad
+     comparable. Un cristal esmerilado real sobre una superficie clara
+     también se ve así en la práctica — ligeramente grisáceo, no más
+     blanco que el fondo — así que este tinte no es solo un parche de
+     contraste, es más fiel al material que el blanco puro. Con esto la
+     tarjeta compone a ~1.22:1 contra el fondo, a la par del oscuro. */
+  --glass-fill: rgba(28, 18, 48, 0.1);
+  --glass-fill-strong: rgba(28, 18, 48, 0.16);
+  /* 0.16, no 0.08: el borde era la única señal de "esto es una
+     superficie distinta" mientras el relleno era indistinguible del
+     fondo — con el relleno ya arreglado (arriba) esto ya no carga solo
+     él con el trabajo, pero seguía siendo notablemente más débil que el
+     0.12 del oscuro. */
+  --glass-border: rgba(24, 12, 46, 0.16);
   --glass-border-top: rgba(255, 255, 255, 0.9);
-  --glass-row: rgba(255, 255, 255, 0.42);
+  --glass-row: rgba(28, 18, 48, 0.045);
   --shadow-card: 0 8px 28px -10px rgba(60, 40, 90, 0.16);
 
   --text: #1c1230;
@@ -2056,9 +2072,13 @@ body {
 
 @media (prefers-reduced-transparency: reduce) {
   :root {
-    --glass-fill: #f2eefa;
-    --glass-fill-strong: #ffffff;
-    --glass-row: #f7f4fc;
+    /* Antes #f2eefa — literalmente idéntico a --bg-mid, cero
+       diferenciación posible incluso antes de tocar el tinte
+       translúcido de arriba. Mismos tonos ya calculados, en versión
+       sólida (sin blur, que es lo que pide este media feature). */
+    --glass-fill: #ddd8e6;
+    --glass-fill-strong: #d0cbda;
+    --glass-row: #e8e4f1;
   }
   :root:not([data-theme="light"]) {
     --glass-fill: #201a30;
