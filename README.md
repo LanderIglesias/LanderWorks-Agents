@@ -100,6 +100,14 @@ Personal expense tracker installable on iPhone as a PWA. Ingests expenses from t
 
 ---
 
+### 12. Taller Mecánico — Multi-Agent Supervisor for a Repair Shop
+Simulates a mechanic shop's diagnosis-to-invoice workflow with a supervisor/router pattern across 4 real agents (Router, Diagnóstico, Presupuestador, Evaluador). No agent that produces customer-facing content self-approves: a dedicated Evaluador reviews every diagnosis and every budget through a 3-way verdict — `aprobado`, `rechazado` (with mandatory retry feedback), or `escalado_humano` — never a simple binary pass/fail. Every decision is written to an auditable `decision_log`, traced end-to-end in Langfuse, with customer PII (Fernet + HMAC-SHA256) encrypted at rest. 300+ tests.
+
+**Tech:** Python · Claude Haiku · SQLite · Langfuse · Fernet/HMAC-SHA256 · FastAPI  
+**[View project →](backend/agents/taller_mecanico/)**
+
+---
+
 ## Stack
 
 ### AI & LLMs
@@ -257,8 +265,8 @@ de diseño (no está versionada en el repo, se trata como dependencia).
 |---|---|
 | `ANTHROPIC_API_KEY` | All Claude-powered agents |
 | `OPENAI_API_KEY` | RAG agents (embeddings) · Dental agent · Meeting Intel |
-| `LANGFUSE_PUBLIC_KEY` | Lead capture agent (LLM observability) |
-| `LANGFUSE_SECRET_KEY` | Lead capture agent (LLM observability) |
+| `LANGFUSE_PUBLIC_KEY` | Lead capture agent + Taller Mecánico (LLM observability) |
+| `LANGFUSE_SECRET_KEY` | Lead capture agent + Taller Mecánico (LLM observability) |
 | `ADMIN_TOKEN` | Lead capture agent admin panel |
 | `RESEND_API_KEY` | Lead capture agent email delivery |
 | `TWILIO_ACCOUNT_SID` | WhatsApp agent |

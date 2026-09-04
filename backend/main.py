@@ -50,8 +50,15 @@ except Exception as e:
     print(f"[JOB_MATCHER] No disponible: {e}")
     JOB_MATCHER_AVAILABLE = False
 from .agents.lead_capture_agent.api import router as lead_capture_agent_router
-from .agents.meeting_intel_agent.api import router as meeting_intel_router
 from .agents.rag_pdf_agent.api import router as rag_pdf_router
+
+try:
+    from .agents.meeting_intel_agent.api import router as meeting_intel_router
+
+    MEETING_INTEL_AVAILABLE = True
+except Exception as e:
+    print(f"[MEETING_INTEL] No disponible: {e}")
+    MEETING_INTEL_AVAILABLE = False
 
 try:
     from .agents.expense_tracker.api import router as expense_tracker_router
@@ -109,7 +116,8 @@ if JOB_MATCHER_AVAILABLE:
     app.include_router(job_matcher_router)
 if TECH_DEBT_AGENT_AVAILABLE:
     app.include_router(tech_debt_router)
-app.include_router(meeting_intel_router)
+if MEETING_INTEL_AVAILABLE:
+    app.include_router(meeting_intel_router)
 if DOC_INTEL_AVAILABLE:
     app.include_router(doc_intel_router)
 if EXPENSE_TRACKER_AVAILABLE:
@@ -209,18 +217,51 @@ def show_config():
     return {"address": c.get("address"), "map_url": c.get("map_url")}
 
 
-@app.get("/admin/routes")
-def admin_routes():
-    return sorted(
-        [
-            {
-                "path": getattr(r, "path", ""),
+def _flatten_routes(routes, prefix: str = ""):
+    """`app.routes` ya no expone directamente las rutas de los routers
+    montados vía `include_router()` -- FastAPI las envuelve en un objeto
+    `_IncludedRouter` (`fastapi/routing.py`) sin atributo `.path` propio,
+    así que `getattr(r, "path", "")` las devolvía todas vacías. Esto
+    dejaba `/admin/routes` reportando solo las rutas declaradas
+    directamente en `app` (`/chat`, `/admin/...`, etc.) y NINGUNA de
+    bi_agent, rag_pdf_agent, pdf_translator_v2, meeting_intel_agent,
+    tech_debt_agent, job_matcher, doc_intel_agent ni expense_tracker --
+    un hallazgo real, no teórico: se detectó porque el Hub Personal de
+    Agentes usa este endpoint para confirmar qué agentes están
+    realmente disponibles, y todos aparecían como ausentes aunque
+    respondían bien de verdad. Se recurre a `.original_router.routes`
+    para los envoltorios sin `.path`.
+
+    El prefijo del propio `include_router(..., prefix=...)` vive en
+    `.include_context.prefix`, NO ya aplicado a las rutas anidadas --
+    hallazgo real de la revisión de código: la primera versión de este
+    fix asumía que sí, y solo no se notó porque ninguna llamada actual a
+    `include_router` en este archivo usa `prefix=`. Se acumula
+    explícitamente aquí para que un `include_router` futuro con
+    `prefix=` no produzca rutas fantasma (que 404 de verdad) en la
+    respuesta. Sin riesgo de recursión infinita: FastAPI ya rechaza en
+    `include_router` un router que se incluya a sí mismo
+    (`assert not router._contains_router(self)`)."""
+    for r in routes:
+        path = getattr(r, "path", None)
+        if path is not None:
+            yield {
+                "path": prefix + path,
                 "methods": sorted(list(getattr(r, "methods", []) or [])),
             }
-            for r in app.routes
-        ],
-        key=lambda x: x["path"],
-    )
+            continue
+        original_router = getattr(r, "original_router", None)
+        nested_prefix = prefix + getattr(getattr(r, "include_context", None), "prefix", "")
+        nested_routes = getattr(
+            original_router if original_router is not None else r, "routes", None
+        )
+        if nested_routes:
+            yield from _flatten_routes(nested_routes, nested_prefix)
+
+
+@app.get("/admin/routes")
+def admin_routes():
+    return sorted(_flatten_routes(app.routes), key=lambda x: x["path"])
 
 
 @app.post("/admin/test-email")
