@@ -204,6 +204,13 @@ class TestRagEngine:
         assert llm.num_predict == 100
         assert llm.reasoning is False
 
+        # Con thinking, el límite se amplía para que el razonamiento no deje la respuesta vacía
+        monkeypatch.setenv("RAG_OLLAMA_REASONING", "1")
+        llm = engine._get_llm(max_tokens=100)
+        assert llm.reasoning is True
+        assert llm.num_predict == 100 + engine.OLLAMA_THINKING_BUDGET
+        monkeypatch.delenv("RAG_OLLAMA_REASONING")
+
         monkeypatch.setenv("RAG_LLM_PROVIDER", "openai")
         with pytest.raises(ValueError):
             engine._get_llm(max_tokens=100)

@@ -44,6 +44,9 @@ OLLAMA_DEFAULT_MODEL = "qwen3:14b"
 # Ollama recorta en silencio lo que no cabe en la ventana de contexto;
 # 8192 tokens cubre prompt + 4 chunks + historial + respuesta con margen.
 OLLAMA_NUM_CTX = 8192
+# Con RAG_OLLAMA_REASONING=1 el modelo "piensa" antes de responder. Esos tokens cuentan
+# dentro de num_predict: sin margen extra, la respuesta puede salir vacía (cortada).
+OLLAMA_THINKING_BUDGET = 4096
 
 # Embeddings: RAG_EMBEDDINGS_PROVIDER="openai" (por defecto) u "ollama" (local).
 # Un índice creado con un proveedor solo se puede consultar con ese mismo proveedor
@@ -138,11 +141,14 @@ def _get_llm(max_tokens: int):
         # producción (Docker) no lo necesita.
         from langchain_ollama import ChatOllama
 
+        # False explícito (no None): si no, Qwen3 mete su razonamiento <think> en la respuesta.
+        # True lo separa en additional_kwargs["reasoning_content"].
+        reasoning = os.getenv("RAG_OLLAMA_REASONING", "0") == "1"
         return ChatOllama(
             model=os.getenv("RAG_OLLAMA_MODEL", OLLAMA_DEFAULT_MODEL),
-            num_predict=max_tokens,
+            num_predict=max_tokens + (OLLAMA_THINKING_BUDGET if reasoning else 0),
             num_ctx=OLLAMA_NUM_CTX,
-            reasoning=False,  # sin esto, Qwen3 mete su razonamiento <think> en la respuesta
+            reasoning=reasoning,
         )
     raise ValueError(f"RAG_LLM_PROVIDER desconocido: {provider!r} (usa 'anthropic' u 'ollama')")
 
