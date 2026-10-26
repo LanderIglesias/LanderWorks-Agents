@@ -45,6 +45,11 @@ OLLAMA_DEFAULT_MODEL = "qwen3:14b"
 # 8192 tokens cubre prompt + 4 chunks + historial + respuesta con margen.
 OLLAMA_NUM_CTX = 8192
 
+# Embeddings: RAG_EMBEDDINGS_PROVIDER="openai" (por defecto) u "ollama" (local).
+# Un índice creado con un proveedor solo se puede consultar con ese mismo proveedor
+# (vectores de distinta dimensión): cambiarlo obliga a volver a subir el PDF.
+OLLAMA_DEFAULT_EMBED_MODEL = "bge-m3"  # multilingüe, sin prefijos de consulta
+
 # ── Prompts ───────────────────────────────────────────────────────────────────
 
 # Prompt para una sola fuente — incluye historial de conversación.
@@ -104,8 +109,18 @@ def _validate_session_id(session_id: str) -> str:
         raise ValueError(f"session_id inválido: {session_id!r}") from e
 
 
-def _get_embeddings() -> OpenAIEmbeddings:
-    return OpenAIEmbeddings(model="text-embedding-3-small")
+def _get_embeddings():
+    """Devuelve el modelo de embeddings según RAG_EMBEDDINGS_PROVIDER (se lee en cada llamada)."""
+    provider = os.getenv("RAG_EMBEDDINGS_PROVIDER", "openai").lower()
+    if provider == "openai":
+        return OpenAIEmbeddings(model="text-embedding-3-small")
+    if provider == "ollama":
+        from langchain_ollama import OllamaEmbeddings
+
+        return OllamaEmbeddings(
+            model=os.getenv("RAG_OLLAMA_EMBED_MODEL", OLLAMA_DEFAULT_EMBED_MODEL)
+        )
+    raise ValueError(f"RAG_EMBEDDINGS_PROVIDER desconocido: {provider!r} (usa 'openai' u 'ollama')")
 
 
 def _get_llm(max_tokens: int):

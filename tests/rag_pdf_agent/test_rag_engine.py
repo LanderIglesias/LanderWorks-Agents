@@ -208,6 +208,27 @@ class TestRagEngine:
         with pytest.raises(ValueError):
             engine._get_llm(max_tokens=100)
 
+    def test_get_embeddings_elige_proveedor_por_variable_de_entorno(self, monkeypatch):
+        """Por defecto OpenAI; con RAG_EMBEDDINGS_PROVIDER=ollama, OllamaEmbeddings; otro valor, error."""
+        import pytest
+        from langchain_ollama import OllamaEmbeddings
+
+        import backend.agents.rag_pdf_agent.rag_engine as engine
+
+        monkeypatch.delenv("RAG_EMBEDDINGS_PROVIDER", raising=False)
+        with patch.object(engine, "OpenAIEmbeddings") as openai_cls:
+            engine._get_embeddings()
+        openai_cls.assert_called_once_with(model="text-embedding-3-small")
+
+        monkeypatch.setenv("RAG_EMBEDDINGS_PROVIDER", "ollama")
+        emb = engine._get_embeddings()
+        assert isinstance(emb, OllamaEmbeddings)
+        assert emb.model == engine.OLLAMA_DEFAULT_EMBED_MODEL
+
+        monkeypatch.setenv("RAG_EMBEDDINGS_PROVIDER", "cohere")
+        with pytest.raises(ValueError):
+            engine._get_embeddings()
+
     def test_cleanup_session_elimina_directorio(self, tmp_path, monkeypatch):
         """cleanup_session debe eliminar el directorio de la sesión."""
         import backend.agents.rag_pdf_agent.rag_engine as engine

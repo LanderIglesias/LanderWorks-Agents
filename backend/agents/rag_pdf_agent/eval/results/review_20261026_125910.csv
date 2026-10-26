@@ -1,0 +1,190 @@
+﻿config;repeat;id;question;expected;answer;auto_grade;manual_grade
+claude-haiku-4.5 (API);1;1;¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?;Los días 15 y 16 de noviembre, en Málaga.;Según el documento, el IX Congreso Nacional de la FEFQ se celebró los días **15 y 16 de noviembre en Málaga** (página 7).;correcta;
+claude-haiku-4.5 (API);1;2;¿Cuántos Pulmonitos se vendieron en 2025?;1.652 Pulmonitos.;Según el documento, en 2025 se vendieron **1.652 Pulmonitos** a las asociaciones y particulares (página 10).;correcta;
+claude-haiku-4.5 (API);1;3;¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?;148 personas.;Según el documento, **148 personas se conectaron al webinar** de presentación del manual de trasplante actualizado, que coincidió con el Día Mundial de la Fibrosis Quística (página 6).;correcta;
+claude-haiku-4.5 (API);1;4;¿Cuántas visitas tuvo la página web en 2025?;36.528 visitas.;Según el documento (página 17), la página web tuvo **36.528 visitas en 2025**, lo que representa una media de más de 3.044 páginas vistas al mes y 102 diarias.;correcta;
+claude-haiku-4.5 (API);1;5;¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?;23 reuniones.;Según el documento, la Comisión Ejecutiva celebró **23 reuniones a lo largo de 2025** (página 22).;correcta;
+claude-haiku-4.5 (API);1;6;¿Qué premio recibió la Federación en 2025 y por qué proyecto?;El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».;Según el documento, en 2025 la Federación recibió el **Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC**, por el proyecto **«Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística** (Página 23).;correcta;
+claude-haiku-4.5 (API);1;7;¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?;237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).;"Según el documento (página 11), los **ingresos reales de 2025 fueron de 237.294,59€**.
+
+De esta cantidad, el **60,62% provino de donaciones privadas**.
+
+El desglose completo fue:
+- 30,72% de subvenciones públicas
+- 60,62% de donaciones privadas
+- 8,66% de fondos propios";correcta;
+claude-haiku-4.5 (API);1;8;¿Cuál fue el resultado económico de 2025?;Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).;"# Resultado Económico de 2025
+
+Según el documento (página 11), los **ingresos de 2025 fueron de 237.294,59€**, distribuidos de la siguiente manera:
+
+- **30,72%** provenía de subvenciones públicas (Concesión Directa, 0'7 IRPF y mantenimiento)
+- **60,62%** provenía de donaciones privadas
+- **8,66%** provenía de fondos propios
+
+El documento no especifica información sobre gastos o resultado neto (beneficio/pérdida) del ejercicio 2025, solo detalla la composición de los ingresos recaudados.";incorrecta;
+claude-haiku-4.5 (API);1;9;En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?;280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).;"Según la página 5 del documento, en el proyecto ""Mens sana in corpore sano"" se realizaron:
+
+- **Psicología: 280 sesiones**
+- **Ejercicio físico: 214 sesiones**";correcta;
+claude-haiku-4.5 (API);1;10;¿Qué funcionalidades del nuevo CRM se completaron en 2025?;"Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.";"Según el documento (Página 8), en 2025 se completaron las siguientes funcionalidades del nuevo CRM de la FEFQ:
+
+1. **Autentificación del usuario y recuperación de credenciales** de forma autónoma.
+2. **Creación de relación familiar y tutela de socios** menores de edad.
+3. **Importación de socios masivo** y posibilidad de descarga de datos en Excel.
+4. **Creación de calendarios laborales** para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.
+
+Además, se menciona que se comenzó también con el **sistema de registro de fichaje** por parte del trabajador y con el **sistema de gestión de consultas** (solicitud, confirmación, realización, desplazamientos).";correcta;
+claude-haiku-4.5 (API);1;11;¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?;18.580,50 € (14.344,71 € + 4.235,79 €).;"Según el documento (página 10), en 2025 se recaudó:
+
+- **Productos solidarios** (Pulmonitos y otros artículos): **14.344,71€**
+- **Agendas escolares solidarias**: **4.235,79€**
+
+**Total recaudado: 18.580,50€**";correcta;
+claude-haiku-4.5 (API);1;12;¿Cuántas personas con fibrosis quística hay en España según la memoria?;No encontré esa información en el documento.;"No encontré esa información en el documento. La memoria que me proporcionaste no contiene datos sobre el número total de personas con fibrosis quística en España. 
+
+El documento sí menciona cifras sobre participación en proyectos específicos (como 57 personas en psicología y 17 en ejercicio físico del proyecto ""Mens Sana in Corpore Sano""), pero no proporciona estadísticas generales sobre la prevalencia de la enfermedad en el país.";correcta;
+claude-haiku-4.5 (API);1;13;¿Quién preside la Federación Española de Fibrosis Quística?;No encontré esa información en el documento.;No encontré esa información en el documento. El contexto proporcionado no menciona quién preside la Federación Española de Fibrosis Quística.;correcta;
+claude-haiku-4.5 (API);2;1;¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?;Los días 15 y 16 de noviembre, en Málaga.;Según el documento, el IX Congreso Nacional de la FEFQ se celebró los días **15 y 16 de noviembre en Málaga** (página 7).;correcta;
+claude-haiku-4.5 (API);2;2;¿Cuántos Pulmonitos se vendieron en 2025?;1.652 Pulmonitos.;Según el documento, en 2025 se vendieron **1.652 Pulmonitos** a las asociaciones y particulares (página 10).;correcta;
+claude-haiku-4.5 (API);2;3;¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?;148 personas.;Según el documento, **148 personas se conectaron al webinar** de presentación del manual de trasplante actualizado, que coincidió con el Día Mundial de la Fibrosis Quística (página 6).;correcta;
+claude-haiku-4.5 (API);2;4;¿Cuántas visitas tuvo la página web en 2025?;36.528 visitas.;Según el documento, la página web tuvo **36.528 visitas en 2025**, lo que representa una media de más de 3.044 páginas vistas al mes y 102 diarias (Página 17).;correcta;
+claude-haiku-4.5 (API);2;5;¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?;23 reuniones.;Según el documento, la Comisión Ejecutiva celebró **23 reuniones a lo largo de 2025** (página 22).;correcta;
+claude-haiku-4.5 (API);2;6;¿Qué premio recibió la Federación en 2025 y por qué proyecto?;El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».;Según el documento (página 23), en 2025 la Federación recibió el **Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC**, por el proyecto **«Luz-IA»**, una asistente virtual para el bienestar emocional en fibrosis quística.;correcta;
+claude-haiku-4.5 (API);2;7;¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?;237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).;"Según el documento (página 11), los ingresos reales de 2025 fueron de **237.294,59€**.
+
+De esta cantidad, el **60,62% provino de donaciones privadas**.";correcta;
+claude-haiku-4.5 (API);2;8;¿Cuál fue el resultado económico de 2025?;Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).;"Según el documento (Página 11), los ingresos de 2025 fueron de **237.294,59€**.
+
+Estos ingresos provenían de:
+- **30,72%** de subvenciones públicas (Concesión Directa, 0'7 IRPF y mantenimiento)
+- **60,62%** de donaciones privadas
+- **8,66%** de fondos propios
+
+El documento no proporciona información sobre gastos o resultado neto (beneficio o pérdida), solo especifica los ingresos totales del año.";incorrecta;
+claude-haiku-4.5 (API);2;9;En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?;280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).;"Según el documento (página 5), en el proyecto ""Mens Sana in Corpore Sano"" se realizaron:
+
+- **Psicología: 280 sesiones**
+- **Ejercicio físico: 214 sesiones**";correcta;
+claude-haiku-4.5 (API);2;10;¿Qué funcionalidades del nuevo CRM se completaron en 2025?;"Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.";"Según el documento (página 8), en 2025 se completaron las siguientes funcionalidades del nuevo CRM de la FEFQ:
+
+1. **Autentificación del usuario y recuperación de credenciales** de forma autónoma.
+2. **Creación de relación familiar y tutela** de socios menores de edad.
+3. **Importación de socios masivo** y posibilidad de descarga de datos en Excel.
+4. **Creación de calendarios laborales** para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.
+
+Además, se comenzó también con:
+- El sistema de **registro de fichaje** por parte del trabajador
+- El sistema de **gestión de consultas** (solicitud, confirmación, realización, desplazamientos, etc.)";correcta;
+claude-haiku-4.5 (API);2;11;¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?;18.580,50 € (14.344,71 € + 4.235,79 €).;"Según el documento (Página 10), la recaudación total en 2025 fue:
+
+- **Productos solidarios**: 14.344,71€
+- **Agendas escolares solidarias**: 4.235,79€
+
+**Total: 18.580,50€**";correcta;
+claude-haiku-4.5 (API);2;12;¿Cuántas personas con fibrosis quística hay en España según la memoria?;No encontré esa información en el documento.;"No encontré esa información en el documento. 
+
+El documento que consulté contiene información sobre actividades, proyectos y publicaciones de la Federación Española de Fibrosis Quística en 2025, pero no incluye datos sobre el número total de personas con fibrosis quística en España.";correcta;
+claude-haiku-4.5 (API);2;13;¿Quién preside la Federación Española de Fibrosis Quística?;No encontré esa información en el documento.;No encontré esa información en el documento. El contexto proporcionado no incluye datos sobre quién preside la Federación Española de Fibrosis Quística.;correcta;
+claude-haiku-4.5 (API);3;1;¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?;Los días 15 y 16 de noviembre, en Málaga.;Según el documento, el IX Congreso Nacional de la FEFQ se celebró los días **15 y 16 de noviembre en Málaga** (página 7).;correcta;
+claude-haiku-4.5 (API);3;2;¿Cuántos Pulmonitos se vendieron en 2025?;1.652 Pulmonitos.;Según el documento, en 2025 se vendieron **1.652 Pulmonitos** a las asociaciones y particulares (página 10).;correcta;
+claude-haiku-4.5 (API);3;3;¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?;148 personas.;Según el documento, **148 personas** se conectaron al webinar de presentación del manual de trasplante actualizado, que coincidió con el Día Mundial de la Fibrosis Quística (página 6).;correcta;
+claude-haiku-4.5 (API);3;4;¿Cuántas visitas tuvo la página web en 2025?;36.528 visitas.;Según el documento, la página web tuvo **36.528 visitas en 2025**, lo que representa una media de más de 3.044 páginas vistas al mes y 102 diarias. (Página 17);correcta;
+claude-haiku-4.5 (API);3;5;¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?;23 reuniones.;Según el documento, la Comisión Ejecutiva celebró **23 reuniones a lo largo de 2025** (página 22).;correcta;
+claude-haiku-4.5 (API);3;6;¿Qué premio recibió la Federación en 2025 y por qué proyecto?;El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».;"Según el documento, en 2025 la Federación recibió el **Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC**, por el proyecto **«Luz-IA»**, una asistente virtual para el bienestar emocional en fibrosis quística.
+
+(Página 23)";correcta;
+claude-haiku-4.5 (API);3;7;¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?;237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).;"Según el documento (página 11), los ingresos reales de 2025 fueron de **237.294,59€**.
+
+De esta cantidad, el **60,62% provino de donaciones privadas**.";correcta;
+claude-haiku-4.5 (API);3;8;¿Cuál fue el resultado económico de 2025?;Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).;"Según el documento (página 11), los ingresos de 2025 fueron de **237.294,59€**.
+
+Esta cantidad se distribuyó de la siguiente manera:
+- **30,72%** provenía de subvenciones públicas (Concesión Directa, 0'7 IRPF y mantenimiento)
+- **60,62%** provenía de donaciones privadas
+- **8,66%** provenía de fondos propios
+
+El documento no proporciona información sobre los gastos o el resultado neto (beneficio o pérdida) del ejercicio 2025.";incorrecta;
+claude-haiku-4.5 (API);3;9;En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?;280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).;"# Sesiones del Proyecto ""Mens Sana in Corpore Sano""
+
+Según la información del documento (página 5):
+
+- **Psicología: 280 sesiones**
+- **Ejercicio físico: 214 sesiones**
+
+El proyecto se desarrolló entre 2024 y 2025, dirigido a familias de menores con Fibrosis Quística entre 9 y 18 años.";correcta;
+claude-haiku-4.5 (API);3;10;¿Qué funcionalidades del nuevo CRM se completaron en 2025?;"Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.";"Según el documento (página 8), en 2025 se completaron las siguientes funcionalidades del nuevo CRM de la FEFQ:
+
+1. **Autentificación del usuario y recuperación de credenciales** de forma autónoma.
+
+2. **Creación de relación familiar y tutela de socios** menores de edad.
+
+3. **Importación de socios masivo** y posibilidad de descarga de datos en Excel.
+
+4. **Creación de calendarios laborales** para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.
+
+Además, se menciona que se comenzó también con el **sistema de registro de fichaje** por parte del trabajador y el **sistema de gestión de consultas** (solicitud, confirmación, realización, desplazamientos...), aunque estos últimos se encuentran en fase de desarrollo inicial.";correcta;
+claude-haiku-4.5 (API);3;11;¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?;18.580,50 € (14.344,71 € + 4.235,79 €).;"Según el documento (página 10), la recaudación total en 2025 sumando productos solidarios y agendas escolares fue de **18.580,50€**.
+
+Este total se compone de:
+- **14.344,71€** de la venta de Pulmonitos y otros artículos solidarios (tazas, bolsas de tela, botellas y tarjetas de boda)
+- **4.235,79€** de la venta de agendas solidarias escolares";correcta;
+claude-haiku-4.5 (API);3;12;¿Cuántas personas con fibrosis quística hay en España según la memoria?;No encontré esa información en el documento.;"No encontré esa información en el documento. La memoria que me proporcionaste no incluye datos sobre el número total de personas con fibrosis quística en España. 
+
+El documento sí menciona cifras de participación en programas específicos (como el proyecto ""Mens Sana in Corpore Sano"" donde se atendieron 57 personas en psicología y 17 en ejercicio físico) y la participación en la asamblea ordinaria (24 personas), pero no proporciona estadísticas generales sobre la prevalencia de la enfermedad en el país.";correcta;
+claude-haiku-4.5 (API);3;13;¿Quién preside la Federación Española de Fibrosis Quística?;No encontré esa información en el documento.;No encontré esa información en el documento. El contexto proporcionado no incluye datos sobre quién preside la Federación Española de Fibrosis Quística.;correcta;
+qwen3:14b (local);1;1;¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?;Los días 15 y 16 de noviembre, en Málaga.;El IX Congreso Nacional de la FEFQ se celebró los días 15 y 16 de noviembre en Málaga (página 7).;correcta;
+qwen3:14b (local);1;2;¿Cuántos Pulmonitos se vendieron en 2025?;1.652 Pulmonitos.;En 2025 se vendieron 1.652 Pulmonitos. (Página 10);correcta;
+qwen3:14b (local);1;3;¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?;148 personas.;148 personas se conectaron al webinar de presentación del manual de trasplante actualizado. (Página 6);correcta;
+qwen3:14b (local);1;4;¿Cuántas visitas tuvo la página web en 2025?;36.528 visitas.;La página web tuvo 36.528 visitas en 2025 (página 17).;correcta;
+qwen3:14b (local);1;5;¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?;23 reuniones.;La Comisión Ejecutiva celebró 23 reuniones a lo largo de 2025. (Página 22);correcta;
+qwen3:14b (local);1;6;¿Qué premio recibió la Federación en 2025 y por qué proyecto?;El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».;"En 2025, la Federación recibió el ""Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC"" por el proyecto «Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística (página 23).";correcta;
+qwen3:14b (local);1;7;¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?;237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).;Los ingresos reales de 2025 fueron de 237.294,59€, y el 60,62% de dicha cantidad provino de donaciones privadas (página 11).;correcta;
+qwen3:14b (local);1;8;¿Cuál fue el resultado económico de 2025?;Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).;El resultado económico de 2025 fue un total de 237.294,59€ en ingresos.;incorrecta;
+qwen3:14b (local);1;9;En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?;280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).;En el proyecto «Mens sana in corpore sano», se realizaron 280 sesiones de psicología y 214 sesiones de ejercicio físico. (Página 5);correcta;
+qwen3:14b (local);1;10;¿Qué funcionalidades del nuevo CRM se completaron en 2025?;"Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.";"En 2025 se completaron las siguientes funcionalidades del nuevo CRM:  
+1. La autenticación del usuario y recuperación de credenciales de forma autónoma.  
+2. Creación de relación familiar y tutela de socios menores de edad.  
+3. Importación de socios masivo y posibilidad de descarga de datos en Excel.  
+4. Creación de calendarios laborales para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.  
+Además, se inició el sistema de registro de fichaje por parte del trabajador y el sistema de gestión de consultas (solicitud, confirmación, realización, desplazamientos, etc.) (página 8).";correcta;
+qwen3:14b (local);1;11;¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?;18.580,50 € (14.344,71 € + 4.235,79 €).;Se recaudó un total de 14.344,71€ en 2025 sumando las ventas de productos solidarios, incluyendo el Pulmonito, tazas, bolsas de tela, botellas y tarjetas de boda solidarias, junto con la venta de agendas escolares solidarias (página 10).;incorrecta;
+qwen3:14b (local);1;12;¿Cuántas personas con fibrosis quística hay en España según la memoria?;No encontré esa información en el documento.;No encontré esa información en el documento.;correcta;
+qwen3:14b (local);1;13;¿Quién preside la Federación Española de Fibrosis Quística?;No encontré esa información en el documento.;No encontré esa información en el documento.;correcta;
+qwen3:14b (local);2;1;¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?;Los días 15 y 16 de noviembre, en Málaga.;El IX Congreso Nacional de la FEFQ se celebró los días 15 y 16 de noviembre en Málaga (página 7).;correcta;
+qwen3:14b (local);2;2;¿Cuántos Pulmonitos se vendieron en 2025?;1.652 Pulmonitos.;Se vendieron 1.652 Pulmonitos en 2025 (página 10).;correcta;
+qwen3:14b (local);2;3;¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?;148 personas.;148 personas se conectaron al webinar de presentación del manual de trasplante actualizado (página 6).;correcta;
+qwen3:14b (local);2;4;¿Cuántas visitas tuvo la página web en 2025?;36.528 visitas.;La página web tuvo 36.528 visitas en 2025 (página 17).;correcta;
+qwen3:14b (local);2;5;¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?;23 reuniones.;La Comisión Ejecutiva celebró 23 reuniones a lo largo de 2025. (Página 22);correcta;
+qwen3:14b (local);2;6;¿Qué premio recibió la Federación en 2025 y por qué proyecto?;El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».;"En 2025, la Federación recibió el ""Premio Social & Public AI Award"" en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística (página 23).";correcta;
+qwen3:14b (local);2;7;¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?;237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).;Los ingresos reales de 2025 fueron de 237.294,59€, y el 60,62% de dicha cantidad provino de donaciones privadas (página 11).;correcta;
+qwen3:14b (local);2;8;¿Cuál fue el resultado económico de 2025?;Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).;El resultado económico de 2025 fue de 237.294,59€ en ingresos.;incorrecta;
+qwen3:14b (local);2;9;En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?;280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).;En el proyecto «Mens sana in corpore sano», se realizaron 280 sesiones de psicología y 214 sesiones de ejercicio físico. (Página 5);correcta;
+qwen3:14b (local);2;10;¿Qué funcionalidades del nuevo CRM se completaron en 2025?;"Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.";"En 2025 se completaron las siguientes funcionalidades del nuevo CRM:  
+1. La autenticación del usuario y recuperación de credenciales de forma autónoma.  
+2. Creación de relación familiar y tutela de socios menores de edad.  
+3. Importación de socios masivo y posibilidad de descarga de datos en Excel.  
+4. Creación de calendarios laborales para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.  
+5. Sistema de registro de fichaje por parte del trabajador.  
+6. Sistema de gestión de consultas (solicitud, confirmación, realización, desplazamientos, etc.). (Página 8)";correcta;
+qwen3:14b (local);2;11;¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?;18.580,50 € (14.344,71 € + 4.235,79 €).;Se recaudó un total de 14.344,71€ en 2025 sumando productos solidarios y agendas escolares (página 10).;incorrecta;
+qwen3:14b (local);2;12;¿Cuántas personas con fibrosis quística hay en España según la memoria?;No encontré esa información en el documento.;No encontré esa información en el documento.;correcta;
+qwen3:14b (local);2;13;¿Quién preside la Federación Española de Fibrosis Quística?;No encontré esa información en el documento.;No encontré esa información en el documento.;correcta;
+qwen3:14b (local);3;1;¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?;Los días 15 y 16 de noviembre, en Málaga.;El IX Congreso Nacional de la FEFQ se celebró los días 15 y 16 de noviembre en Málaga (página 7).;correcta;
+qwen3:14b (local);3;2;¿Cuántos Pulmonitos se vendieron en 2025?;1.652 Pulmonitos.;En 2025 se vendieron 1.652 Pulmonitos. (Página 10);correcta;
+qwen3:14b (local);3;3;¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?;148 personas.;148 personas se conectaron al webinar de presentación del manual de trasplante actualizado. (Página 6);correcta;
+qwen3:14b (local);3;4;¿Cuántas visitas tuvo la página web en 2025?;36.528 visitas.;La página web tuvo 36.528 visitas en 2025 (página 17).;correcta;
+qwen3:14b (local);3;5;¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?;23 reuniones.;La Comisión Ejecutiva celebró 23 reuniones a lo largo de 2025. (Página 22);correcta;
+qwen3:14b (local);3;6;¿Qué premio recibió la Federación en 2025 y por qué proyecto?;El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».;En 2025, la Federación recibió el Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística (página 23).;correcta;
+qwen3:14b (local);3;7;¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?;237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).;Los ingresos reales de 2025 fueron de 237.294,59€, y el 60,62% de dicha cantidad provino de donaciones privadas (página 11).;correcta;
+qwen3:14b (local);3;8;¿Cuál fue el resultado económico de 2025?;Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).;El resultado económico de 2025 fue de 237.294,59€ en ingresos.;incorrecta;
+qwen3:14b (local);3;9;En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?;280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).;En el proyecto «Mens sana in corpore sano», se realizaron 280 sesiones de psicología y 214 sesiones de ejercicio físico. (Página 5);correcta;
+qwen3:14b (local);3;10;¿Qué funcionalidades del nuevo CRM se completaron en 2025?;"Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.";"En 2025 se completaron las siguientes funcionalidades del nuevo CRM:  
+1. La autenticación del usuario y recuperación de credenciales de forma autónoma.  
+2. La creación de relación familiar y tutela de socios menores de edad.  
+3. La importación de socios masivo y posibilidad de descarga de datos en Excel.  
+4. La creación de calendarios laborales para trabajadores, incluyendo horario laboral, permisos, vacaciones, bajas, etc.  
+5. El inicio del sistema de registro de fichaje por parte del trabajador.  
+6. El inicio del sistema de gestión de consultas (solicitud, confirmación, realización, desplazamientos, etc.). (Página 8)";correcta;
+qwen3:14b (local);3;11;¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?;18.580,50 € (14.344,71 € + 4.235,79 €).;Se recaudó un total de 14.344,71€ en 2025 sumando las ventas de productos solidarios y agendas escolares (página 10).;incorrecta;
+qwen3:14b (local);3;12;¿Cuántas personas con fibrosis quística hay en España según la memoria?;No encontré esa información en el documento.;No encontré esa información en el documento.;correcta;
+qwen3:14b (local);3;13;¿Quién preside la Federación Española de Fibrosis Quística?;No encontré esa información en el documento.;No encontré esa información en el documento.;correcta;

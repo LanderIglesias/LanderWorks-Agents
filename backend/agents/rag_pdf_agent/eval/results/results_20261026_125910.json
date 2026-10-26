@@ -1,0 +1,1822 @@
+{
+  "meta": {
+    "timestamp": "20261026_125910",
+    "repeats": 3,
+    "gpu": "NVIDIA GeForce RTX 4080, 16376 MiB",
+    "packages": {
+      "langchain-core": "1.2.23",
+      "langchain-anthropic": "1.4.0",
+      "langchain-ollama": "1.1.0"
+    },
+    "runs": [
+      {
+        "config": "claude-haiku-4.5 (API)",
+        "vram_baseline_mib": 3334,
+        "cold_start_s": 4.1
+      },
+      {
+        "config": "qwen3:14b (local)",
+        "vram_baseline_mib": 3278,
+        "cold_start_s": 4.7
+      }
+    ]
+  },
+  "records": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 1,
+      "type": "dato_exacto",
+      "question": "¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?",
+      "expected": "Los días 15 y 16 de noviembre, en Málaga.",
+      "answer": "Según el documento, el IX Congreso Nacional de la FEFQ se celebró los días **15 y 16 de noviembre en Málaga** (página 7).",
+      "pages_retrieved": [
+        7,
+        14,
+        20,
+        22
+      ],
+      "expected_page": 7,
+      "seconds": 1.32,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 2,
+      "type": "dato_exacto",
+      "question": "¿Cuántos Pulmonitos se vendieron en 2025?",
+      "expected": "1.652 Pulmonitos.",
+      "answer": "Según el documento, en 2025 se vendieron **1.652 Pulmonitos** a las asociaciones y particulares (página 10).",
+      "pages_retrieved": [
+        10,
+        2,
+        11,
+        6
+      ],
+      "expected_page": 10,
+      "seconds": 1.21,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 3,
+      "type": "dato_exacto",
+      "question": "¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?",
+      "expected": "148 personas.",
+      "answer": "Según el documento, **148 personas se conectaron al webinar** de presentación del manual de trasplante actualizado, que coincidió con el Día Mundial de la Fibrosis Quística (página 6).",
+      "pages_retrieved": [
+        6,
+        2,
+        7,
+        11
+      ],
+      "expected_page": 6,
+      "seconds": 1.42,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 4,
+      "type": "dato_exacto",
+      "question": "¿Cuántas visitas tuvo la página web en 2025?",
+      "expected": "36.528 visitas.",
+      "answer": "Según el documento (página 17), la página web tuvo **36.528 visitas en 2025**, lo que representa una media de más de 3.044 páginas vistas al mes y 102 diarias.",
+      "pages_retrieved": [
+        17,
+        10,
+        2,
+        6
+      ],
+      "expected_page": 17,
+      "seconds": 1.31,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 5,
+      "type": "dato_exacto",
+      "question": "¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?",
+      "expected": "23 reuniones.",
+      "answer": "Según el documento, la Comisión Ejecutiva celebró **23 reuniones a lo largo de 2025** (página 22).",
+      "pages_retrieved": [
+        22,
+        2,
+        18,
+        17
+      ],
+      "expected_page": 22,
+      "seconds": 1.18,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 6,
+      "type": "dato_exacto",
+      "question": "¿Qué premio recibió la Federación en 2025 y por qué proyecto?",
+      "expected": "El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».",
+      "answer": "Según el documento, en 2025 la Federación recibió el **Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC**, por el proyecto **«Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística** (Página 23).",
+      "pages_retrieved": [
+        11,
+        23,
+        2,
+        23
+      ],
+      "expected_page": 23,
+      "seconds": 1.53,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 7,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?",
+      "expected": "237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).",
+      "answer": "Según el documento (página 11), los **ingresos reales de 2025 fueron de 237.294,59€**.\n\nDe esta cantidad, el **60,62% provino de donaciones privadas**.\n\nEl desglose completo fue:\n- 30,72% de subvenciones públicas\n- 60,62% de donaciones privadas\n- 8,66% de fondos propios",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        11
+      ],
+      "expected_page": 11,
+      "seconds": 1.65,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 8,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuál fue el resultado económico de 2025?",
+      "expected": "Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).",
+      "answer": "# Resultado Económico de 2025\n\nSegún el documento (página 11), los **ingresos de 2025 fueron de 237.294,59€**, distribuidos de la siguiente manera:\n\n- **30,72%** provenía de subvenciones públicas (Concesión Directa, 0'7 IRPF y mantenimiento)\n- **60,62%** provenía de donaciones privadas\n- **8,66%** provenía de fondos propios\n\nEl documento no especifica información sobre gastos o resultado neto (beneficio/pérdida) del ejercicio 2025, solo detalla la composición de los ingresos recaudados.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        22
+      ],
+      "expected_page": 11,
+      "seconds": 2.4,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 9,
+      "type": "cifra_con_trampa",
+      "question": "En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?",
+      "expected": "280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).",
+      "answer": "Según la página 5 del documento, en el proyecto \"Mens sana in corpore sano\" se realizaron:\n\n- **Psicología: 280 sesiones**\n- **Ejercicio físico: 214 sesiones**",
+      "pages_retrieved": [
+        5,
+        4,
+        11,
+        20
+      ],
+      "expected_page": 5,
+      "seconds": 1.28,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 10,
+      "type": "lista_sintesis",
+      "question": "¿Qué funcionalidades del nuevo CRM se completaron en 2025?",
+      "expected": "Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.",
+      "answer": "Según el documento (Página 8), en 2025 se completaron las siguientes funcionalidades del nuevo CRM de la FEFQ:\n\n1. **Autentificación del usuario y recuperación de credenciales** de forma autónoma.\n2. **Creación de relación familiar y tutela de socios** menores de edad.\n3. **Importación de socios masivo** y posibilidad de descarga de datos en Excel.\n4. **Creación de calendarios laborales** para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.\n\nAdemás, se menciona que se comenzó también con el **sistema de registro de fichaje** por parte del trabajador y con el **sistema de gestión de consultas** (solicitud, confirmación, realización, desplazamientos).",
+      "pages_retrieved": [
+        8,
+        2,
+        6,
+        22
+      ],
+      "expected_page": 8,
+      "seconds": 2.38,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 11,
+      "type": "calculo",
+      "question": "¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?",
+      "expected": "18.580,50 € (14.344,71 € + 4.235,79 €).",
+      "answer": "Según el documento (página 10), en 2025 se recaudó:\n\n- **Productos solidarios** (Pulmonitos y otros artículos): **14.344,71€**\n- **Agendas escolares solidarias**: **4.235,79€**\n\n**Total recaudado: 18.580,50€**",
+      "pages_retrieved": [
+        10,
+        11,
+        2,
+        23
+      ],
+      "expected_page": 10,
+      "seconds": 1.71,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 12,
+      "type": "no_en_documento",
+      "question": "¿Cuántas personas con fibrosis quística hay en España según la memoria?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento. La memoria que me proporcionaste no contiene datos sobre el número total de personas con fibrosis quística en España. \n\nEl documento sí menciona cifras sobre participación en proyectos específicos (como 57 personas en psicología y 17 en ejercicio físico del proyecto \"Mens Sana in Corpore Sano\"), pero no proporciona estadísticas generales sobre la prevalencia de la enfermedad en el país.",
+      "pages_retrieved": [
+        24,
+        22,
+        24,
+        5
+      ],
+      "expected_page": null,
+      "seconds": 1.84,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 13,
+      "type": "no_en_documento",
+      "question": "¿Quién preside la Federación Española de Fibrosis Quística?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento. El contexto proporcionado no menciona quién preside la Federación Española de Fibrosis Quística.",
+      "pages_retrieved": [
+        22,
+        2,
+        24,
+        24
+      ],
+      "expected_page": null,
+      "seconds": 1.59,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 1,
+      "type": "dato_exacto",
+      "question": "¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?",
+      "expected": "Los días 15 y 16 de noviembre, en Málaga.",
+      "answer": "Según el documento, el IX Congreso Nacional de la FEFQ se celebró los días **15 y 16 de noviembre en Málaga** (página 7).",
+      "pages_retrieved": [
+        7,
+        14,
+        20,
+        22
+      ],
+      "expected_page": 7,
+      "seconds": 1.32,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 2,
+      "type": "dato_exacto",
+      "question": "¿Cuántos Pulmonitos se vendieron en 2025?",
+      "expected": "1.652 Pulmonitos.",
+      "answer": "Según el documento, en 2025 se vendieron **1.652 Pulmonitos** a las asociaciones y particulares (página 10).",
+      "pages_retrieved": [
+        10,
+        2,
+        11,
+        6
+      ],
+      "expected_page": 10,
+      "seconds": 1.32,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 3,
+      "type": "dato_exacto",
+      "question": "¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?",
+      "expected": "148 personas.",
+      "answer": "Según el documento, **148 personas se conectaron al webinar** de presentación del manual de trasplante actualizado, que coincidió con el Día Mundial de la Fibrosis Quística (página 6).",
+      "pages_retrieved": [
+        6,
+        2,
+        7,
+        11
+      ],
+      "expected_page": 6,
+      "seconds": 1.36,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 4,
+      "type": "dato_exacto",
+      "question": "¿Cuántas visitas tuvo la página web en 2025?",
+      "expected": "36.528 visitas.",
+      "answer": "Según el documento, la página web tuvo **36.528 visitas en 2025**, lo que representa una media de más de 3.044 páginas vistas al mes y 102 diarias (Página 17).",
+      "pages_retrieved": [
+        17,
+        10,
+        2,
+        6
+      ],
+      "expected_page": 17,
+      "seconds": 1.35,
+      "vram_used_mib": 3307,
+      "vram_delta_mib": -27,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 5,
+      "type": "dato_exacto",
+      "question": "¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?",
+      "expected": "23 reuniones.",
+      "answer": "Según el documento, la Comisión Ejecutiva celebró **23 reuniones a lo largo de 2025** (página 22).",
+      "pages_retrieved": [
+        22,
+        2,
+        18,
+        17
+      ],
+      "expected_page": 22,
+      "seconds": 1.2,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 6,
+      "type": "dato_exacto",
+      "question": "¿Qué premio recibió la Federación en 2025 y por qué proyecto?",
+      "expected": "El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».",
+      "answer": "Según el documento (página 23), en 2025 la Federación recibió el **Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC**, por el proyecto **«Luz-IA»**, una asistente virtual para el bienestar emocional en fibrosis quística.",
+      "pages_retrieved": [
+        11,
+        23,
+        2,
+        23
+      ],
+      "expected_page": 23,
+      "seconds": 1.5,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 7,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?",
+      "expected": "237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).",
+      "answer": "Según el documento (página 11), los ingresos reales de 2025 fueron de **237.294,59€**.\n\nDe esta cantidad, el **60,62% provino de donaciones privadas**.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        11
+      ],
+      "expected_page": 11,
+      "seconds": 1.35,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 8,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuál fue el resultado económico de 2025?",
+      "expected": "Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).",
+      "answer": "Según el documento (Página 11), los ingresos de 2025 fueron de **237.294,59€**.\n\nEstos ingresos provenían de:\n- **30,72%** de subvenciones públicas (Concesión Directa, 0'7 IRPF y mantenimiento)\n- **60,62%** de donaciones privadas\n- **8,66%** de fondos propios\n\nEl documento no proporciona información sobre gastos o resultado neto (beneficio o pérdida), solo especifica los ingresos totales del año.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        22
+      ],
+      "expected_page": 11,
+      "seconds": 2.16,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 9,
+      "type": "cifra_con_trampa",
+      "question": "En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?",
+      "expected": "280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).",
+      "answer": "Según el documento (página 5), en el proyecto \"Mens Sana in Corpore Sano\" se realizaron:\n\n- **Psicología: 280 sesiones**\n- **Ejercicio físico: 214 sesiones**",
+      "pages_retrieved": [
+        5,
+        4,
+        11,
+        20
+      ],
+      "expected_page": 5,
+      "seconds": 1.4,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 10,
+      "type": "lista_sintesis",
+      "question": "¿Qué funcionalidades del nuevo CRM se completaron en 2025?",
+      "expected": "Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.",
+      "answer": "Según el documento (página 8), en 2025 se completaron las siguientes funcionalidades del nuevo CRM de la FEFQ:\n\n1. **Autentificación del usuario y recuperación de credenciales** de forma autónoma.\n2. **Creación de relación familiar y tutela** de socios menores de edad.\n3. **Importación de socios masivo** y posibilidad de descarga de datos en Excel.\n4. **Creación de calendarios laborales** para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.\n\nAdemás, se comenzó también con:\n- El sistema de **registro de fichaje** por parte del trabajador\n- El sistema de **gestión de consultas** (solicitud, confirmación, realización, desplazamientos, etc.)",
+      "pages_retrieved": [
+        8,
+        2,
+        6,
+        22
+      ],
+      "expected_page": 8,
+      "seconds": 2.48,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 11,
+      "type": "calculo",
+      "question": "¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?",
+      "expected": "18.580,50 € (14.344,71 € + 4.235,79 €).",
+      "answer": "Según el documento (Página 10), la recaudación total en 2025 fue:\n\n- **Productos solidarios**: 14.344,71€\n- **Agendas escolares solidarias**: 4.235,79€\n\n**Total: 18.580,50€**",
+      "pages_retrieved": [
+        10,
+        11,
+        2,
+        23
+      ],
+      "expected_page": 10,
+      "seconds": 1.48,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 12,
+      "type": "no_en_documento",
+      "question": "¿Cuántas personas con fibrosis quística hay en España según la memoria?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento. \n\nEl documento que consulté contiene información sobre actividades, proyectos y publicaciones de la Federación Española de Fibrosis Quística en 2025, pero no incluye datos sobre el número total de personas con fibrosis quística en España.",
+      "pages_retrieved": [
+        24,
+        22,
+        24,
+        5
+      ],
+      "expected_page": null,
+      "seconds": 1.5,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2,
+      "id": 13,
+      "type": "no_en_documento",
+      "question": "¿Quién preside la Federación Española de Fibrosis Quística?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento. El contexto proporcionado no incluye datos sobre quién preside la Federación Española de Fibrosis Quística.",
+      "pages_retrieved": [
+        22,
+        2,
+        24,
+        24
+      ],
+      "expected_page": null,
+      "seconds": 1.33,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 1,
+      "type": "dato_exacto",
+      "question": "¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?",
+      "expected": "Los días 15 y 16 de noviembre, en Málaga.",
+      "answer": "Según el documento, el IX Congreso Nacional de la FEFQ se celebró los días **15 y 16 de noviembre en Málaga** (página 7).",
+      "pages_retrieved": [
+        7,
+        14,
+        20,
+        22
+      ],
+      "expected_page": 7,
+      "seconds": 1.26,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 2,
+      "type": "dato_exacto",
+      "question": "¿Cuántos Pulmonitos se vendieron en 2025?",
+      "expected": "1.652 Pulmonitos.",
+      "answer": "Según el documento, en 2025 se vendieron **1.652 Pulmonitos** a las asociaciones y particulares (página 10).",
+      "pages_retrieved": [
+        10,
+        2,
+        11,
+        6
+      ],
+      "expected_page": 10,
+      "seconds": 1.27,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 3,
+      "type": "dato_exacto",
+      "question": "¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?",
+      "expected": "148 personas.",
+      "answer": "Según el documento, **148 personas** se conectaron al webinar de presentación del manual de trasplante actualizado, que coincidió con el Día Mundial de la Fibrosis Quística (página 6).",
+      "pages_retrieved": [
+        6,
+        2,
+        7,
+        11
+      ],
+      "expected_page": 6,
+      "seconds": 1.47,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 4,
+      "type": "dato_exacto",
+      "question": "¿Cuántas visitas tuvo la página web en 2025?",
+      "expected": "36.528 visitas.",
+      "answer": "Según el documento, la página web tuvo **36.528 visitas en 2025**, lo que representa una media de más de 3.044 páginas vistas al mes y 102 diarias. (Página 17)",
+      "pages_retrieved": [
+        17,
+        10,
+        2,
+        6
+      ],
+      "expected_page": 17,
+      "seconds": 1.4,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 5,
+      "type": "dato_exacto",
+      "question": "¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?",
+      "expected": "23 reuniones.",
+      "answer": "Según el documento, la Comisión Ejecutiva celebró **23 reuniones a lo largo de 2025** (página 22).",
+      "pages_retrieved": [
+        22,
+        2,
+        18,
+        17
+      ],
+      "expected_page": 22,
+      "seconds": 1.16,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 6,
+      "type": "dato_exacto",
+      "question": "¿Qué premio recibió la Federación en 2025 y por qué proyecto?",
+      "expected": "El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».",
+      "answer": "Según el documento, en 2025 la Federación recibió el **Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC**, por el proyecto **«Luz-IA»**, una asistente virtual para el bienestar emocional en fibrosis quística.\n\n(Página 23)",
+      "pages_retrieved": [
+        11,
+        23,
+        2,
+        23
+      ],
+      "expected_page": 23,
+      "seconds": 1.57,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 7,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?",
+      "expected": "237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).",
+      "answer": "Según el documento (página 11), los ingresos reales de 2025 fueron de **237.294,59€**.\n\nDe esta cantidad, el **60,62% provino de donaciones privadas**.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        11
+      ],
+      "expected_page": 11,
+      "seconds": 1.25,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 8,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuál fue el resultado económico de 2025?",
+      "expected": "Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).",
+      "answer": "Según el documento (página 11), los ingresos de 2025 fueron de **237.294,59€**.\n\nEsta cantidad se distribuyó de la siguiente manera:\n- **30,72%** provenía de subvenciones públicas (Concesión Directa, 0'7 IRPF y mantenimiento)\n- **60,62%** provenía de donaciones privadas\n- **8,66%** provenía de fondos propios\n\nEl documento no proporciona información sobre los gastos o el resultado neto (beneficio o pérdida) del ejercicio 2025.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        22
+      ],
+      "expected_page": 11,
+      "seconds": 2.25,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 9,
+      "type": "cifra_con_trampa",
+      "question": "En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?",
+      "expected": "280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).",
+      "answer": "# Sesiones del Proyecto \"Mens Sana in Corpore Sano\"\n\nSegún la información del documento (página 5):\n\n- **Psicología: 280 sesiones**\n- **Ejercicio físico: 214 sesiones**\n\nEl proyecto se desarrolló entre 2024 y 2025, dirigido a familias de menores con Fibrosis Quística entre 9 y 18 años.",
+      "pages_retrieved": [
+        5,
+        4,
+        11,
+        20
+      ],
+      "expected_page": 5,
+      "seconds": 1.79,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 10,
+      "type": "lista_sintesis",
+      "question": "¿Qué funcionalidades del nuevo CRM se completaron en 2025?",
+      "expected": "Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.",
+      "answer": "Según el documento (página 8), en 2025 se completaron las siguientes funcionalidades del nuevo CRM de la FEFQ:\n\n1. **Autentificación del usuario y recuperación de credenciales** de forma autónoma.\n\n2. **Creación de relación familiar y tutela de socios** menores de edad.\n\n3. **Importación de socios masivo** y posibilidad de descarga de datos en Excel.\n\n4. **Creación de calendarios laborales** para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.\n\nAdemás, se menciona que se comenzó también con el **sistema de registro de fichaje** por parte del trabajador y el **sistema de gestión de consultas** (solicitud, confirmación, realización, desplazamientos...), aunque estos últimos se encuentran en fase de desarrollo inicial.",
+      "pages_retrieved": [
+        8,
+        2,
+        6,
+        22
+      ],
+      "expected_page": 8,
+      "seconds": 2.51,
+      "vram_used_mib": 3308,
+      "vram_delta_mib": -26,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 11,
+      "type": "calculo",
+      "question": "¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?",
+      "expected": "18.580,50 € (14.344,71 € + 4.235,79 €).",
+      "answer": "Según el documento (página 10), la recaudación total en 2025 sumando productos solidarios y agendas escolares fue de **18.580,50€**.\n\nEste total se compone de:\n- **14.344,71€** de la venta de Pulmonitos y otros artículos solidarios (tazas, bolsas de tela, botellas y tarjetas de boda)\n- **4.235,79€** de la venta de agendas solidarias escolares",
+      "pages_retrieved": [
+        10,
+        11,
+        2,
+        23
+      ],
+      "expected_page": 10,
+      "seconds": 2.24,
+      "vram_used_mib": 3278,
+      "vram_delta_mib": -56,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 12,
+      "type": "no_en_documento",
+      "question": "¿Cuántas personas con fibrosis quística hay en España según la memoria?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento. La memoria que me proporcionaste no incluye datos sobre el número total de personas con fibrosis quística en España. \n\nEl documento sí menciona cifras de participación en programas específicos (como el proyecto \"Mens Sana in Corpore Sano\" donde se atendieron 57 personas en psicología y 17 en ejercicio físico) y la participación en la asamblea ordinaria (24 personas), pero no proporciona estadísticas generales sobre la prevalencia de la enfermedad en el país.",
+      "pages_retrieved": [
+        24,
+        22,
+        24,
+        5
+      ],
+      "expected_page": null,
+      "seconds": 2.13,
+      "vram_used_mib": 3278,
+      "vram_delta_mib": -56,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3,
+      "id": 13,
+      "type": "no_en_documento",
+      "question": "¿Quién preside la Federación Española de Fibrosis Quística?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento. El contexto proporcionado no incluye datos sobre quién preside la Federación Española de Fibrosis Quística.",
+      "pages_retrieved": [
+        22,
+        2,
+        24,
+        24
+      ],
+      "expected_page": null,
+      "seconds": 1.26,
+      "vram_used_mib": 3278,
+      "vram_delta_mib": -56,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 1,
+      "type": "dato_exacto",
+      "question": "¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?",
+      "expected": "Los días 15 y 16 de noviembre, en Málaga.",
+      "answer": "El IX Congreso Nacional de la FEFQ se celebró los días 15 y 16 de noviembre en Málaga (página 7).",
+      "pages_retrieved": [
+        7,
+        14,
+        20,
+        22
+      ],
+      "expected_page": 7,
+      "seconds": 1.47,
+      "vram_used_mib": 13565,
+      "vram_delta_mib": 10287,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 2,
+      "type": "dato_exacto",
+      "question": "¿Cuántos Pulmonitos se vendieron en 2025?",
+      "expected": "1.652 Pulmonitos.",
+      "answer": "En 2025 se vendieron 1.652 Pulmonitos. (Página 10)",
+      "pages_retrieved": [
+        10,
+        2,
+        11,
+        6
+      ],
+      "expected_page": 10,
+      "seconds": 1.3,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 3,
+      "type": "dato_exacto",
+      "question": "¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?",
+      "expected": "148 personas.",
+      "answer": "148 personas se conectaron al webinar de presentación del manual de trasplante actualizado. (Página 6)",
+      "pages_retrieved": [
+        6,
+        2,
+        7,
+        11
+      ],
+      "expected_page": 6,
+      "seconds": 1.24,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 4,
+      "type": "dato_exacto",
+      "question": "¿Cuántas visitas tuvo la página web en 2025?",
+      "expected": "36.528 visitas.",
+      "answer": "La página web tuvo 36.528 visitas en 2025 (página 17).",
+      "pages_retrieved": [
+        17,
+        10,
+        2,
+        6
+      ],
+      "expected_page": 17,
+      "seconds": 1.28,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 5,
+      "type": "dato_exacto",
+      "question": "¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?",
+      "expected": "23 reuniones.",
+      "answer": "La Comisión Ejecutiva celebró 23 reuniones a lo largo de 2025. (Página 22)",
+      "pages_retrieved": [
+        22,
+        2,
+        18,
+        17
+      ],
+      "expected_page": 22,
+      "seconds": 1.36,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 6,
+      "type": "dato_exacto",
+      "question": "¿Qué premio recibió la Federación en 2025 y por qué proyecto?",
+      "expected": "El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».",
+      "answer": "En 2025, la Federación recibió el \"Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC\" por el proyecto «Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística (página 23).",
+      "pages_retrieved": [
+        11,
+        23,
+        2,
+        23
+      ],
+      "expected_page": 23,
+      "seconds": 2.03,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 7,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?",
+      "expected": "237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).",
+      "answer": "Los ingresos reales de 2025 fueron de 237.294,59€, y el 60,62% de dicha cantidad provino de donaciones privadas (página 11).",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        11
+      ],
+      "expected_page": 11,
+      "seconds": 1.63,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 8,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuál fue el resultado económico de 2025?",
+      "expected": "Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).",
+      "answer": "El resultado económico de 2025 fue un total de 237.294,59€ en ingresos.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        22
+      ],
+      "expected_page": 11,
+      "seconds": 1.1,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 9,
+      "type": "cifra_con_trampa",
+      "question": "En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?",
+      "expected": "280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).",
+      "answer": "En el proyecto «Mens sana in corpore sano», se realizaron 280 sesiones de psicología y 214 sesiones de ejercicio físico. (Página 5)",
+      "pages_retrieved": [
+        5,
+        4,
+        11,
+        20
+      ],
+      "expected_page": 5,
+      "seconds": 1.56,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 10,
+      "type": "lista_sintesis",
+      "question": "¿Qué funcionalidades del nuevo CRM se completaron en 2025?",
+      "expected": "Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.",
+      "answer": "En 2025 se completaron las siguientes funcionalidades del nuevo CRM:  \n1. La autenticación del usuario y recuperación de credenciales de forma autónoma.  \n2. Creación de relación familiar y tutela de socios menores de edad.  \n3. Importación de socios masivo y posibilidad de descarga de datos en Excel.  \n4. Creación de calendarios laborales para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.  \nAdemás, se inició el sistema de registro de fichaje por parte del trabajador y el sistema de gestión de consultas (solicitud, confirmación, realización, desplazamientos, etc.) (página 8).",
+      "pages_retrieved": [
+        8,
+        2,
+        6,
+        22
+      ],
+      "expected_page": 8,
+      "seconds": 3.37,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 11,
+      "type": "calculo",
+      "question": "¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?",
+      "expected": "18.580,50 € (14.344,71 € + 4.235,79 €).",
+      "answer": "Se recaudó un total de 14.344,71€ en 2025 sumando las ventas de productos solidarios, incluyendo el Pulmonito, tazas, bolsas de tela, botellas y tarjetas de boda solidarias, junto con la venta de agendas escolares solidarias (página 10).",
+      "pages_retrieved": [
+        10,
+        11,
+        2,
+        23
+      ],
+      "expected_page": 10,
+      "seconds": 2.15,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 12,
+      "type": "no_en_documento",
+      "question": "¿Cuántas personas con fibrosis quística hay en España según la memoria?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento.",
+      "pages_retrieved": [
+        24,
+        22,
+        24,
+        5
+      ],
+      "expected_page": null,
+      "seconds": 1.09,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 13,
+      "type": "no_en_documento",
+      "question": "¿Quién preside la Federación Española de Fibrosis Quística?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento.",
+      "pages_retrieved": [
+        22,
+        2,
+        24,
+        24
+      ],
+      "expected_page": null,
+      "seconds": 1.01,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 1,
+      "type": "dato_exacto",
+      "question": "¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?",
+      "expected": "Los días 15 y 16 de noviembre, en Málaga.",
+      "answer": "El IX Congreso Nacional de la FEFQ se celebró los días 15 y 16 de noviembre en Málaga (página 7).",
+      "pages_retrieved": [
+        7,
+        14,
+        20,
+        22
+      ],
+      "expected_page": 7,
+      "seconds": 1.21,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 2,
+      "type": "dato_exacto",
+      "question": "¿Cuántos Pulmonitos se vendieron en 2025?",
+      "expected": "1.652 Pulmonitos.",
+      "answer": "Se vendieron 1.652 Pulmonitos en 2025 (página 10).",
+      "pages_retrieved": [
+        10,
+        2,
+        11,
+        6
+      ],
+      "expected_page": 10,
+      "seconds": 1.3,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 3,
+      "type": "dato_exacto",
+      "question": "¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?",
+      "expected": "148 personas.",
+      "answer": "148 personas se conectaron al webinar de presentación del manual de trasplante actualizado (página 6).",
+      "pages_retrieved": [
+        6,
+        2,
+        7,
+        11
+      ],
+      "expected_page": 6,
+      "seconds": 1.07,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 4,
+      "type": "dato_exacto",
+      "question": "¿Cuántas visitas tuvo la página web en 2025?",
+      "expected": "36.528 visitas.",
+      "answer": "La página web tuvo 36.528 visitas en 2025 (página 17).",
+      "pages_retrieved": [
+        17,
+        10,
+        2,
+        6
+      ],
+      "expected_page": 17,
+      "seconds": 1.08,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 5,
+      "type": "dato_exacto",
+      "question": "¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?",
+      "expected": "23 reuniones.",
+      "answer": "La Comisión Ejecutiva celebró 23 reuniones a lo largo de 2025. (Página 22)",
+      "pages_retrieved": [
+        22,
+        2,
+        18,
+        17
+      ],
+      "expected_page": 22,
+      "seconds": 1.32,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 6,
+      "type": "dato_exacto",
+      "question": "¿Qué premio recibió la Federación en 2025 y por qué proyecto?",
+      "expected": "El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».",
+      "answer": "En 2025, la Federación recibió el \"Premio Social & Public AI Award\" en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística (página 23).",
+      "pages_retrieved": [
+        11,
+        23,
+        2,
+        23
+      ],
+      "expected_page": 23,
+      "seconds": 1.79,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 7,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?",
+      "expected": "237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).",
+      "answer": "Los ingresos reales de 2025 fueron de 237.294,59€, y el 60,62% de dicha cantidad provino de donaciones privadas (página 11).",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        11
+      ],
+      "expected_page": 11,
+      "seconds": 1.53,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 8,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuál fue el resultado económico de 2025?",
+      "expected": "Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).",
+      "answer": "El resultado económico de 2025 fue de 237.294,59€ en ingresos.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        22
+      ],
+      "expected_page": 11,
+      "seconds": 1.08,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 9,
+      "type": "cifra_con_trampa",
+      "question": "En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?",
+      "expected": "280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).",
+      "answer": "En el proyecto «Mens sana in corpore sano», se realizaron 280 sesiones de psicología y 214 sesiones de ejercicio físico. (Página 5)",
+      "pages_retrieved": [
+        5,
+        4,
+        11,
+        20
+      ],
+      "expected_page": 5,
+      "seconds": 1.34,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 10,
+      "type": "lista_sintesis",
+      "question": "¿Qué funcionalidades del nuevo CRM se completaron en 2025?",
+      "expected": "Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.",
+      "answer": "En 2025 se completaron las siguientes funcionalidades del nuevo CRM:  \n1. La autenticación del usuario y recuperación de credenciales de forma autónoma.  \n2. Creación de relación familiar y tutela de socios menores de edad.  \n3. Importación de socios masivo y posibilidad de descarga de datos en Excel.  \n4. Creación de calendarios laborales para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.  \n5. Sistema de registro de fichaje por parte del trabajador.  \n6. Sistema de gestión de consultas (solicitud, confirmación, realización, desplazamientos, etc.). (Página 8)",
+      "pages_retrieved": [
+        8,
+        2,
+        6,
+        22
+      ],
+      "expected_page": 8,
+      "seconds": 3.11,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 11,
+      "type": "calculo",
+      "question": "¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?",
+      "expected": "18.580,50 € (14.344,71 € + 4.235,79 €).",
+      "answer": "Se recaudó un total de 14.344,71€ en 2025 sumando productos solidarios y agendas escolares (página 10).",
+      "pages_retrieved": [
+        10,
+        11,
+        2,
+        23
+      ],
+      "expected_page": 10,
+      "seconds": 1.3,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 12,
+      "type": "no_en_documento",
+      "question": "¿Cuántas personas con fibrosis quística hay en España según la memoria?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento.",
+      "pages_retrieved": [
+        24,
+        22,
+        24,
+        5
+      ],
+      "expected_page": null,
+      "seconds": 0.82,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2,
+      "id": 13,
+      "type": "no_en_documento",
+      "question": "¿Quién preside la Federación Española de Fibrosis Quística?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento.",
+      "pages_retrieved": [
+        22,
+        2,
+        24,
+        24
+      ],
+      "expected_page": null,
+      "seconds": 1.0,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 1,
+      "type": "dato_exacto",
+      "question": "¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?",
+      "expected": "Los días 15 y 16 de noviembre, en Málaga.",
+      "answer": "El IX Congreso Nacional de la FEFQ se celebró los días 15 y 16 de noviembre en Málaga (página 7).",
+      "pages_retrieved": [
+        7,
+        14,
+        20,
+        22
+      ],
+      "expected_page": 7,
+      "seconds": 1.21,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 2,
+      "type": "dato_exacto",
+      "question": "¿Cuántos Pulmonitos se vendieron en 2025?",
+      "expected": "1.652 Pulmonitos.",
+      "answer": "En 2025 se vendieron 1.652 Pulmonitos. (Página 10)",
+      "pages_retrieved": [
+        10,
+        2,
+        11,
+        6
+      ],
+      "expected_page": 10,
+      "seconds": 1.07,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 3,
+      "type": "dato_exacto",
+      "question": "¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?",
+      "expected": "148 personas.",
+      "answer": "148 personas se conectaron al webinar de presentación del manual de trasplante actualizado. (Página 6)",
+      "pages_retrieved": [
+        6,
+        2,
+        7,
+        11
+      ],
+      "expected_page": 6,
+      "seconds": 1.09,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 4,
+      "type": "dato_exacto",
+      "question": "¿Cuántas visitas tuvo la página web en 2025?",
+      "expected": "36.528 visitas.",
+      "answer": "La página web tuvo 36.528 visitas en 2025 (página 17).",
+      "pages_retrieved": [
+        17,
+        10,
+        2,
+        6
+      ],
+      "expected_page": 17,
+      "seconds": 1.08,
+      "vram_used_mib": 13575,
+      "vram_delta_mib": 10297,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 5,
+      "type": "dato_exacto",
+      "question": "¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?",
+      "expected": "23 reuniones.",
+      "answer": "La Comisión Ejecutiva celebró 23 reuniones a lo largo de 2025. (Página 22)",
+      "pages_retrieved": [
+        22,
+        2,
+        18,
+        17
+      ],
+      "expected_page": 22,
+      "seconds": 1.32,
+      "vram_used_mib": 13560,
+      "vram_delta_mib": 10282,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 6,
+      "type": "dato_exacto",
+      "question": "¿Qué premio recibió la Federación en 2025 y por qué proyecto?",
+      "expected": "El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».",
+      "answer": "En 2025, la Federación recibió el Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística (página 23).",
+      "pages_retrieved": [
+        11,
+        23,
+        2,
+        23
+      ],
+      "expected_page": 23,
+      "seconds": 1.76,
+      "vram_used_mib": 13554,
+      "vram_delta_mib": 10276,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 7,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?",
+      "expected": "237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).",
+      "answer": "Los ingresos reales de 2025 fueron de 237.294,59€, y el 60,62% de dicha cantidad provino de donaciones privadas (página 11).",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        11
+      ],
+      "expected_page": 11,
+      "seconds": 1.53,
+      "vram_used_mib": 13554,
+      "vram_delta_mib": 10276,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 8,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuál fue el resultado económico de 2025?",
+      "expected": "Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).",
+      "answer": "El resultado económico de 2025 fue de 237.294,59€ en ingresos.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        22
+      ],
+      "expected_page": 11,
+      "seconds": 1.07,
+      "vram_used_mib": 13554,
+      "vram_delta_mib": 10276,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 9,
+      "type": "cifra_con_trampa",
+      "question": "En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?",
+      "expected": "280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).",
+      "answer": "En el proyecto «Mens sana in corpore sano», se realizaron 280 sesiones de psicología y 214 sesiones de ejercicio físico. (Página 5)",
+      "pages_retrieved": [
+        5,
+        4,
+        11,
+        20
+      ],
+      "expected_page": 5,
+      "seconds": 1.36,
+      "vram_used_mib": 13554,
+      "vram_delta_mib": 10276,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 10,
+      "type": "lista_sintesis",
+      "question": "¿Qué funcionalidades del nuevo CRM se completaron en 2025?",
+      "expected": "Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.",
+      "answer": "En 2025 se completaron las siguientes funcionalidades del nuevo CRM:  \n1. La autenticación del usuario y recuperación de credenciales de forma autónoma.  \n2. La creación de relación familiar y tutela de socios menores de edad.  \n3. La importación de socios masivo y posibilidad de descarga de datos en Excel.  \n4. La creación de calendarios laborales para trabajadores, incluyendo horario laboral, permisos, vacaciones, bajas, etc.  \n5. El inicio del sistema de registro de fichaje por parte del trabajador.  \n6. El inicio del sistema de gestión de consultas (solicitud, confirmación, realización, desplazamientos, etc.). (Página 8)",
+      "pages_retrieved": [
+        8,
+        2,
+        6,
+        22
+      ],
+      "expected_page": 8,
+      "seconds": 3.28,
+      "vram_used_mib": 13554,
+      "vram_delta_mib": 10276,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 11,
+      "type": "calculo",
+      "question": "¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?",
+      "expected": "18.580,50 € (14.344,71 € + 4.235,79 €).",
+      "answer": "Se recaudó un total de 14.344,71€ en 2025 sumando las ventas de productos solidarios y agendas escolares (página 10).",
+      "pages_retrieved": [
+        10,
+        11,
+        2,
+        23
+      ],
+      "expected_page": 10,
+      "seconds": 1.35,
+      "vram_used_mib": 13554,
+      "vram_delta_mib": 10276,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 12,
+      "type": "no_en_documento",
+      "question": "¿Cuántas personas con fibrosis quística hay en España según la memoria?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento.",
+      "pages_retrieved": [
+        24,
+        22,
+        24,
+        5
+      ],
+      "expected_page": null,
+      "seconds": 0.81,
+      "vram_used_mib": 13554,
+      "vram_delta_mib": 10276,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3,
+      "id": 13,
+      "type": "no_en_documento",
+      "question": "¿Quién preside la Federación Española de Fibrosis Quística?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento.",
+      "pages_retrieved": [
+        22,
+        2,
+        24,
+        24
+      ],
+      "expected_page": null,
+      "seconds": 1.01,
+      "vram_used_mib": 13554,
+      "vram_delta_mib": 10276,
+      "auto_grade": "correcta"
+    }
+  ],
+  "retrieved_chunks": {
+    "1": [
+      {
+        "page": 7,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO  \nIX CONGRESO NACIONAL DE LA FEFQ \nLa FEFQ organizó su IX Congreso Nacional los días 15 y 16 de noviembre en \nMálaga, coincidiendo con el Congreso de la Sociedad Española de FQ. \n \nEste año se han inscrito 78 personas incluyendo a ponentes, moderadores y \nmiembros del equipo técnico. Además, hubo 671 asistentes virtuales. \n \nEl 85% de las ponencias han sido puntuadas mayoritariamente por los \nasistentes con un 4 sobre 5. \nLas ponencias mejor valoradas fueron “Nuevas fronteras en el tratamiento de la \nFQ: de los moduladores a la terapia génica”, “El trasplante en la FQ: actualidad, \ndatos e innovación” y “Genética y cribado neonatal: hacia una detección más justa \nen FQ y otras enfermedades raras”. \n \n \n Las personas asistentes valoran que se han cumplido sus expectativas en \nel 82% de los casos."
+      },
+      {
+        "page": 14,
+        "text": "DEFENSA DE DERECHOS Y POSICIONAMIENTO DE LA ENTIDAD COMO CATALIZADORA DE \nINCIDENCIA POLÍTICA Y CAMBIO SOCIAL \nDÍA NACIONAL DE LA FQ: \n“MÁS CERCA DEL TRATAMIENTO PARA TODOS” \nEn abril de 2025, la FEFQ celebró el Día Nacional de la FQ bajo el lema “Más \ncerca del tratamiento para todos ”, poniendo el foco en la urgente necesidad \nde impulsar la investigación en fibrosis quística y en la agilización de los \nprocesos para la inclusión en el sistema sanitario público de los tratamientos ya \naprobados a nivel europeo.  Para ello, se crearon varios materiales gráficos y un vídeo \npublicados en redes sociales (https://youtu.be/mpG5y1_tgtA?si=xWRj7ElIwcDmVk-x). \n \nTambién se  creó una página web , donde se recogía, además de la campaña, \ntodas las actividades organizadas por las asociaciones en sus diferentes \ncomunidades autónomas y una galería de fotos con la celebración de este día \nen las diferentes CCAA. \nSe consiguieron más de 40 apariciones en medios"
+      },
+      {
+        "page": 20,
+        "text": "PARTICIPACIÓN ASOCIATIVA Y BUENAS PRÁCTICAS \nCALIDAD Y FORTALECIMIENTO ASOCIATIVO  \n \nEste programa ha consistido en avanzar y mantener la gestión de calidad en \nlas diferentes asociaciones de FQ.  Se han realizado 19 sesiones de \nasesoramiento personalizado \n \n9 asociaciones y la FEFQ mantienen su Sello de Calidad: Sello de Excelencia a \nla Gestión y al Compromiso Social. \n \nLa inversión en renovaciones y evaluaciones de seguimiento de calidad ha sido \nde 11.253€. \n \n \n \nSe ha realizado el último taller para las juntas directivas de las asociaciones \nque componen la FEFQ con el objetivo de incorporar nuevas habilidades \ndirectivas y de liderazgo que redunden en el bienestar de las personas con FQ y \nsus familias.  \n \nEste año ha participado la asociación de Murcia con un alto grado de \nsatisfacción."
+      },
+      {
+        "page": 22,
+        "text": "PARTICIPACIÓN ASOCIATIVA Y BUENAS PRÁCTICAS \nPARTICIPACIÓN \n \nEste año 2025 sigue con la transparencia y búsqueda de consenso en la \ngestión asociativa y se apuesta por fomentar la participación de todo el \ncolectivo. \n \n ASAMBLEA ORDINARIA. Se celebró el 7 de junio en Madrid con la \nparticipación de representantes de las distintas asociaciones de FQ, tanto \npresencialmente como por videoconferencia.  \n \nEn total participaron 24 personas en la asamblea, entre familiares, personas \ncon fibrosis quística y profesionales, pertenecientes al colectivo FQ.  \n \nEn este encuentro anual se revisaron los principales avances y retos de la \nentidad, así como los objetivos estratégicos para el próximo ejercicio. \nPrincipalmente, relacionados con los nuevos tratamientos e investigaciones. \n \nCOMISIÓN EJECUTIVA. 23 reuniones a lo largo de 2025"
+      }
+    ],
+    "2": [
+      {
+        "page": 10,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nPRODUCTOS SOLIDARIOS \n \nDurante 2025 hemos continuado con las ventas de la tienda online, nuestra \nmascota Pulmonito y las agendas escolares solidarias.  \n  \n \nSe han vendido 1.652 Pulmonitos a las asociaciones y particulares. Junto con la \nventa del resto de artículos solidarios, como tazas, bolsas de tela, botellas y \ntarjetas de boda solidarias, se ha conseguido una recaudación total \nde 14.344,71€.  \n \nEn 2025 se han distribuido 1.254 agendas solidarias entre los escolares de \ntoda España, cuya recaudación ha ascendido a 4.235,79€."
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 11,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nSEGUIMIENTO PRESUPUESTARIO \n \n A principio de 2025 la Federación tenía previsto un total de 240.650,44€ de \ningresos. De dicha cantidad, el 28,83% provenían de subvenciones públicas \n(I.R.P.F. y FEDER) y un 63,14% de donaciones privadas (donaciones individuales, \nempresas, colaboraciones laboratorios), mientras que el 8,03% provenía de fondos \npropios y comprendía ventas de mercadería, las aportaciones de socios fijas y \nvariables, y la lotería.  \n \n  \n \n \n \n \n \nLos ingresos de 2025 han sido de 237.294,59€. De dicha cantidad, el 30,72% \nproviene de subvenciones públicas (Concesión Directa, 0‘7 IRPF y \nmantenimiento) y un 60,62% de donaciones privadas, mientras que el 8,66% \nproviene de fondos propios. Gracias al importe recibido a través de subvenciones \n(públicas y privadas) se han podido desarrollar diferentes proyectos: programa de"
+      },
+      {
+        "page": 6,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO \nACTUALIZACIÓN DEL MANUAL DE \nTRASPLANTE  \nEn 2024 se empezó con la actualización del manual del trasplante, pero en \n2025 se ha finalizado y, paralelamente, se ha elaborado un informe con los \ndatos obtenidos en la investigación sobre este tema. \n \n  \n  \n  \n  \n \n \n  \nEl manual actualizado se ha presentado en un webinar coincidiendo con el Día \nMundial de la Fibrosis Quística al que se conectaron 148 personas.  \n \nSe han realizado 1.043 visitas al formato electrónico del manual. \n \nCon la información recopilada para el manual, de los grupos de discusión y de \nun cuestionario, se desarrolló un informe sobre cómo ha evolucionado el \nbienestar psicosocial y sociosanitario de las personas trasplantadas con FQ."
+      }
+    ],
+    "3": [
+      {
+        "page": 6,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO \nACTUALIZACIÓN DEL MANUAL DE \nTRASPLANTE  \nEn 2024 se empezó con la actualización del manual del trasplante, pero en \n2025 se ha finalizado y, paralelamente, se ha elaborado un informe con los \ndatos obtenidos en la investigación sobre este tema. \n \n  \n  \n  \n  \n \n \n  \nEl manual actualizado se ha presentado en un webinar coincidiendo con el Día \nMundial de la Fibrosis Quística al que se conectaron 148 personas.  \n \nSe han realizado 1.043 visitas al formato electrónico del manual. \n \nCon la información recopilada para el manual, de los grupos de discusión y de \nun cuestionario, se desarrolló un informe sobre cómo ha evolucionado el \nbienestar psicosocial y sociosanitario de las personas trasplantadas con FQ."
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 7,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO  \nIX CONGRESO NACIONAL DE LA FEFQ \nLa FEFQ organizó su IX Congreso Nacional los días 15 y 16 de noviembre en \nMálaga, coincidiendo con el Congreso de la Sociedad Española de FQ. \n \nEste año se han inscrito 78 personas incluyendo a ponentes, moderadores y \nmiembros del equipo técnico. Además, hubo 671 asistentes virtuales. \n \nEl 85% de las ponencias han sido puntuadas mayoritariamente por los \nasistentes con un 4 sobre 5. \nLas ponencias mejor valoradas fueron “Nuevas fronteras en el tratamiento de la \nFQ: de los moduladores a la terapia génica”, “El trasplante en la FQ: actualidad, \ndatos e innovación” y “Genética y cribado neonatal: hacia una detección más justa \nen FQ y otras enfermedades raras”. \n \n \n Las personas asistentes valoran que se han cumplido sus expectativas en \nel 82% de los casos."
+      },
+      {
+        "page": 11,
+        "text": "proviene de fondos propios. Gracias al importe recibido a través de subvenciones \n(públicas y privadas) se han podido desarrollar diferentes proyectos: programa de \nfortalecimiento, programa de actualización del manual del trasplante, programa de \ninvestigación, programa laboral, programa de atención psicológica y ejercicio físico \npara jóvenes, y programa de innovación tecnológica. \n \n Los gastos (201.246,18€) han sido inferiores respecto al presupuesto \nplanteado, lo cual ha permitido un resultado positivo de 36.048,41 €."
+      }
+    ],
+    "4": [
+      {
+        "page": 17,
+        "text": "DEFENSA DE DERECHOS Y POSICIONAMIENTO DE LA ENTIDAD COMO CATALIZADORA DE \nINCIDENCIA POLÍTICA Y CAMBIO SOCIAL \nBOLETÍN, WEB y RRSS \n \nLa página web ha tenido 36.528 visitas en 2025. Esto hace una media de más \nde 3.044 páginas vistas al mes y 102 diarias. Además, el 90% de los contenidos \npublicados cumplen nuestro checklist de comunicaciones inclusivas respecto a \ngénero y discapacidad. \n  \n \nEl boletín electrónico mensual se envía por e-mail a todas las asociaciones con \nlas noticias más destacadas del mes, publicadas por la FEFQ  o asociaciones, a \ntravés de la plataforma Brevo. \n \nAlcance en redes sociales durante 2025:  \n• Facebook: 28.000 visualizaciones de media al mes. \n• X (Twitter): 16.000 impresiones de media al mes. \n• Instagram: 35.000 visualizaciones de media al mes."
+      },
+      {
+        "page": 10,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nPRODUCTOS SOLIDARIOS \n \nDurante 2025 hemos continuado con las ventas de la tienda online, nuestra \nmascota Pulmonito y las agendas escolares solidarias.  \n  \n \nSe han vendido 1.652 Pulmonitos a las asociaciones y particulares. Junto con la \nventa del resto de artículos solidarios, como tazas, bolsas de tela, botellas y \ntarjetas de boda solidarias, se ha conseguido una recaudación total \nde 14.344,71€.  \n \nEn 2025 se han distribuido 1.254 agendas solidarias entre los escolares de \ntoda España, cuya recaudación ha ascendido a 4.235,79€."
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 6,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO \nACTUALIZACIÓN DEL MANUAL DE \nTRASPLANTE  \nEn 2024 se empezó con la actualización del manual del trasplante, pero en \n2025 se ha finalizado y, paralelamente, se ha elaborado un informe con los \ndatos obtenidos en la investigación sobre este tema. \n \n  \n  \n  \n  \n \n \n  \nEl manual actualizado se ha presentado en un webinar coincidiendo con el Día \nMundial de la Fibrosis Quística al que se conectaron 148 personas.  \n \nSe han realizado 1.043 visitas al formato electrónico del manual. \n \nCon la información recopilada para el manual, de los grupos de discusión y de \nun cuestionario, se desarrolló un informe sobre cómo ha evolucionado el \nbienestar psicosocial y sociosanitario de las personas trasplantadas con FQ."
+      }
+    ],
+    "5": [
+      {
+        "page": 22,
+        "text": "PARTICIPACIÓN ASOCIATIVA Y BUENAS PRÁCTICAS \nPARTICIPACIÓN \n \nEste año 2025 sigue con la transparencia y búsqueda de consenso en la \ngestión asociativa y se apuesta por fomentar la participación de todo el \ncolectivo. \n \n ASAMBLEA ORDINARIA. Se celebró el 7 de junio en Madrid con la \nparticipación de representantes de las distintas asociaciones de FQ, tanto \npresencialmente como por videoconferencia.  \n \nEn total participaron 24 personas en la asamblea, entre familiares, personas \ncon fibrosis quística y profesionales, pertenecientes al colectivo FQ.  \n \nEn este encuentro anual se revisaron los principales avances y retos de la \nentidad, así como los objetivos estratégicos para el próximo ejercicio. \nPrincipalmente, relacionados con los nuevos tratamientos e investigaciones. \n \nCOMISIÓN EJECUTIVA. 23 reuniones a lo largo de 2025"
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 18,
+        "text": "DEFENSA DE DERECHOS Y POSICIONAMIENTO DE LA ENTIDAD COMO CATALIZADORA DE \nINCIDENCIA POLÍTICA Y CAMBIO SOCIAL \nREPRESENTACIÓN DE LA FQ ANTE \nORGANISMOS PÚBLICOS \n \nEn 2025, la Comisión Ejecutiva en su compromiso con la representación y \nreivindicación de la Federación Española de FQ ha participado en numerosos \nactos y reuniones.  \nParticipación en actos representativos de: Eurordis, OREE, Plataforma de \nPacientes, COCEMFE, FEDER, Unión de Trasplantados (UTxs), CF Europe, Separ \nPacientes."
+      },
+      {
+        "page": 17,
+        "text": "DEFENSA DE DERECHOS Y POSICIONAMIENTO DE LA ENTIDAD COMO CATALIZADORA DE \nINCIDENCIA POLÍTICA Y CAMBIO SOCIAL \nBOLETÍN, WEB y RRSS \n \nLa página web ha tenido 36.528 visitas en 2025. Esto hace una media de más \nde 3.044 páginas vistas al mes y 102 diarias. Además, el 90% de los contenidos \npublicados cumplen nuestro checklist de comunicaciones inclusivas respecto a \ngénero y discapacidad. \n  \n \nEl boletín electrónico mensual se envía por e-mail a todas las asociaciones con \nlas noticias más destacadas del mes, publicadas por la FEFQ  o asociaciones, a \ntravés de la plataforma Brevo. \n \nAlcance en redes sociales durante 2025:  \n• Facebook: 28.000 visualizaciones de media al mes. \n• X (Twitter): 16.000 impresiones de media al mes. \n• Instagram: 35.000 visualizaciones de media al mes."
+      }
+    ],
+    "6": [
+      {
+        "page": 11,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nSEGUIMIENTO PRESUPUESTARIO \n \n A principio de 2025 la Federación tenía previsto un total de 240.650,44€ de \ningresos. De dicha cantidad, el 28,83% provenían de subvenciones públicas \n(I.R.P.F. y FEDER) y un 63,14% de donaciones privadas (donaciones individuales, \nempresas, colaboraciones laboratorios), mientras que el 8,03% provenía de fondos \npropios y comprendía ventas de mercadería, las aportaciones de socios fijas y \nvariables, y la lotería.  \n \n  \n \n \n \n \n \nLos ingresos de 2025 han sido de 237.294,59€. De dicha cantidad, el 30,72% \nproviene de subvenciones públicas (Concesión Directa, 0‘7 IRPF y \nmantenimiento) y un 60,62% de donaciones privadas, mientras que el 8,66% \nproviene de fondos propios. Gracias al importe recibido a través de subvenciones \n(públicas y privadas) se han podido desarrollar diferentes proyectos: programa de"
+      },
+      {
+        "page": 23,
+        "text": "PREMIOS Y RECONOCIMIENTOS \n2025 – Premio Social & Public AI Award en la V Edición de Premios IA con impacto \nsocial de AMETIC, por el proyecto «Luz-IA», una asistente virtual para el bienestar \nemocional en fibrosis quística. \n2023 – Segundo premio SEPAR Pacientes en el 6º Foro SEPAR de Pacientes con \nEnfermedades Respiratorias al proyecto “Imagen corporal y Fibrosis Quística”. \n \n2022 – Primer premio del Foro Afectivo-Efectivo a la mejor iniciativa de \nsensibilización” desarrollada por asociaciones de pacientes y ONG del ámbito de \nla salud por la campaña “Imagen corporal y FQ”. \n2022 – Finalista en los Premios Somos Pacientes a la “Mejor iniciativa de \ndivulgación y concienciación social” en la categoría “Pacientes” por la campaña \n“Imagen corporal y FQ”. \n2021 – Premio Fundación Cofares en reconocimiento a la labor social a favor de \npacientes y comunidades necesitadas de atención sanitaria. \n \n2020 y 2018 - Sello de Excelencia a la Gestión y al Compromiso Social. Nivel 3"
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 23,
+        "text": "pacientes y comunidades necesitadas de atención sanitaria. \n \n2020 y 2018 - Sello de Excelencia a la Gestión y al Compromiso Social. Nivel 3 \nestrellas. \n \n 2017- Segundo premio a la calidad en la formación dirigida a pacientes y familiares \ndesarrollada por asociaciones de pacientes y ONG en el ámbito de salud. \n \n2017 - Mención especial al proyecto Respira Conmigo de los premios ayudas \npaciente Vital Aire. \n \n2016 - Primer premio en I Edición de los Premios Cruz Roja a la innovación \ntecnológica aplicada a fines humanitarios en la categoría “Salud Constante” por la \napp “FQ-UP”. \n \n2015 - Premio a la mejor formación dirigida a pacientes y/o familiares, concedido \npor la Fundación Albert Jovell. \n \n2011 - Premio al compromiso con la investigación. Servicio al paciente, concedido \npor la Fundación Farmaindustria."
+      }
+    ],
+    "7": [
+      {
+        "page": 11,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nSEGUIMIENTO PRESUPUESTARIO \n \n A principio de 2025 la Federación tenía previsto un total de 240.650,44€ de \ningresos. De dicha cantidad, el 28,83% provenían de subvenciones públicas \n(I.R.P.F. y FEDER) y un 63,14% de donaciones privadas (donaciones individuales, \nempresas, colaboraciones laboratorios), mientras que el 8,03% provenía de fondos \npropios y comprendía ventas de mercadería, las aportaciones de socios fijas y \nvariables, y la lotería.  \n \n  \n \n \n \n \n \nLos ingresos de 2025 han sido de 237.294,59€. De dicha cantidad, el 30,72% \nproviene de subvenciones públicas (Concesión Directa, 0‘7 IRPF y \nmantenimiento) y un 60,62% de donaciones privadas, mientras que el 8,66% \nproviene de fondos propios. Gracias al importe recibido a través de subvenciones \n(públicas y privadas) se han podido desarrollar diferentes proyectos: programa de"
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 10,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nPRODUCTOS SOLIDARIOS \n \nDurante 2025 hemos continuado con las ventas de la tienda online, nuestra \nmascota Pulmonito y las agendas escolares solidarias.  \n  \n \nSe han vendido 1.652 Pulmonitos a las asociaciones y particulares. Junto con la \nventa del resto de artículos solidarios, como tazas, bolsas de tela, botellas y \ntarjetas de boda solidarias, se ha conseguido una recaudación total \nde 14.344,71€.  \n \nEn 2025 se han distribuido 1.254 agendas solidarias entre los escolares de \ntoda España, cuya recaudación ha ascendido a 4.235,79€."
+      },
+      {
+        "page": 11,
+        "text": "proviene de fondos propios. Gracias al importe recibido a través de subvenciones \n(públicas y privadas) se han podido desarrollar diferentes proyectos: programa de \nfortalecimiento, programa de actualización del manual del trasplante, programa de \ninvestigación, programa laboral, programa de atención psicológica y ejercicio físico \npara jóvenes, y programa de innovación tecnológica. \n \n Los gastos (201.246,18€) han sido inferiores respecto al presupuesto \nplanteado, lo cual ha permitido un resultado positivo de 36.048,41 €."
+      }
+    ],
+    "8": [
+      {
+        "page": 11,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nSEGUIMIENTO PRESUPUESTARIO \n \n A principio de 2025 la Federación tenía previsto un total de 240.650,44€ de \ningresos. De dicha cantidad, el 28,83% provenían de subvenciones públicas \n(I.R.P.F. y FEDER) y un 63,14% de donaciones privadas (donaciones individuales, \nempresas, colaboraciones laboratorios), mientras que el 8,03% provenía de fondos \npropios y comprendía ventas de mercadería, las aportaciones de socios fijas y \nvariables, y la lotería.  \n \n  \n \n \n \n \n \nLos ingresos de 2025 han sido de 237.294,59€. De dicha cantidad, el 30,72% \nproviene de subvenciones públicas (Concesión Directa, 0‘7 IRPF y \nmantenimiento) y un 60,62% de donaciones privadas, mientras que el 8,66% \nproviene de fondos propios. Gracias al importe recibido a través de subvenciones \n(públicas y privadas) se han podido desarrollar diferentes proyectos: programa de"
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 10,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nPRODUCTOS SOLIDARIOS \n \nDurante 2025 hemos continuado con las ventas de la tienda online, nuestra \nmascota Pulmonito y las agendas escolares solidarias.  \n  \n \nSe han vendido 1.652 Pulmonitos a las asociaciones y particulares. Junto con la \nventa del resto de artículos solidarios, como tazas, bolsas de tela, botellas y \ntarjetas de boda solidarias, se ha conseguido una recaudación total \nde 14.344,71€.  \n \nEn 2025 se han distribuido 1.254 agendas solidarias entre los escolares de \ntoda España, cuya recaudación ha ascendido a 4.235,79€."
+      },
+      {
+        "page": 22,
+        "text": "PARTICIPACIÓN ASOCIATIVA Y BUENAS PRÁCTICAS \nPARTICIPACIÓN \n \nEste año 2025 sigue con la transparencia y búsqueda de consenso en la \ngestión asociativa y se apuesta por fomentar la participación de todo el \ncolectivo. \n \n ASAMBLEA ORDINARIA. Se celebró el 7 de junio en Madrid con la \nparticipación de representantes de las distintas asociaciones de FQ, tanto \npresencialmente como por videoconferencia.  \n \nEn total participaron 24 personas en la asamblea, entre familiares, personas \ncon fibrosis quística y profesionales, pertenecientes al colectivo FQ.  \n \nEn este encuentro anual se revisaron los principales avances y retos de la \nentidad, así como los objetivos estratégicos para el próximo ejercicio. \nPrincipalmente, relacionados con los nuevos tratamientos e investigaciones. \n \nCOMISIÓN EJECUTIVA. 23 reuniones a lo largo de 2025"
+      }
+    ],
+    "9": [
+      {
+        "page": 5,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO \nPROYECTO “MENS SANA IN CORPORE SANO” \nEn 2025 se ha desarrollado el último cuatrimestre del proyecto para facilitar a \nlas familias de menores con FQ entre 9 y 18 años sesiones de tratamiento de \npsicología y de ejercicio físico. \n \n \n \n \n \n \n \n \nEl proyecto se ha dividido en 3 cuatrimestres entre 2024 y 2025. La \nparticipación total de este proyecto ha sido: \nASOCIACIONES PARTICIPANTES \n- Asociación Asturiana de Fibrosis Quística \n- Asociación Andaluza de Fibrosis Quística \n- Asociación Balear de Fibrosis Quística \n- Asociación de la Comunidad Valenciana \n- Asociación Gallega de Fibrosis Quística \n- Asociación FQ del País Vasco. \nNÚMERO DE PERSONAS ATENDIDAS \n- Psicología: 57 \n- Ejercicio físico: 17 \nNÚMERO DE SESIONES REALIZADAS \n- Psicología: 280 \n- Ejercicio físico: 214"
+      },
+      {
+        "page": 4,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO \nENCUENTROS PROFESIONALES DE FQ \n \nSe ha organizado el encuentro de los Grupos Profesionales de trabajo social, \npsicología, fisioterapia y dietética y nutrición para favorecer el intercambio de \nexperiencias y actualizar conocimientos entre profesionales. \n   \nHan participado 38 profesionales de 9 asociaciones. \n \nLa celebración de estos encuentros se ha valorado mayoritariamente con un 4 \nsobre 5. El 92% de las personas asistentes valoran que se han cumplido sus \nexpectativas.   \n \nEste año se ha realizado una sesión conjunta sobre sostenibilidad social y \nambiental desde la interdisciplinariedad. Se reflexionó sobre la importancia de \nun modelo de atención ecosostenible y justo desde las diferentes disciplinas."
+      },
+      {
+        "page": 11,
+        "text": "proviene de fondos propios. Gracias al importe recibido a través de subvenciones \n(públicas y privadas) se han podido desarrollar diferentes proyectos: programa de \nfortalecimiento, programa de actualización del manual del trasplante, programa de \ninvestigación, programa laboral, programa de atención psicológica y ejercicio físico \npara jóvenes, y programa de innovación tecnológica. \n \n Los gastos (201.246,18€) han sido inferiores respecto al presupuesto \nplanteado, lo cual ha permitido un resultado positivo de 36.048,41 €."
+      },
+      {
+        "page": 20,
+        "text": "PARTICIPACIÓN ASOCIATIVA Y BUENAS PRÁCTICAS \nCALIDAD Y FORTALECIMIENTO ASOCIATIVO  \n \nEste programa ha consistido en avanzar y mantener la gestión de calidad en \nlas diferentes asociaciones de FQ.  Se han realizado 19 sesiones de \nasesoramiento personalizado \n \n9 asociaciones y la FEFQ mantienen su Sello de Calidad: Sello de Excelencia a \nla Gestión y al Compromiso Social. \n \nLa inversión en renovaciones y evaluaciones de seguimiento de calidad ha sido \nde 11.253€. \n \n \n \nSe ha realizado el último taller para las juntas directivas de las asociaciones \nque componen la FEFQ con el objetivo de incorporar nuevas habilidades \ndirectivas y de liderazgo que redunden en el bienestar de las personas con FQ y \nsus familias.  \n \nEste año ha participado la asociación de Murcia con un alto grado de \nsatisfacción."
+      }
+    ],
+    "10": [
+      {
+        "page": 8,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO  \nPROYECTO DE TRANSFORMACIÓN DIGITAL DE \nLA FEFQ \nLa FEFQ está desarrollando una nueva herramienta CRM para digitalizar a \nnuestro movimiento asociativo FQ, y que se pueda implementar en el trabajo \ndel día a día del colectivo.  \n \n \nEn 2025 se ha realizado: \n1.- La autentificación del usuario y recuperación \nde credenciales de forma autónoma. \n2.- Creación de relación familiar y tutela de socios \nmenores de edad. \n3.- Importación de socios masivo y posibilidad de \ndescarga de datos en Excel. \n4.- Creación de calendarios laborales para \ntrabajadores: horario laboral, permisos, vacaciones, \nbajas…  \n \nSe ha comenzado también con el sistema de registro de fichaje por parte del \ntrabajador y con el sistema de gestión de consultas (solicitud, confirmación, \nrealización, desplazamientos…)."
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 6,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO \nACTUALIZACIÓN DEL MANUAL DE \nTRASPLANTE  \nEn 2024 se empezó con la actualización del manual del trasplante, pero en \n2025 se ha finalizado y, paralelamente, se ha elaborado un informe con los \ndatos obtenidos en la investigación sobre este tema. \n \n  \n  \n  \n  \n \n \n  \nEl manual actualizado se ha presentado en un webinar coincidiendo con el Día \nMundial de la Fibrosis Quística al que se conectaron 148 personas.  \n \nSe han realizado 1.043 visitas al formato electrónico del manual. \n \nCon la información recopilada para el manual, de los grupos de discusión y de \nun cuestionario, se desarrolló un informe sobre cómo ha evolucionado el \nbienestar psicosocial y sociosanitario de las personas trasplantadas con FQ."
+      },
+      {
+        "page": 22,
+        "text": "PARTICIPACIÓN ASOCIATIVA Y BUENAS PRÁCTICAS \nPARTICIPACIÓN \n \nEste año 2025 sigue con la transparencia y búsqueda de consenso en la \ngestión asociativa y se apuesta por fomentar la participación de todo el \ncolectivo. \n \n ASAMBLEA ORDINARIA. Se celebró el 7 de junio en Madrid con la \nparticipación de representantes de las distintas asociaciones de FQ, tanto \npresencialmente como por videoconferencia.  \n \nEn total participaron 24 personas en la asamblea, entre familiares, personas \ncon fibrosis quística y profesionales, pertenecientes al colectivo FQ.  \n \nEn este encuentro anual se revisaron los principales avances y retos de la \nentidad, así como los objetivos estratégicos para el próximo ejercicio. \nPrincipalmente, relacionados con los nuevos tratamientos e investigaciones. \n \nCOMISIÓN EJECUTIVA. 23 reuniones a lo largo de 2025"
+      }
+    ],
+    "11": [
+      {
+        "page": 10,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nPRODUCTOS SOLIDARIOS \n \nDurante 2025 hemos continuado con las ventas de la tienda online, nuestra \nmascota Pulmonito y las agendas escolares solidarias.  \n  \n \nSe han vendido 1.652 Pulmonitos a las asociaciones y particulares. Junto con la \nventa del resto de artículos solidarios, como tazas, bolsas de tela, botellas y \ntarjetas de boda solidarias, se ha conseguido una recaudación total \nde 14.344,71€.  \n \nEn 2025 se han distribuido 1.254 agendas solidarias entre los escolares de \ntoda España, cuya recaudación ha ascendido a 4.235,79€."
+      },
+      {
+        "page": 11,
+        "text": "SOSTENIBILIDAD ECONÓMICA Y DESARROLLO DE ALIANZAS PARA LA AMPLIACIÓN DE LOS \nRECURSOS ECONÓMICOS \n \nSEGUIMIENTO PRESUPUESTARIO \n \n A principio de 2025 la Federación tenía previsto un total de 240.650,44€ de \ningresos. De dicha cantidad, el 28,83% provenían de subvenciones públicas \n(I.R.P.F. y FEDER) y un 63,14% de donaciones privadas (donaciones individuales, \nempresas, colaboraciones laboratorios), mientras que el 8,03% provenía de fondos \npropios y comprendía ventas de mercadería, las aportaciones de socios fijas y \nvariables, y la lotería.  \n \n  \n \n \n \n \n \nLos ingresos de 2025 han sido de 237.294,59€. De dicha cantidad, el 30,72% \nproviene de subvenciones públicas (Concesión Directa, 0‘7 IRPF y \nmantenimiento) y un 60,62% de donaciones privadas, mientras que el 8,66% \nproviene de fondos propios. Gracias al importe recibido a través de subvenciones \n(públicas y privadas) se han podido desarrollar diferentes proyectos: programa de"
+      },
+      {
+        "page": 2,
+        "text": "En 2025 hemos continuado en la defensa del acceso a los tratamientos, \nreivindicando que todas las personas puedan beneficiarse de ellos y \nreforzando nuestro compromiso para que lleguen cada vez a más personas.  \nTambién hemos celebrado nuestro IX Congreso Nacional en la ciudad de \nMálaga. \nEste año ha estado marcado por la actualización del manual de trasplante y \nel desarrollo de una investigación sobre la evolución del bienestar de las \npersonas trasplantadas, contribuyendo a una mejor comprensión de su \nrealidad. \nAdemás, hemos empezado a organizar grupos de trabajo orientados a \nabordar las nuevas necesidades emergentes, como el aumento de la \nesperanza de vida en fibrosis quística, que exige respuestas adaptadas desde \nel movimiento asociativo. \n \n \nRecordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información."
+      },
+      {
+        "page": 23,
+        "text": "PREMIOS Y RECONOCIMIENTOS \n2025 – Premio Social & Public AI Award en la V Edición de Premios IA con impacto \nsocial de AMETIC, por el proyecto «Luz-IA», una asistente virtual para el bienestar \nemocional en fibrosis quística. \n2023 – Segundo premio SEPAR Pacientes en el 6º Foro SEPAR de Pacientes con \nEnfermedades Respiratorias al proyecto “Imagen corporal y Fibrosis Quística”. \n \n2022 – Primer premio del Foro Afectivo-Efectivo a la mejor iniciativa de \nsensibilización” desarrollada por asociaciones de pacientes y ONG del ámbito de \nla salud por la campaña “Imagen corporal y FQ”. \n2022 – Finalista en los Premios Somos Pacientes a la “Mejor iniciativa de \ndivulgación y concienciación social” en la categoría “Pacientes” por la campaña \n“Imagen corporal y FQ”. \n2021 – Premio Fundación Cofares en reconocimiento a la labor social a favor de \npacientes y comunidades necesitadas de atención sanitaria. \n \n2020 y 2018 - Sello de Excelencia a la Gestión y al Compromiso Social. Nivel 3"
+      }
+    ],
+    "12": [
+      {
+        "page": 24,
+        "text": "10. Lo que debes saber sobre la Diabetes \nRelacionada con la Fibrosis Quística (DRFQ) \n11. Hablemos de Sexo. Salud sexual, \nAnticonceptiva y Reproductiva en los jóvenes con \nFibrosis Quística \n12. 101 preguntas sobre Fibrosis Quística \n \n13. Investigación psicosocial de las personas con \nFibrosis Quística. Comparativa 1999-2011. \n14. Manual de urgencias médicas en FQ \n15. DVD de Fisioterapia y aerosolterapia en FQ \n16. El ejercicio es medicina en la FQ \n17. Exercise is medicine for Cystic Fibrosis \n18. Guía de fortalecimiento asociativo en FQ \n19. La Fibrosis Quística en el cole (disponible \ntambién en gallego, catalán y euskera) \n20. Guía de recursos. Inserción laboral de las \npersonas con FQ. Una misión muy posible \n21. Imagen corporal y Fibrosis Quística \n22. Guía de apoyo psicológico ante situaciones \nde crisis. \n23. Noche de relatos: Ciencia de letras y otras \nletras. \n24. Guía de orientación educativo-laboral para \njóvenes con FQ. \n25. El trasplante en fibrosis quística (2025)"
+      },
+      {
+        "page": 22,
+        "text": "PARTICIPACIÓN ASOCIATIVA Y BUENAS PRÁCTICAS \nPARTICIPACIÓN \n \nEste año 2025 sigue con la transparencia y búsqueda de consenso en la \ngestión asociativa y se apuesta por fomentar la participación de todo el \ncolectivo. \n \n ASAMBLEA ORDINARIA. Se celebró el 7 de junio en Madrid con la \nparticipación de representantes de las distintas asociaciones de FQ, tanto \npresencialmente como por videoconferencia.  \n \nEn total participaron 24 personas en la asamblea, entre familiares, personas \ncon fibrosis quística y profesionales, pertenecientes al colectivo FQ.  \n \nEn este encuentro anual se revisaron los principales avances y retos de la \nentidad, así como los objetivos estratégicos para el próximo ejercicio. \nPrincipalmente, relacionados con los nuevos tratamientos e investigaciones. \n \nCOMISIÓN EJECUTIVA. 23 reuniones a lo largo de 2025"
+      },
+      {
+        "page": 24,
+        "text": "PUBLICACIONES DE LA FEFQ \nLa Federación cuenta con 24 publicaciones y DVDs hasta la fecha, que se pueden \nencontrar en la página web: fibrosisquistica.org/guias-y-manuales. \n \n1. Inserción laboral de las personas afectadas de \nFQ. Guía de buenas prácticas. \n2. Investigación sobre la situación psicosocial de \nlas personas afectadas de Fibrosis Quística. \n3. La inserción social de las personas con FQ. En \nlos ámbitos educativo, laboral y trasplante. \n4. Libro Blanco de atención a la FQ \n5. Guía de apoyo y cuidados para enfermos y \nfamiliares FQ \n6. El trasplante en Fibrosis Quística (2004) \n7. Cuidarme bien para cuidar mejor. Manual de \nmedidas de protección para familiares de \npersonas con fibrosis quística. \n8. Los tres pilares del tratamiento en FQ \n9. DVD de Nutrición para personas con FQ. \n10. Lo que debes saber sobre la Diabetes \nRelacionada con la Fibrosis Quística (DRFQ) \n11. Hablemos de Sexo. Salud sexual, \nAnticonceptiva y Reproductiva en los jóvenes con \nFibrosis Quística"
+      },
+      {
+        "page": 5,
+        "text": "INNOVACIÓN Y GESTIÓN DEL CONOCIMIENTO \nPROYECTO “MENS SANA IN CORPORE SANO” \nEn 2025 se ha desarrollado el último cuatrimestre del proyecto para facilitar a \nlas familias de menores con FQ entre 9 y 18 años sesiones de tratamiento de \npsicología y de ejercicio físico. \n \n \n \n \n \n \n \n \nEl proyecto se ha dividido en 3 cuatrimestres entre 2024 y 2025. La \nparticipación total de este proyecto ha sido: \nASOCIACIONES PARTICIPANTES \n- Asociación Asturiana de Fibrosis Quística \n- Asociación Andaluza de Fibrosis Quística \n- Asociación Balear de Fibrosis Quística \n- Asociación de la Comunidad Valenciana \n- Asociación Gallega de Fibrosis Quística \n- Asociación FQ del País Vasco. \nNÚMERO DE PERSONAS ATENDIDAS \n- Psicología: 57 \n- Ejercicio físico: 17 \nNÚMERO DE SESIONES REALIZADAS \n- Psicología: 280 \n- Ejercicio físico: 214"
+      }
+    ],
+    "13": [
+      {
+        "page": 22,
+        "text": "PARTICIPACIÓN ASOCIATIVA Y BUENAS PRÁCTICAS \nPARTICIPACIÓN \n \nEste año 2025 sigue con la transparencia y búsqueda de consenso en la \ngestión asociativa y se apuesta por fomentar la participación de todo el \ncolectivo. \n \n ASAMBLEA ORDINARIA. Se celebró el 7 de junio en Madrid con la \nparticipación de representantes de las distintas asociaciones de FQ, tanto \npresencialmente como por videoconferencia.  \n \nEn total participaron 24 personas en la asamblea, entre familiares, personas \ncon fibrosis quística y profesionales, pertenecientes al colectivo FQ.  \n \nEn este encuentro anual se revisaron los principales avances y retos de la \nentidad, así como los objetivos estratégicos para el próximo ejercicio. \nPrincipalmente, relacionados con los nuevos tratamientos e investigaciones. \n \nCOMISIÓN EJECUTIVA. 23 reuniones a lo largo de 2025"
+      },
+      {
+        "page": 2,
+        "text": "Recordando nuestra Misión y Visión, a continuación, presentamos nuestra \nmemoria de actividades esquematizada por ejes estratégicos con enlaces \npara ampliar la información. \n \nMisión: Agrupar a las asociaciones de Fibrosis Quística para \ntrabajar juntos en la mejora de la calidad de vida de las personas \ncon FQ y sus familias. \n \nVisión: Que la Fibrosis Quística sea una enfermedad conocida y \nliderada por una Federación fuertemente unida, representando a \ntodas las asociaciones y siendo su principal apoyo."
+      },
+      {
+        "page": 24,
+        "text": "10. Lo que debes saber sobre la Diabetes \nRelacionada con la Fibrosis Quística (DRFQ) \n11. Hablemos de Sexo. Salud sexual, \nAnticonceptiva y Reproductiva en los jóvenes con \nFibrosis Quística \n12. 101 preguntas sobre Fibrosis Quística \n \n13. Investigación psicosocial de las personas con \nFibrosis Quística. Comparativa 1999-2011. \n14. Manual de urgencias médicas en FQ \n15. DVD de Fisioterapia y aerosolterapia en FQ \n16. El ejercicio es medicina en la FQ \n17. Exercise is medicine for Cystic Fibrosis \n18. Guía de fortalecimiento asociativo en FQ \n19. La Fibrosis Quística en el cole (disponible \ntambién en gallego, catalán y euskera) \n20. Guía de recursos. Inserción laboral de las \npersonas con FQ. Una misión muy posible \n21. Imagen corporal y Fibrosis Quística \n22. Guía de apoyo psicológico ante situaciones \nde crisis. \n23. Noche de relatos: Ciencia de letras y otras \nletras. \n24. Guía de orientación educativo-laboral para \njóvenes con FQ. \n25. El trasplante en fibrosis quística (2025)"
+      },
+      {
+        "page": 24,
+        "text": "PUBLICACIONES DE LA FEFQ \nLa Federación cuenta con 24 publicaciones y DVDs hasta la fecha, que se pueden \nencontrar en la página web: fibrosisquistica.org/guias-y-manuales. \n \n1. Inserción laboral de las personas afectadas de \nFQ. Guía de buenas prácticas. \n2. Investigación sobre la situación psicosocial de \nlas personas afectadas de Fibrosis Quística. \n3. La inserción social de las personas con FQ. En \nlos ámbitos educativo, laboral y trasplante. \n4. Libro Blanco de atención a la FQ \n5. Guía de apoyo y cuidados para enfermos y \nfamiliares FQ \n6. El trasplante en Fibrosis Quística (2004) \n7. Cuidarme bien para cuidar mejor. Manual de \nmedidas de protección para familiares de \npersonas con fibrosis quística. \n8. Los tres pilares del tratamiento en FQ \n9. DVD de Nutrición para personas con FQ. \n10. Lo que debes saber sobre la Diabetes \nRelacionada con la Fibrosis Quística (DRFQ) \n11. Hablemos de Sexo. Salud sexual, \nAnticonceptiva y Reproductiva en los jóvenes con \nFibrosis Quística"
+      }
+    ]
+  }
+}

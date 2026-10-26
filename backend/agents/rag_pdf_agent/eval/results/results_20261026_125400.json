@@ -1,0 +1,546 @@
+{
+  "meta": {
+    "timestamp": "20261026_125400",
+    "repeats": 1,
+    "gpu": "NVIDIA GeForce RTX 4080, 16376 MiB",
+    "packages": {
+      "langchain-core": "1.2.23",
+      "langchain-anthropic": "1.4.0",
+      "langchain-ollama": "1.1.0"
+    },
+    "runs": [
+      {
+        "config": "claude-haiku-4.5 (API)",
+        "vram_baseline_mib": 13496,
+        "cold_start_s": 3.88
+      },
+      {
+        "config": "qwen3:14b (local)",
+        "vram_baseline_mib": 3197,
+        "cold_start_s": 4.9
+      }
+    ]
+  },
+  "records": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 1,
+      "type": "dato_exacto",
+      "question": "¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?",
+      "expected": "Los días 15 y 16 de noviembre, en Málaga.",
+      "answer": "Según el documento, el IX Congreso Nacional de la FEFQ se celebró los días **15 y 16 de noviembre en Málaga** (página 7).",
+      "pages_retrieved": [
+        7,
+        14,
+        20,
+        22
+      ],
+      "expected_page": 7,
+      "seconds": 1.3,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 2,
+      "type": "dato_exacto",
+      "question": "¿Cuántos Pulmonitos se vendieron en 2025?",
+      "expected": "1.652 Pulmonitos.",
+      "answer": "Según el documento (página 10), se vendieron **1.652 Pulmonitos** a las asociaciones y particulares durante 2025.",
+      "pages_retrieved": [
+        10,
+        2,
+        11,
+        6
+      ],
+      "expected_page": 10,
+      "seconds": 1.26,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 3,
+      "type": "dato_exacto",
+      "question": "¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?",
+      "expected": "148 personas.",
+      "answer": "Según el documento, **148 personas se conectaron al webinar** de presentación del manual de trasplante actualizado, que coincidió con el Día Mundial de la Fibrosis Quística (página 6).",
+      "pages_retrieved": [
+        6,
+        2,
+        7,
+        11
+      ],
+      "expected_page": 6,
+      "seconds": 1.39,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 4,
+      "type": "dato_exacto",
+      "question": "¿Cuántas visitas tuvo la página web en 2025?",
+      "expected": "36.528 visitas.",
+      "answer": "Según el documento (página 17), la página web tuvo **36.528 visitas en 2025**, lo que representa una media de más de 3.044 páginas vistas al mes y 102 diarias.",
+      "pages_retrieved": [
+        17,
+        10,
+        2,
+        6
+      ],
+      "expected_page": 17,
+      "seconds": 1.41,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 5,
+      "type": "dato_exacto",
+      "question": "¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?",
+      "expected": "23 reuniones.",
+      "answer": "Según el documento (página 22), la Comisión Ejecutiva celebró **23 reuniones a lo largo de 2025**.",
+      "pages_retrieved": [
+        22,
+        2,
+        18,
+        17
+      ],
+      "expected_page": 22,
+      "seconds": 1.25,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 6,
+      "type": "dato_exacto",
+      "question": "¿Qué premio recibió la Federación en 2025 y por qué proyecto?",
+      "expected": "El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».",
+      "answer": "Según el documento (página 23), en 2025 la Federación recibió el **Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC**, por el proyecto **«Luz-IA»**, una asistente virtual para el bienestar emocional en fibrosis quística.",
+      "pages_retrieved": [
+        11,
+        23,
+        2,
+        23
+      ],
+      "expected_page": 23,
+      "seconds": 1.53,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 7,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?",
+      "expected": "237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).",
+      "answer": "Según el documento (página 11):\n\n**Ingresos reales de 2025:** 237.294,59€\n\n**Porcentaje de donaciones privadas:** 60,62%\n\nEsto significa que las donaciones privadas (donaciones individuales, empresas, colaboraciones con laboratorios) representaron aproximadamente 143.954€ del total de ingresos de 2025.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        11
+      ],
+      "expected_page": 11,
+      "seconds": 1.68,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 8,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuál fue el resultado económico de 2025?",
+      "expected": "Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).",
+      "answer": "Según el documento (página 11), los **ingresos de 2025 fueron de 237.294,59€**.\n\nEstos ingresos provenían de:\n- **30,72%** de subvenciones públicas (Concesión Directa, 0'7 IRPF y mantenimiento)\n- **60,62%** de donaciones privadas\n- **8,66%** de fondos propios\n\nEl documento especifica que gracias a estos ingresos se pudieron desarrollar diferentes proyectos, aunque no proporciona información sobre gastos o resultado neto final.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        22
+      ],
+      "expected_page": 11,
+      "seconds": 2.04,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 9,
+      "type": "cifra_con_trampa",
+      "question": "En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?",
+      "expected": "280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).",
+      "answer": "Según el documento (página 5), en el proyecto \"Mens sana in corpore sano\" se realizaron:\n\n- **Psicología: 280 sesiones**\n- **Ejercicio físico: 214 sesiones**",
+      "pages_retrieved": [
+        5,
+        4,
+        11,
+        20
+      ],
+      "expected_page": 5,
+      "seconds": 1.34,
+      "vram_used_mib": 13492,
+      "vram_delta_mib": -4,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 10,
+      "type": "lista_sintesis",
+      "question": "¿Qué funcionalidades del nuevo CRM se completaron en 2025?",
+      "expected": "Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.",
+      "answer": "Según el documento (página 8), en 2025 se completaron las siguientes funcionalidades del nuevo CRM:\n\n1. **Autentificación del usuario y recuperación de credenciales** de forma autónoma.\n\n2. **Creación de relación familiar y tutela de socios** menores de edad.\n\n3. **Importación de socios masivo** y posibilidad de descarga de datos en Excel.\n\n4. **Creación de calendarios laborales** para trabajadores: horario laboral, permisos, vacaciones, bajas, etc.\n\nAdemás, se menciona que se comenzó también con:\n- Sistema de registro de fichaje por parte del trabajador\n- Sistema de gestión de consultas (solicitud, confirmación, realización, desplazamientos)",
+      "pages_retrieved": [
+        8,
+        2,
+        6,
+        22
+      ],
+      "expected_page": 8,
+      "seconds": 2.24,
+      "vram_used_mib": 13497,
+      "vram_delta_mib": 1,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 11,
+      "type": "calculo",
+      "question": "¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?",
+      "expected": "18.580,50 € (14.344,71 € + 4.235,79 €).",
+      "answer": "Según el documento (página 10), la recaudación total en 2025 sumando productos solidarios y agendas escolares fue:\n\n- **Productos solidarios**: 14.344,71€\n- **Agendas escolares solidarias**: 4.235,79€\n\n**Total: 18.580,50€**",
+      "pages_retrieved": [
+        10,
+        11,
+        2,
+        23
+      ],
+      "expected_page": 10,
+      "seconds": 1.58,
+      "vram_used_mib": 13494,
+      "vram_delta_mib": -2,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 12,
+      "type": "no_en_documento",
+      "question": "¿Cuántas personas con fibrosis quística hay en España según la memoria?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento. La memoria no proporciona datos sobre el número total de personas con fibrosis quística en España.",
+      "pages_retrieved": [
+        24,
+        22,
+        24,
+        5
+      ],
+      "expected_page": null,
+      "seconds": 1.16,
+      "vram_used_mib": 13494,
+      "vram_delta_mib": -2,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1,
+      "id": 13,
+      "type": "no_en_documento",
+      "question": "¿Quién preside la Federación Española de Fibrosis Quística?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento. El documento no especifica quién es el presidente o presidenta de la Federación Española de Fibrosis Quística.",
+      "pages_retrieved": [
+        22,
+        2,
+        24,
+        24
+      ],
+      "expected_page": null,
+      "seconds": 1.37,
+      "vram_used_mib": 13490,
+      "vram_delta_mib": -6,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 1,
+      "type": "dato_exacto",
+      "question": "¿En qué fechas y en qué ciudad se celebró el IX Congreso Nacional de la FEFQ?",
+      "expected": "Los días 15 y 16 de noviembre, en Málaga.",
+      "answer": "El IX Congreso Nacional de la FEFQ se celebró los días 15 y 16 de noviembre en Málaga (página 7).",
+      "pages_retrieved": [
+        7,
+        14,
+        20,
+        22
+      ],
+      "expected_page": 7,
+      "seconds": 1.5,
+      "vram_used_mib": 13485,
+      "vram_delta_mib": 10288,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 2,
+      "type": "dato_exacto",
+      "question": "¿Cuántos Pulmonitos se vendieron en 2025?",
+      "expected": "1.652 Pulmonitos.",
+      "answer": "En 2025 se vendieron 1.652 Pulmonitos. (Página 10)",
+      "pages_retrieved": [
+        10,
+        2,
+        11,
+        6
+      ],
+      "expected_page": 10,
+      "seconds": 1.32,
+      "vram_used_mib": 13495,
+      "vram_delta_mib": 10298,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 3,
+      "type": "dato_exacto",
+      "question": "¿Cuántas personas se conectaron al webinar de presentación del manual de trasplante actualizado?",
+      "expected": "148 personas.",
+      "answer": "148 personas se conectaron al webinar de presentación del manual de trasplante actualizado. (Página 6)",
+      "pages_retrieved": [
+        6,
+        2,
+        7,
+        11
+      ],
+      "expected_page": 6,
+      "seconds": 1.29,
+      "vram_used_mib": 13490,
+      "vram_delta_mib": 10293,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 4,
+      "type": "dato_exacto",
+      "question": "¿Cuántas visitas tuvo la página web en 2025?",
+      "expected": "36.528 visitas.",
+      "answer": "La página web tuvo 36.528 visitas en 2025 (página 17).",
+      "pages_retrieved": [
+        17,
+        10,
+        2,
+        6
+      ],
+      "expected_page": 17,
+      "seconds": 1.33,
+      "vram_used_mib": 13490,
+      "vram_delta_mib": 10293,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 5,
+      "type": "dato_exacto",
+      "question": "¿Cuántas reuniones celebró la Comisión Ejecutiva en 2025?",
+      "expected": "23 reuniones.",
+      "answer": "La Comisión Ejecutiva celebró 23 reuniones a lo largo de 2025. (Página 22)",
+      "pages_retrieved": [
+        22,
+        2,
+        18,
+        17
+      ],
+      "expected_page": 22,
+      "seconds": 1.4,
+      "vram_used_mib": 13490,
+      "vram_delta_mib": 10293,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 6,
+      "type": "dato_exacto",
+      "question": "¿Qué premio recibió la Federación en 2025 y por qué proyecto?",
+      "expected": "El Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC, por el proyecto «Luz-IA».",
+      "answer": "En 2025, la Federación recibió el \"Premio Social & Public AI Award en la V Edición de Premios IA con impacto social de AMETIC\" por el proyecto «Luz-IA», una asistente virtual para el bienestar emocional en fibrosis quística (página 23).",
+      "pages_retrieved": [
+        11,
+        23,
+        2,
+        23
+      ],
+      "expected_page": 23,
+      "seconds": 2.13,
+      "vram_used_mib": 13490,
+      "vram_delta_mib": 10293,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 7,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuáles fueron los ingresos reales de 2025 y qué porcentaje vino de donaciones privadas?",
+      "expected": "237.294,59 €, de los que el 60,62% vino de donaciones privadas (lo previsto eran 240.650,44 € y 63,14%).",
+      "answer": "Los ingresos reales de 2025 fueron de 237.294,59€, y el 60,62% de dicha cantidad provino de donaciones privadas (página 11).",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        11
+      ],
+      "expected_page": 11,
+      "seconds": 1.69,
+      "vram_used_mib": 13490,
+      "vram_delta_mib": 10293,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 8,
+      "type": "cifra_con_trampa",
+      "question": "¿Cuál fue el resultado económico de 2025?",
+      "expected": "Un resultado positivo de 36.048,41 € (gastos de 201.246,18 €).",
+      "answer": "El resultado económico de 2025 fue un total de 237.294,59€ en ingresos.",
+      "pages_retrieved": [
+        11,
+        2,
+        10,
+        22
+      ],
+      "expected_page": 11,
+      "seconds": 1.19,
+      "vram_used_mib": 13489,
+      "vram_delta_mib": 10292,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 9,
+      "type": "cifra_con_trampa",
+      "question": "En el proyecto «Mens sana in corpore sano», ¿cuántas sesiones de psicología y de ejercicio físico se realizaron?",
+      "expected": "280 sesiones de psicología y 214 de ejercicio físico (las personas atendidas fueron 57 y 17).",
+      "answer": "En el proyecto «Mens sana in corpore sano», se realizaron 280 sesiones de psicología y 214 sesiones de ejercicio físico (página 5).",
+      "pages_retrieved": [
+        5,
+        4,
+        11,
+        20
+      ],
+      "expected_page": 5,
+      "seconds": 1.59,
+      "vram_used_mib": 13489,
+      "vram_delta_mib": 10292,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 10,
+      "type": "lista_sintesis",
+      "question": "¿Qué funcionalidades del nuevo CRM se completaron en 2025?",
+      "expected": "Autentificación del usuario y recuperación de credenciales; relación familiar y tutela de socios menores; importación masiva de socios y descarga en Excel; calendarios laborales para trabajadores.",
+      "answer": "En 2025 se completaron las siguientes funcionalidades del nuevo CRM:  \n1. La autenticación del usuario y recuperación de credenciales de forma autónoma.  \n2. Creación de relación familiar y tutela de socios menores de edad.  \n3. Importación de socios masivo y posibilidad de descarga de datos en Excel.  \n4. Creación de calendarios laborales para trabajadores (horario laboral, permisos, vacaciones, bajas, etc.).  \n5. Sistema de registro de fichaje por parte del trabajador.  \n6. Sistema de gestión de consultas (solicitud, confirmación, realización, desplazamientos, etc.). (Página 8)",
+      "pages_retrieved": [
+        8,
+        2,
+        6,
+        22
+      ],
+      "expected_page": 8,
+      "seconds": 3.49,
+      "vram_used_mib": 13491,
+      "vram_delta_mib": 10294,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 11,
+      "type": "calculo",
+      "question": "¿Cuánto se recaudó en total en 2025 sumando productos solidarios y agendas escolares?",
+      "expected": "18.580,50 € (14.344,71 € + 4.235,79 €).",
+      "answer": "Se recaudó un total de 14.344,71€ en 2025 sumando las ventas de productos solidarios y agendas escolares (página 10).",
+      "pages_retrieved": [
+        10,
+        11,
+        2,
+        23
+      ],
+      "expected_page": 10,
+      "seconds": 1.64,
+      "vram_used_mib": 13495,
+      "vram_delta_mib": 10298,
+      "auto_grade": "incorrecta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 12,
+      "type": "no_en_documento",
+      "question": "¿Cuántas personas con fibrosis quística hay en España según la memoria?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento.",
+      "pages_retrieved": [
+        24,
+        22,
+        24,
+        5
+      ],
+      "expected_page": null,
+      "seconds": 1.11,
+      "vram_used_mib": 13495,
+      "vram_delta_mib": 10298,
+      "auto_grade": "correcta"
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1,
+      "id": 13,
+      "type": "no_en_documento",
+      "question": "¿Quién preside la Federación Española de Fibrosis Quística?",
+      "expected": "No encontré esa información en el documento.",
+      "answer": "No encontré esa información en el documento.",
+      "pages_retrieved": [
+        22,
+        2,
+        24,
+        24
+      ],
+      "expected_page": null,
+      "seconds": 1.04,
+      "vram_used_mib": 13491,
+      "vram_delta_mib": 10294,
+      "auto_grade": "correcta"
+    }
+  ]
+}
