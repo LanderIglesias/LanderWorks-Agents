@@ -88,11 +88,20 @@ Contexto del Documento B:
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 
+def _validate_session_id(session_id: str) -> str:
+    """Valida que session_id sea un UUID válido para evitar path traversal."""
+    try:
+        return str(uuid.UUID(session_id))
+    except (ValueError, AttributeError, TypeError) as e:
+        raise ValueError(f"session_id inválido: {session_id!r}") from e
+
+
 def _get_embeddings() -> OpenAIEmbeddings:
     return OpenAIEmbeddings(model="text-embedding-3-small")
 
 
 def _load_vectorstore(session_id: str) -> Chroma:
+    session_id = _validate_session_id(session_id)
     persist_dir = str(CHROMA_BASE_DIR / session_id)
     return Chroma(
         persist_directory=persist_dir,
@@ -128,8 +137,8 @@ def _clean_chunk_text(text: str) -> str:
     """Elimina líneas de bibliografía, listas de autores y URLs."""
     lines = text.split("\n")
     clean = []
-    for l in lines:
-        stripped = l.strip()
+    for line in lines:
+        stripped = line.strip()
         if len(stripped) < 20:
             continue
         if stripped.replace(".", "").replace(" ", "").isdigit():
@@ -288,6 +297,10 @@ def get_answer_compare(
 
 
 def session_exists(session_id: str) -> bool:
+    try:
+        session_id = _validate_session_id(session_id)
+    except ValueError:
+        return False
     persist_dir = CHROMA_BASE_DIR / session_id
     return persist_dir.exists() and any(persist_dir.iterdir())
 
@@ -299,6 +312,7 @@ def create_session_id() -> str:
 def cleanup_session(session_id: str) -> None:
     import shutil
 
+    session_id = _validate_session_id(session_id)
     persist_dir = CHROMA_BASE_DIR / session_id
     if persist_dir.exists():
         shutil.rmtree(persist_dir)

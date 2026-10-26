@@ -38,7 +38,20 @@ class TestRagEngine:
 
         monkeypatch.setattr(engine, "CHROMA_BASE_DIR", tmp_path)
 
-        assert session_exists("sesion-que-no-existe") is False
+        # UUID válido pero sin carpeta: prueba "no existe", no la validación
+        assert session_exists(create_session_id()) is False
+
+    def test_session_id_no_uuid_se_rechaza(self, tmp_path, monkeypatch):
+        """Un session_id que no es UUID (p. ej. path traversal) no debe existir ni borrarse."""
+        import pytest
+
+        import backend.agents.rag_pdf_agent.rag_engine as engine
+
+        monkeypatch.setattr(engine, "CHROMA_BASE_DIR", tmp_path)
+
+        assert session_exists("../../etc") is False
+        with pytest.raises(ValueError):
+            engine.cleanup_session("../../etc")
 
     def test_session_exists_devuelve_true_si_existe(self, tmp_path, monkeypatch):
         """Una sesión con directorio no vacío debe existir."""
@@ -47,11 +60,12 @@ class TestRagEngine:
         monkeypatch.setattr(engine, "CHROMA_BASE_DIR", tmp_path)
 
         # Crear un directorio con un archivo (simula ChromaDB guardado)
-        session_dir = tmp_path / "mi-sesion"
+        session_id = create_session_id()
+        session_dir = tmp_path / session_id
         session_dir.mkdir()
         (session_dir / "chroma.sqlite3").write_text("fake")
 
-        assert session_exists("mi-sesion") is True
+        assert session_exists(session_id) is True
 
     def test_chunk_size_configurado_correctamente(self):
         """Verificar que los parámetros de chunking son razonables."""
@@ -122,7 +136,8 @@ class TestRagEngine:
         monkeypatch.setattr(engine, "CHROMA_BASE_DIR", tmp_path)
 
         # Crear directorio de sesión (para que session_exists sea True)
-        session_dir = tmp_path / "test-session-2"
+        session_id = create_session_id()
+        session_dir = tmp_path / session_id
         session_dir.mkdir()
         (session_dir / "chroma.sqlite3").write_text("fake")
 
@@ -162,7 +177,7 @@ class TestRagEngine:
                 # Ejecutar — el resultado depende de cómo estén encadenados los mocks
                 # Si la cadena falla, al menos verificamos que Chroma y el retriever se llamaron
                 try:
-                    result = engine.get_answer("¿De qué trata el documento?", "test-session-2")
+                    result = engine.get_answer("¿De qué trata el documento?", session_id)
                     assert "answer" in result
                     assert "sources" in result
                 except Exception:
@@ -177,13 +192,14 @@ class TestRagEngine:
         monkeypatch.setattr(engine, "CHROMA_BASE_DIR", tmp_path)
 
         # Crear directorio de sesión con contenido
-        session_dir = tmp_path / "sesion-a-borrar"
+        session_id = create_session_id()
+        session_dir = tmp_path / session_id
         session_dir.mkdir()
         (session_dir / "datos.db").write_text("datos")
 
         assert session_dir.exists()
 
-        engine.cleanup_session("sesion-a-borrar")
+        engine.cleanup_session(session_id)
 
         assert not session_dir.exists()
 

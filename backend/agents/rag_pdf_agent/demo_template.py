@@ -11,6 +11,7 @@ def demo_html() -> str:
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PDF Chat Agent</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
@@ -283,7 +284,8 @@ def demo_html() -> str:
       function addBotMessage(text, sourcesA, sourcesB) {
         const chatArea = document.getElementById('chatArea');
         const id = 'src-' + Date.now();
-        const renderedText = typeof marked !== 'undefined' ? marked.parse(text) : esc(text);
+        const rawRenderedText = typeof marked !== 'undefined' ? marked.parse(text) : esc(text);
+        const renderedText = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(rawRenderedText) : esc(text);
         let sourcesHtml = '';
         if (sourcesA && sourcesA.length) {
           if (sourcesB && sourcesB.length) {
