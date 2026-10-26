@@ -185,6 +185,29 @@ class TestRagEngine:
                     # verificamos que al menos se intentó usar ChromaDB
                     chroma_cls.assert_called_once()
 
+    def test_get_llm_elige_proveedor_por_variable_de_entorno(self, monkeypatch):
+        """Por defecto Anthropic; con RAG_LLM_PROVIDER=ollama, ChatOllama; otro valor, error."""
+        import pytest
+        from langchain_ollama import ChatOllama
+
+        import backend.agents.rag_pdf_agent.rag_engine as engine
+
+        monkeypatch.delenv("RAG_LLM_PROVIDER", raising=False)
+        with patch.object(engine, "ChatAnthropic") as anthropic_cls:
+            engine._get_llm(max_tokens=100)
+        anthropic_cls.assert_called_once_with(model=engine.ANTHROPIC_MODEL, max_tokens=100)
+
+        monkeypatch.setenv("RAG_LLM_PROVIDER", "ollama")
+        llm = engine._get_llm(max_tokens=100)
+        assert isinstance(llm, ChatOllama)
+        assert llm.model == engine.OLLAMA_DEFAULT_MODEL
+        assert llm.num_predict == 100
+        assert llm.reasoning is False
+
+        monkeypatch.setenv("RAG_LLM_PROVIDER", "openai")
+        with pytest.raises(ValueError):
+            engine._get_llm(max_tokens=100)
+
     def test_cleanup_session_elimina_directorio(self, tmp_path, monkeypatch):
         """cleanup_session debe eliminar el directorio de la sesión."""
         import backend.agents.rag_pdf_agent.rag_engine as engine

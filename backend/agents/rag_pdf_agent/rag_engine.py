@@ -14,6 +14,7 @@ Mejoras sobre v1:
 
 from __future__ import annotations
 
+import os
 import uuid
 from pathlib import Path
 
@@ -36,6 +37,13 @@ CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 TOP_K_CHUNKS = 4
 CHROMA_BASE_DIR = Path(__file__).resolve().parent / "data" / "chroma"
+
+# Modelo de chat: RAG_LLM_PROVIDER="anthropic" (por defecto) u "ollama" (local).
+ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
+OLLAMA_DEFAULT_MODEL = "qwen3:14b"
+# Ollama recorta en silencio lo que no cabe en la ventana de contexto;
+# 8192 tokens cubre prompt + 4 chunks + historial + respuesta con margen.
+OLLAMA_NUM_CTX = 8192
 
 # ── Prompts ───────────────────────────────────────────────────────────────────
 
@@ -98,6 +106,30 @@ def _validate_session_id(session_id: str) -> str:
 
 def _get_embeddings() -> OpenAIEmbeddings:
     return OpenAIEmbeddings(model="text-embedding-3-small")
+
+
+def _get_llm(max_tokens: int):
+    """
+    Devuelve el modelo de chat según la variable de entorno RAG_LLM_PROVIDER.
+
+    Se lee en cada llamada (no al importar el módulo) para poder alternar
+    entre proveedores dentro de un mismo proceso, p. ej. en el script de evaluación.
+    """
+    provider = os.getenv("RAG_LLM_PROVIDER", "anthropic").lower()
+    if provider == "anthropic":
+        return ChatAnthropic(model=ANTHROPIC_MODEL, max_tokens=max_tokens)
+    if provider == "ollama":
+        # Import perezoso: langchain-ollama solo se instala para el experimento local,
+        # producción (Docker) no lo necesita.
+        from langchain_ollama import ChatOllama
+
+        return ChatOllama(
+            model=os.getenv("RAG_OLLAMA_MODEL", OLLAMA_DEFAULT_MODEL),
+            num_predict=max_tokens,
+            num_ctx=OLLAMA_NUM_CTX,
+            reasoning=False,  # sin esto, Qwen3 mete su razonamiento <think> en la respuesta
+        )
+    raise ValueError(f"RAG_LLM_PROVIDER desconocido: {provider!r} (usa 'anthropic' u 'ollama')")
 
 
 def _load_vectorstore(session_id: str) -> Chroma:
@@ -219,7 +251,7 @@ def get_answer(
     """
     vectorstore = _load_vectorstore(session_id)
     retriever = vectorstore.as_retriever(search_kwargs={"k": TOP_K_CHUNKS})
-    llm = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=1024)
+    llm = _get_llm(max_tokens=1024)
 
     history_messages = _build_history(chat_history or [])
     source_docs = retriever.invoke(question)
@@ -274,7 +306,7 @@ def get_answer_compare(
         .invoke(question)
     )
 
-    llm = ChatAnthropic(model="claude-haiku-4-5-20251001", max_tokens=1500)
+    llm = _get_llm(max_tokens=1500)
     history_messages = _build_history(chat_history or [])
 
     chain = (

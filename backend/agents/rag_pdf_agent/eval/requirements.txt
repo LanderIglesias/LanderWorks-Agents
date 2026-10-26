@@ -1,0 +1,3 @@
+# Dependencias solo para el experimento API vs local (no van a producción).
+# Requiere langchain-core 1.x (la del .venv local).
+langchain-ollama==1.1.0
