@@ -1,11 +1,12 @@
 """
-Evaluación del RAG PDF Agent: mismo PDF y mismas preguntas contra Haiku (API) y un modelo local (Ollama).
+Evaluación del RAG PDF Agent: mismo PDF y mismas preguntas contra Haiku (API) y modelos locales (Ollama).
 
 Uso (desde la raíz del repo, con Ollama arrancado):
     python -m backend.agents.rag_pdf_agent.eval.run_eval
     python -m backend.agents.rag_pdf_agent.eval.run_eval --repeats 3
 
-Registra por pregunta: respuesta, tiempo, VRAM en uso y corrección automática provisional.
+Registra por pregunta: respuesta, tiempo, VRAM en uso, tokens y motivo de parada del LLM,
+y corrección automática provisional. Por pregunta (una vez, no depende del LLM): calidad de la búsqueda.
 Los resultados se guardan en eval/results/ (JSON completo + CSV para la revisión manual).
 """
 
@@ -29,11 +30,24 @@ PDF_PATH = EVAL_DIR / "data" / "memoria_fq_2025.pdf"
 RESULTS_DIR = EVAL_DIR / "results"
 OLLAMA_URL = "http://localhost:11434"
 
-# (nombre, variables de entorno que leen rag_engine._get_llm)
+# (nombre, variables de entorno que leen rag_engine._get_llm, máximo de pasadas o None)
 CONFIGS = [
-    ("claude-haiku-4.5 (API)", {"RAG_LLM_PROVIDER": "anthropic"}),
-    ("qwen3:14b (local)", {"RAG_LLM_PROVIDER": "ollama", "RAG_OLLAMA_MODEL": "qwen3:14b"}),
+    ("claude-haiku-4.5 (API)", {"RAG_LLM_PROVIDER": "anthropic"}, None),
+    ("qwen3:14b (local)", {"RAG_LLM_PROVIDER": "ollama", "RAG_OLLAMA_MODEL": "qwen3:14b"}, None),
+    (
+        "qwen3:14b + thinking (local)",
+        {
+            "RAG_LLM_PROVIDER": "ollama",
+            "RAG_OLLAMA_MODEL": "qwen3:14b",
+            "RAG_OLLAMA_REASONING": "1",
+        },
+        None,
+    ),
+    # Referencia de baja capacidad: 1 pasada y se presenta aparte de la comparación principal.
+    ("llama3.2:3b (local)", {"RAG_LLM_PROVIDER": "ollama", "RAG_OLLAMA_MODEL": "llama3.2:3b"}, 1),
 ]
+# Se borran antes de cada configuración: os.environ.update no quita las de la anterior.
+CONFIG_KEYS = {k for _, env, _ in CONFIGS for k in env}
 
 # Frases con las que el modelo admite que el documento no tiene la respuesta.
 REFUSAL_MARKERS = [
@@ -77,7 +91,47 @@ def grade(question: dict, answer: str) -> str:
     return "parcial" if any(checks) else "incorrecta"
 
 
+def retrieval_metrics(question: dict, chunks: list[dict]) -> dict | None:
+    """Calidad de la búsqueda para una pregunta. None si la respuesta no está en el documento."""
+    if question["page"] is None:
+        return None
+    expected = question["page"] if isinstance(question["page"], list) else [question["page"]]
+    retrieved = {c["page"] for c in chunks}
+    metrics = {
+        "pages_found": sum(p in retrieved for p in expected),
+        "pages_expected": len(expected),
+    }
+    # Más fino que la página: una página partida en varios chunks puede recuperarse sin el
+    # fragmento con la cifra. En 'calculo' el resultado no está en el texto, solo los sumandos.
+    # ponytail: una cifra corta (6, 23) puede aparecer por azar; techo: buscarla con su contexto.
+    if question["numbers"] and question["type"] != "calculo":
+        # "\n" y no " ": _numbers_in une dígitos separados por espacio entre dos chunks.
+        in_context = _numbers_in("\n".join(c["text"] for c in chunks))
+        metrics["numbers_found"] = sum(n in in_context for n in question["numbers"])
+        metrics["numbers_expected"] = len(question["numbers"])
+    return metrics
+
+
 # ── Medición ──────────────────────────────────────────────────────────────────
+
+
+def llm_stats(runs_cb) -> dict:
+    """Tokens y motivo de parada de la llamada al LLM, para detectar respuestas cortadas."""
+    stack = list(runs_cb.traced_runs)
+    while stack:
+        run = stack.pop()
+        if run.run_type in ("llm", "chat_model"):
+            msg = run.outputs["generations"][0][0]["message"]["kwargs"]
+            meta = msg.get("response_metadata", {})
+            usage = msg.get("usage_metadata") or {}
+            return {
+                "input_tokens": usage.get("input_tokens"),
+                "output_tokens": usage.get("output_tokens"),
+                # Ollama: done_reason ('length' = cortada). Anthropic: stop_reason ('max_tokens').
+                "stop_reason": meta.get("done_reason") or meta.get("stop_reason"),
+            }
+        stack.extend(run.child_runs)
+    return {}
 
 
 def vram_used_mib() -> int:
@@ -119,6 +173,8 @@ def ensure_pdf(meta: dict) -> Path:
 
 def run(repeats: int) -> Path:
     # Import tardío: rag_engine carga .env y LangChain, y así --help responde al instante.
+    from langchain_core.tracers.context import collect_runs
+
     from backend.agents.rag_pdf_agent import rag_engine
 
     spec = json.loads((EVAL_DIR / "questions.json").read_text(encoding="utf-8"))
@@ -145,10 +201,16 @@ def run(repeats: int) -> Path:
             ]
             for q in spec["questions"]
         }
+        retrieval = {q["id"]: retrieval_metrics(q, chunks[q["id"]]) for q in spec["questions"]}
 
-        local_models = [e["RAG_OLLAMA_MODEL"] for _, e in CONFIGS if "RAG_OLLAMA_MODEL" in e]
-        for name, env in CONFIGS:
+        local_models = sorted(
+            {e["RAG_OLLAMA_MODEL"] for _, e, _ in CONFIGS if "RAG_OLLAMA_MODEL" in e}
+        )
+        for name, env, max_repeats in CONFIGS:
+            for k in CONFIG_KEYS:
+                os.environ.pop(k, None)
             os.environ.update(env)
+            n_repeats = repeats if max_repeats is None else min(repeats, max_repeats)
             # Ningún LLM local cargado al medir la base (también antes de la config por API).
             for m in local_models:
                 ollama_unload(m)
@@ -161,15 +223,23 @@ def run(repeats: int) -> Path:
             rag_engine.get_answer("¿De qué trata el documento?", session_id)
             cold_s = time.perf_counter() - t0
             runs.append(
-                {"config": name, "vram_baseline_mib": baseline, "cold_start_s": round(cold_s, 2)}
+                {
+                    "config": name,
+                    "env": env,
+                    "repeats": n_repeats,
+                    "vram_baseline_mib": baseline,
+                    "cold_start_s": round(cold_s, 2),
+                }
             )
             print(f"\n== {name} | VRAM base {baseline} MiB | arranque en frío {cold_s:.1f}s")
 
-            for rep in range(1, repeats + 1):
+            for rep in range(1, n_repeats + 1):
                 for q in spec["questions"]:
                     t0 = time.perf_counter()
-                    result = rag_engine.get_answer(q["question"], session_id)
+                    with collect_runs() as runs_cb:
+                        result = rag_engine.get_answer(q["question"], session_id)
                     elapsed = time.perf_counter() - t0
+                    stats = llm_stats(runs_cb)
                     vram = vram_used_mib()
                     status = grade(q, result["answer"])
                     records.append(
@@ -186,13 +256,16 @@ def run(repeats: int) -> Path:
                             "seconds": round(elapsed, 2),
                             "vram_used_mib": vram,
                             "vram_delta_mib": vram - baseline,
+                            **stats,
                             "auto_grade": status,
                         }
                     )
                     print(
                         f"  r{rep} Q{q['id']:>2} {elapsed:6.1f}s  {status:<10} {vram - baseline:>6} MiB"
+                        f"  tok {stats.get('input_tokens')}+{stats.get('output_tokens')}"
+                        f" {stats.get('stop_reason')}"
                     )
-        return save(records, runs, repeats, chunks)
+        return save(records, runs, repeats, chunks, retrieval)
     finally:
         try:
             rag_engine.cleanup_session(session_id)
@@ -201,7 +274,9 @@ def run(repeats: int) -> Path:
             print(f"\nAVISO: borra a mano el índice temporal data/chroma/{session_id}")
 
 
-def save(records: list[dict], runs: list[dict], repeats: int, chunks: dict) -> Path:
+def save(
+    records: list[dict], runs: list[dict], repeats: int, chunks: dict, retrieval: dict
+) -> Path:
     import importlib.metadata as md
 
     RESULTS_DIR.mkdir(exist_ok=True)
@@ -223,7 +298,7 @@ def save(records: list[dict], runs: list[dict], repeats: int, chunks: dict) -> P
     json_path = RESULTS_DIR / f"results_{stamp}.json"
     json_path.write_text(
         json.dumps(
-            {"meta": meta, "records": records, "retrieved_chunks": chunks},
+            {"meta": meta, "records": records, "retrieval": retrieval, "retrieved_chunks": chunks},
             ensure_ascii=False,
             indent=2,
         ),
