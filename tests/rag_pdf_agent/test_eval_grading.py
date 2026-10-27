@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from backend.agents.rag_pdf_agent.eval.blind import blind_export
 from backend.agents.rag_pdf_agent.eval.run_eval import grade, retrieval_metrics
 
 Q_INGRESOS = {"numbers": ["23729459", "6062"], "terms": []}
@@ -56,3 +57,40 @@ def test_retrieval_varias_paginas_y_casos_sin_aplicar():
     q_suma = {"page": 5, "type": "calculo", "numbers": ["999"], "terms": []}
     assert "numbers_found" not in retrieval_metrics(q_suma, chunks)
     assert retrieval_metrics({"page": None}, chunks) is None
+
+
+def test_blind_export_agrupa_respuestas_iguales_y_oculta_la_configuracion():
+    def rec(config, repeat, qid, answer):
+        return {
+            "config": config,
+            "repeat": repeat,
+            "id": qid,
+            "type": "dato_exacto",
+            "question": f"P{qid}",
+            "expected": f"E{qid}",
+            "answer": answer,
+            "auto_grade": "correcta",
+        }
+
+    records = [
+        rec("A", 1, 1, "x"),
+        rec("A", 2, 1, "x"),
+        rec("B", 1, 1, "x"),  # misma respuesta en otra configuración: una sola entrada
+        rec("B", 2, 1, "y"),
+        rec("A", 1, 2, "x"),  # mismo texto en otra pregunta: entrada distinta
+    ]
+    items, key = blind_export(records)
+
+    assert len(items) == 3
+    assert all("config" not in i and "auto_grade" not in i for i in items)
+    # La clave devuelve cada una de las 5 apariciones exactamente una vez
+    apariciones = sorted((o["config"], o["repeat"]) for occ in key.values() for o in occ)
+    assert len(apariciones) == 5 and set(key) == {i["blind_id"] for i in items}
+    x1 = next(i["blind_id"] for i in items if i["question_id"] == 1 and i["answer"] == "x")
+    assert key[x1] == [
+        {"config": "A", "repeat": 1},
+        {"config": "A", "repeat": 2},
+        {"config": "B", "repeat": 1},
+    ]
+    # Semilla fija: el mismo orden en cada ejecución
+    assert blind_export(records) == (items, key)
