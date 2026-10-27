@@ -134,8 +134,12 @@ def _get_llm(max_tokens: int):
     entre proveedores dentro de un mismo proceso, p. ej. en el script de evaluación.
     """
     provider = os.getenv("RAG_LLM_PROVIDER", "anthropic").lower()
+    # Solo para la evaluación (RAG_LLM_TEMPERATURE). Sin ella no se envía y cada proveedor usa
+    # la suya: Anthropic la de su API, Ollama la del Modelfile del modelo.
+    temperature = os.getenv("RAG_LLM_TEMPERATURE")
+    extra = {} if temperature is None else {"temperature": float(temperature)}
     if provider == "anthropic":
-        return ChatAnthropic(model=ANTHROPIC_MODEL, max_tokens=max_tokens)
+        return ChatAnthropic(model=ANTHROPIC_MODEL, max_tokens=max_tokens, **extra)
     if provider == "ollama":
         # Import perezoso: langchain-ollama solo se instala para el experimento local,
         # producción (Docker) no lo necesita.
@@ -149,6 +153,7 @@ def _get_llm(max_tokens: int):
             num_predict=max_tokens + (OLLAMA_THINKING_BUDGET if reasoning else 0),
             num_ctx=OLLAMA_NUM_CTX,
             reasoning=reasoning,
+            **extra,
         )
     raise ValueError(f"RAG_LLM_PROVIDER desconocido: {provider!r} (usa 'anthropic' u 'ollama')")
 

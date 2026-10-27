@@ -30,21 +30,34 @@ PDF_PATH = EVAL_DIR / "data" / "memoria_fq_2025.pdf"
 RESULTS_DIR = EVAL_DIR / "results"
 OLLAMA_URL = "http://localhost:11434"
 
+# Temperatura 0 en todas para que sean comparables, salvo thinking: Qwen3 pide 0.6 en ese modo
+# ("DO NOT use greedy decoding", model card de Qwen3-14B en Hugging Face).
+GREEDY = {"RAG_LLM_TEMPERATURE": "0"}
+
 # (nombre, variables de entorno que leen rag_engine._get_llm, máximo de pasadas o None)
 CONFIGS = [
-    ("claude-haiku-4.5 (API)", {"RAG_LLM_PROVIDER": "anthropic"}, None),
-    ("qwen3:14b (local)", {"RAG_LLM_PROVIDER": "ollama", "RAG_OLLAMA_MODEL": "qwen3:14b"}, None),
+    ("claude-haiku-4.5 (API)", {"RAG_LLM_PROVIDER": "anthropic", **GREEDY}, None),
+    (
+        "qwen3:14b (local)",
+        {"RAG_LLM_PROVIDER": "ollama", "RAG_OLLAMA_MODEL": "qwen3:14b", **GREEDY},
+        None,
+    ),
     (
         "qwen3:14b + thinking (local)",
         {
             "RAG_LLM_PROVIDER": "ollama",
             "RAG_OLLAMA_MODEL": "qwen3:14b",
             "RAG_OLLAMA_REASONING": "1",
+            "RAG_LLM_TEMPERATURE": "0.6",
         },
         None,
     ),
     # Referencia de baja capacidad: 1 pasada y se presenta aparte de la comparación principal.
-    ("llama3.2:3b (local)", {"RAG_LLM_PROVIDER": "ollama", "RAG_OLLAMA_MODEL": "llama3.2:3b"}, 1),
+    (
+        "llama3.2:3b (local)",
+        {"RAG_LLM_PROVIDER": "ollama", "RAG_OLLAMA_MODEL": "llama3.2:3b", **GREEDY},
+        1,
+    ),
 ]
 # Se borran antes de cada configuración: os.environ.update no quita las de la anterior.
 CONFIG_KEYS = {k for _, env, _ in CONFIGS for k in env}

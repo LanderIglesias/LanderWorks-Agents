@@ -192,7 +192,16 @@ class TestRagEngine:
 
         import backend.agents.rag_pdf_agent.rag_engine as engine
 
-        monkeypatch.delenv("RAG_LLM_PROVIDER", raising=False)
+        # El test no debe depender de lo que haya en la terminal o en .env
+        for var in (
+            "RAG_LLM_PROVIDER",
+            "RAG_OLLAMA_MODEL",
+            "RAG_OLLAMA_REASONING",
+            "RAG_LLM_TEMPERATURE",
+        ):
+            monkeypatch.delenv(var, raising=False)
+
+        # Producción (sin RAG_LLM_TEMPERATURE): no se envía temperatura
         with patch.object(engine, "ChatAnthropic") as anthropic_cls:
             engine._get_llm(max_tokens=100)
         anthropic_cls.assert_called_once_with(model=engine.ANTHROPIC_MODEL, max_tokens=100)
@@ -203,12 +212,26 @@ class TestRagEngine:
         assert llm.model == engine.OLLAMA_DEFAULT_MODEL
         assert llm.num_predict == 100
         assert llm.reasoning is False
+        assert llm.temperature is None
+
+        # Evaluación: temperatura explícita en los dos proveedores
+        monkeypatch.setenv("RAG_LLM_TEMPERATURE", "0")
+        assert engine._get_llm(max_tokens=100).temperature == 0.0
+        monkeypatch.setenv("RAG_LLM_PROVIDER", "anthropic")
+        with patch.object(engine, "ChatAnthropic") as anthropic_cls:
+            engine._get_llm(max_tokens=100)
+        anthropic_cls.assert_called_once_with(
+            model=engine.ANTHROPIC_MODEL, max_tokens=100, temperature=0.0
+        )
+        monkeypatch.setenv("RAG_LLM_PROVIDER", "ollama")
 
         # Con thinking, el límite se amplía para que el razonamiento no deje la respuesta vacía
         monkeypatch.setenv("RAG_OLLAMA_REASONING", "1")
+        monkeypatch.setenv("RAG_LLM_TEMPERATURE", "0.6")
         llm = engine._get_llm(max_tokens=100)
         assert llm.reasoning is True
         assert llm.num_predict == 100 + engine.OLLAMA_THINKING_BUDGET
+        assert llm.temperature == 0.6
         monkeypatch.delenv("RAG_OLLAMA_REASONING")
 
         monkeypatch.setenv("RAG_LLM_PROVIDER", "openai")
