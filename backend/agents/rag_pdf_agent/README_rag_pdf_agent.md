@@ -2,6 +2,8 @@
 
 Conversational agent that answers questions about PDF documents using Retrieval-Augmented Generation. Upload any PDF and ask questions in natural language — the agent responds using only the document content, with cited sources.
 
+See [eval/README.md](eval/README.md) for the local vs. API model evaluation experiment.
+
 ---
 
 ## What it does
