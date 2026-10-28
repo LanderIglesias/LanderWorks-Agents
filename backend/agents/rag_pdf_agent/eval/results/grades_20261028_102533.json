@@ -1,0 +1,1024 @@
+[
+  {
+    "blind_id": "b001",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Recoge portal, noviembre/Semana Europea, podcast de 3 episodios, observatorio, capacitación y asesoramiento; añade detalles como guías prácticas."
+  },
+  {
+    "blind_id": "b002",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 6 asociaciones y 9 más la FEFQ con el Sello de Calidad, como expected."
+  },
+  {
+    "blind_id": "b003",
+    "grade": "incorrecta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Dice que no encontró la información cuando expected da 38 profesionales de 9 asociaciones."
+  },
+  {
+    "blind_id": "b004",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € en inglés, cifra equivalente a expected."
+  },
+  {
+    "blind_id": "b005",
+    "grade": "incorrecta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Dice que no encontró la información cuando expected da 102 páginas vistas diarias."
+  },
+  {
+    "blind_id": "b006",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da 6 asociaciones y 9 más la FEFQ; añade la lista de asociaciones y el nombre del sello."
+  },
+  {
+    "blind_id": "b007",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Afirma que el documento no tiene esa información, lo que equivale al rechazo de la premisa según expected."
+  },
+  {
+    "blind_id": "b008",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Lista las cuatro funcionalidades de expected; añade detalle sobre horario, permisos y vacaciones."
+  },
+  {
+    "blind_id": "b009",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Cita tres de los cuatro retos y omite innovación y gestión del conocimiento."
+  },
+  {
+    "blind_id": "b010",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da la publicación de 2004 y el manual actualizado en 2025, pero no la versión de 2025 de la publicación; añade otra publicación."
+  },
+  {
+    "blind_id": "b011",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica que el congreso se celebró en noviembre de 2025 en Málaga y que no hay cancelación, rechazando la premisa."
+  },
+  {
+    "blind_id": "b012",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € en inglés."
+  },
+  {
+    "blind_id": "b013",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Señala que el documento no menciona esa subvención y cita las subvenciones públicas reales, como expected."
+  },
+  {
+    "blind_id": "b014",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Responde Málaga y vincula el premio Luz-IA con 2025."
+  },
+  {
+    "blind_id": "b015",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 1.652 Pulmonitos en inglés."
+  },
+  {
+    "blind_id": "b016",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 1.652 Pulmonitos."
+  },
+  {
+    "blind_id": "b017",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Dice que no encuentra ningún premio para el podcast, lo que equivale al rechazo de la premisa."
+  },
+  {
+    "blind_id": "b018",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Omite abril de 2025 y el lema, y dice que las más de 40 apariciones en medios fueron de más de 40 comunidades autónomas, lo que distorsiona el dato."
+  },
+  {
+    "blind_id": "b019",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Fechas 15 y 16 de noviembre y Málaga correctas."
+  },
+  {
+    "blind_id": "b020",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 36.048,41 €."
+  },
+  {
+    "blind_id": "b021",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "La inversión en calidad es mayor, con 11.253 € frente a 4.235,79 €."
+  },
+  {
+    "blind_id": "b022",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "La inversión en calidad es mayor, con 11.253 € frente a 4.235,79 €."
+  },
+  {
+    "blind_id": "b023",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Cubre materiales, vídeo, web, edificios y más de 40 apariciones, pero omite abril de 2025 y el lema."
+  },
+  {
+    "blind_id": "b024",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € y 60,62% de donaciones privadas."
+  },
+  {
+    "blind_id": "b025",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica que el congreso se celebró los días 15 y 16 de noviembre en Málaga y que no hay cancelación."
+  },
+  {
+    "blind_id": "b026",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Rechaza la premisa indicando que sí se celebró en Málaga; añade datos de inscritos y asistentes virtuales."
+  },
+  {
+    "blind_id": "b027",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Cita tres de los cuatro retos y omite innovación y gestión del conocimiento; añade entidades como Eurordis y COCEMFE."
+  },
+  {
+    "blind_id": "b028",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "La inversión en calidad es mayor, con 11.253 € frente a 4.235,79 €."
+  },
+  {
+    "blind_id": "b029",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da 36.528 visitas; añade datos de páginas vistas mensuales y diarias."
+  },
+  {
+    "blind_id": "b030",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 102 diarias sin presentarlas como personas, aunque las llama visitas."
+  },
+  {
+    "blind_id": "b031",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 36.048,41 € de resultado positivo."
+  },
+  {
+    "blind_id": "b032",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Afirma que el documento no tiene esa información."
+  },
+  {
+    "blind_id": "b033",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Rechaza que el podcast recibiera premio y señala que el premio fue para Luz-IA; añade que el podcast se lanzó en noviembre dentro del portal."
+  },
+  {
+    "blind_id": "b034",
+    "grade": "incorrecta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Calcula 3.355,85 € como diferencia entre ingresos previstos y reales, no el resultado positivo de 36.048,41 €."
+  },
+  {
+    "blind_id": "b035",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da la publicación de 2004 y la actualización del manual de 2025, pero no la versión de 2025 de la publicación; añade un informe."
+  },
+  {
+    "blind_id": "b036",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 36.528 visitas."
+  },
+  {
+    "blind_id": "b037",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € y 60,62%."
+  },
+  {
+    "blind_id": "b038",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da 36.048,41 € de resultado positivo; añade que el excedente sale de comparar gastos con el presupuesto."
+  },
+  {
+    "blind_id": "b039",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 18.580,50 € con los dos sumandos correctos."
+  },
+  {
+    "blind_id": "b040",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Solo menciona la publicación de 2004 y omite la versión de 2025 y el manual actualizado."
+  },
+  {
+    "blind_id": "b041",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 671 asistentes virtuales."
+  },
+  {
+    "blind_id": "b042",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da la publicación de 2004 y la actualización del manual en 2025, pero no la versión de 2025; añade un informe."
+  },
+  {
+    "blind_id": "b043",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € en inglés; añade el desglose por porcentajes de origen."
+  },
+  {
+    "blind_id": "b044",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 148 personas."
+  },
+  {
+    "blind_id": "b045",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da 6 asociaciones y 9 con el Sello de Calidad; añade la lista de asociaciones, aunque dice '9 de ellas' sin mencionar la FEFQ."
+  },
+  {
+    "blind_id": "b046",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Málaga, 15 y 16 de noviembre, igual que expected."
+  },
+  {
+    "blind_id": "b047",
+    "grade": "incorrecta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Dice que no encontró la información cuando expected da Málaga, 15-16 de noviembre."
+  },
+  {
+    "blind_id": "b048",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 23 reuniones."
+  },
+  {
+    "blind_id": "b049",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Afirma que el documento no tiene esa información."
+  },
+  {
+    "blind_id": "b050",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da el premio y el proyecto Luz-IA como expected; añade la descripción de asistente virtual."
+  },
+  {
+    "blind_id": "b051",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 23 reuniones."
+  },
+  {
+    "blind_id": "b052",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 671 asistentes virtuales."
+  },
+  {
+    "blind_id": "b053",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da el resultado positivo de 36.048,41 € y el gasto de 201.246,18 €; añade que fue inferior al presupuesto."
+  },
+  {
+    "blind_id": "b054",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237,294.59 € como ingresos reales."
+  },
+  {
+    "blind_id": "b055",
+    "grade": "incorrecta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Responde con los ingresos (237.294,59 €) en lugar del resultado positivo de 36.048,41 €."
+  },
+  {
+    "blind_id": "b056",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Indica 148 personas; añade que coincidió con el Día Mundial de la FQ."
+  },
+  {
+    "blind_id": "b057",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Menciona portal, podcast, observatorio y capacitación, pero omite asesoramiento personalizado y los 3 episodios."
+  },
+  {
+    "blind_id": "b058",
+    "grade": "incorrecta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Dice que no encontró la información cuando expected da el dato de que se celebró en Málaga el 15 y 16 de noviembre."
+  },
+  {
+    "blind_id": "b059",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da Málaga, 15 y 16 de noviembre; los datos coinciden aunque responde en español."
+  },
+  {
+    "blind_id": "b060",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 6 asociaciones participantes y 9 con el Sello de Calidad."
+  },
+  {
+    "blind_id": "b061",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Cubre portal, podcast de tres episodios, observatorio, capacitación y asesoramiento."
+  },
+  {
+    "blind_id": "b062",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Recoge materiales y vídeo, web, más de 40 apariciones y edificios iluminados; omite abril y el lema."
+  },
+  {
+    "blind_id": "b063",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da el premio y el proyecto Luz-IA; añade la descripción del proyecto."
+  },
+  {
+    "blind_id": "b064",
+    "grade": "incorrecta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Dice que no encontró la información cuando expected la da."
+  },
+  {
+    "blind_id": "b065",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 671 personas."
+  },
+  {
+    "blind_id": "b066",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 11.253 € frente a 4.235,79 € y concluye que la inversión fue mayor."
+  },
+  {
+    "blind_id": "b067",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 671 personas."
+  },
+  {
+    "blind_id": "b068",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 23 reuniones."
+  },
+  {
+    "blind_id": "b069",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 6 asociaciones participantes y 9 con el Sello de Calidad."
+  },
+  {
+    "blind_id": "b070",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Cubre sostenibilidad, derechos y participación, pero no recoge innovación y gestión del conocimiento como reto propio."
+  },
+  {
+    "blind_id": "b071",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 1.652 Pulmonitos aunque responde en español."
+  },
+  {
+    "blind_id": "b072",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 6 asociaciones y 9 más la FEFQ."
+  },
+  {
+    "blind_id": "b073",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Tras autocorregirse concluye que la inversión en calidad (11.253 €) fue mayor que 4.235,79 €."
+  },
+  {
+    "blind_id": "b074",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € y 60,62 %."
+  },
+  {
+    "blind_id": "b075",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Cubre portal, podcast, observatorio, capacitación y asesoramiento; omite el número de episodios."
+  },
+  {
+    "blind_id": "b076",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € y 60,62 %."
+  },
+  {
+    "blind_id": "b077",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Responde Málaga y relaciona ambos hechos con 2025."
+  },
+  {
+    "blind_id": "b078",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da el premio y el proyecto Luz-IA; añade la descripción del proyecto."
+  },
+  {
+    "blind_id": "b079",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 148 personas."
+  },
+  {
+    "blind_id": "b080",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 671 asistentes virtuales."
+  },
+  {
+    "blind_id": "b081",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Menciona portal y podcast de tres episodios, pero omite observatorio, capacitación y asesoramiento."
+  },
+  {
+    "blind_id": "b082",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da Málaga, 15 y 16 de noviembre, en inglés."
+  },
+  {
+    "blind_id": "b083",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € como ingresos reales."
+  },
+  {
+    "blind_id": "b084",
+    "grade": "incorrecta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da los ingresos como resultado económico y dice que no hay información de gastos, en lugar del resultado positivo de 36.048,41 €."
+  },
+  {
+    "blind_id": "b085",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Empieza diciendo que no lo encontró, pero menciona 38 profesionales de 9 asociaciones sin contradecir expected."
+  },
+  {
+    "blind_id": "b086",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Responde Málaga y vincula el premio y el congreso a 2025."
+  },
+  {
+    "blind_id": "b087",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Cubre abril de 2025, materiales, web, edificios y más de 40 apariciones; omite el lema y añade impacto en redes."
+  },
+  {
+    "blind_id": "b088",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Suma 18.580,50 € con los dos componentes correctos."
+  },
+  {
+    "blind_id": "b089",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € aunque responde en español."
+  },
+  {
+    "blind_id": "b090",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 280 sesiones de psicología y 214 de ejercicio físico."
+  },
+  {
+    "blind_id": "b091",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Incluye las cuatro funcionalidades de expected y añade dos funcionalidades que solo comenzaron."
+  },
+  {
+    "blind_id": "b092",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da 237.294,59 € y añade el desglose por origen de ingresos."
+  },
+  {
+    "blind_id": "b093",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Cubre portal, podcast, observatorio, capacitación y asesoramiento."
+  },
+  {
+    "blind_id": "b094",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Recoge tres de los cuatro retos y omite innovación y gestión del conocimiento."
+  },
+  {
+    "blind_id": "b095",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da el resultado positivo de 36.048,41 €."
+  },
+  {
+    "blind_id": "b096",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 15 y 16 de noviembre en Málaga."
+  },
+  {
+    "blind_id": "b097",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Rechaza la cancelación y recuerda que se celebró en Málaga el 15 y 16 de noviembre."
+  },
+  {
+    "blind_id": "b098",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Cubre materiales, web, edificios y más de 40 apariciones; omite abril y el lema, y añade impacto en redes."
+  },
+  {
+    "blind_id": "b099",
+    "grade": "incorrecta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da los ingresos (237.294,59 €) como resultado económico en lugar del resultado positivo de 36.048,41 €."
+  },
+  {
+    "blind_id": "b100",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 102 diarias sin presentarlas como personas (las llama visitas)."
+  },
+  {
+    "blind_id": "b101",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Incluye las cuatro funcionalidades de expected y añade el inicio de fichaje y de gestión de consultas."
+  },
+  {
+    "blind_id": "b102",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Afirma que el documento no incluye esa información."
+  },
+  {
+    "blind_id": "b103",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 1.652 Pulmonitos."
+  },
+  {
+    "blind_id": "b104",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Responde Málaga en 2025."
+  },
+  {
+    "blind_id": "b105",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da la cifra 1.652 correcta, aunque responde en español en lugar de inglés."
+  },
+  {
+    "blind_id": "b106",
+    "grade": "incorrecta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da solo los ingresos y afirma que el documento no informa del resultado, cuando expected sí lo da (36.048,41 €)."
+  },
+  {
+    "blind_id": "b107",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 1.652 Pulmonitos."
+  },
+  {
+    "blind_id": "b108",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Enumera seis retos que cubren los cuatro de expected (innovación, sostenibilidad, derechos, participación) con añadidos como comunicación interna y liderazgo."
+  },
+  {
+    "blind_id": "b109",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Málaga, 15 y 16 de noviembre, en inglés."
+  },
+  {
+    "blind_id": "b110",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Solo menciona la publicación de 2004; faltan la versión de 2025 y el manual actualizado."
+  },
+  {
+    "blind_id": "b111",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "280 sesiones de psicología y 214 de ejercicio físico."
+  },
+  {
+    "blind_id": "b112",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da tres retos; cubre sostenibilidad, derechos y participación, pero la innovación y gestión del conocimiento no aparece como reto propio."
+  },
+  {
+    "blind_id": "b113",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 1.652 Pulmonitos."
+  },
+  {
+    "blind_id": "b114",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Dice no encontrar la información pero menciona los 38 profesionales; no da las 9 asociaciones."
+  },
+  {
+    "blind_id": "b115",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "280 sesiones de psicología y 214 de ejercicio físico."
+  },
+  {
+    "blind_id": "b116",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Calidad 11.253 € mayor que agendas 4.235,79 €."
+  },
+  {
+    "blind_id": "b117",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Málaga en 2025."
+  },
+  {
+    "blind_id": "b118",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "23 reuniones."
+  },
+  {
+    "blind_id": "b119",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Incluye las cuatro funcionalidades de expected y añade fichaje y gestión de consultas."
+  },
+  {
+    "blind_id": "b120",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Cubre materiales/vídeo, web e iluminación, pero faltan abril, el lema y las más de 40 apariciones en medios."
+  },
+  {
+    "blind_id": "b121",
+    "grade": "incorrecta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 14.344,71 € como total en lugar de la suma 18.580,50 €."
+  },
+  {
+    "blind_id": "b122",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "15 y 16 de noviembre en Málaga."
+  },
+  {
+    "blind_id": "b123",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Incluye las cuatro funcionalidades y añade fichaje y gestión de consultas."
+  },
+  {
+    "blind_id": "b124",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 102 páginas vistas diarias y aclara que no son visitantes."
+  },
+  {
+    "blind_id": "b125",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Incluye las cuatro funcionalidades y añade fichaje y gestión de consultas."
+  },
+  {
+    "blind_id": "b126",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Suma correcta de 18.580,50 €."
+  },
+  {
+    "blind_id": "b127",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Afirma que el documento no tiene esa información."
+  },
+  {
+    "blind_id": "b128",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Da 102 diarias sin presentarlas como personas (las llama visitas)."
+  },
+  {
+    "blind_id": "b129",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Premio Social & Public AI Award de AMETIC por Luz-IA, con descripción añadida del proyecto."
+  },
+  {
+    "blind_id": "b130",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Indica 1.652 Pulmonitos."
+  },
+  {
+    "blind_id": "b131",
+    "grade": "correcta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Málaga, 15 y 16 de noviembre, con el dato añadido de coincidir con el congreso de la sociedad de FQ."
+  },
+  {
+    "blind_id": "b132",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Responde Málaga y vincula con el año del premio."
+  },
+  {
+    "blind_id": "b133",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Suma correcta de 18.580,50 €."
+  },
+  {
+    "blind_id": "b134",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "36.528 visitas."
+  },
+  {
+    "blind_id": "b135",
+    "grade": "incorrecta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da los ingresos (237.294,59 €) en lugar del resultado positivo de 36.048,41 €."
+  },
+  {
+    "blind_id": "b136",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "1.652 Pulmonitos, en inglés."
+  },
+  {
+    "blind_id": "b137",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "280 sesiones de psicología y 214 de ejercicio físico."
+  },
+  {
+    "blind_id": "b138",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Menciona el libro de 2004 y el manual actualizado en 2025, pero no la versión de 2025 del libro, y añade un informe."
+  },
+  {
+    "blind_id": "b139",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "671 asistentes virtuales."
+  },
+  {
+    "blind_id": "b140",
+    "grade": "parcial",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da tres retos; faltan la innovación y gestión del conocimiento como reto propio (solo aparece 'innovación' dentro de otro)."
+  },
+  {
+    "blind_id": "b141",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "1.652 Pulmonitos."
+  },
+  {
+    "blind_id": "b142",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "280 sesiones de psicología y 214 de ejercicio físico."
+  },
+  {
+    "blind_id": "b143",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "23 reuniones."
+  },
+  {
+    "blind_id": "b144",
+    "grade": "correcta",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "14.344,71 € + 4.235,79 € = 18.580,50 €."
+  },
+  {
+    "blind_id": "b145",
+    "grade": "incorrecta",
+    "extra_claims": true,
+    "rounding_only": false,
+    "reason": "Da los ingresos (237.294,59 €) como resultado en lugar de 36.048,41 € positivo."
+  },
+  {
+    "blind_id": "b146",
+    "grade": "parcial",
+    "extra_claims": false,
+    "rounding_only": false,
+    "reason": "Dice no encontrar el desglose pero menciona los 38 profesionales; no da las 9 asociaciones."
+  }
+]

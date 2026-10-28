@@ -35,7 +35,8 @@ Tipos con regla propia:
 - "no_en_documento": "correcta" si afirma que el documento no tiene esa información; "parcial" si
   lo insinúa sin afirmarlo; "incorrecta" si responde con un dato.
 - "premisa_falsa": "correcta" si rechaza la premisa de forma explícita, como hace "expected"
-  (si "expected" dice que el documento no lo menciona, decir que no está cuenta como rechazo);
+  (si "expected" dice que el documento no lo menciona, decir que no está cuenta como rechazo;
+  si "expected" da el dato que desmiente la premisa, decir que no lo encontró es "incorrecta");
   "parcial" si responde a la pregunta de fondo sin corregir la premisa; "incorrecta" si acepta la
   premisa (da una cifra, un motivo o un premio que la pregunta da por supuesto).
 

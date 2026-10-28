@@ -1,0 +1,1494 @@
+{
+  "b001": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b002": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b003": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b004": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b005": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b006": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b007": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    },
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b008": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b009": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    }
+  ],
+  "b010": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b011": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b012": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b013": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b014": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b015": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b016": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b017": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    },
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b018": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b019": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b020": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b021": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b022": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b023": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b024": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b025": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b026": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b027": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b028": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b029": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b030": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b031": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b032": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    },
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b033": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b034": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b035": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b036": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b037": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b038": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b039": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b040": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b041": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b042": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b043": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    }
+  ],
+  "b044": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b045": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b046": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b047": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b048": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b049": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    },
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b050": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b051": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b052": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b053": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b054": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b055": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b056": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b057": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b058": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b059": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b060": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b061": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b062": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b063": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b064": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b065": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b066": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b067": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b068": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b069": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b070": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b071": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b072": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b073": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b074": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b075": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b076": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b077": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    }
+  ],
+  "b078": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b079": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b080": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b081": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b082": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b083": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b084": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b085": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b086": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b087": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b088": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b089": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b090": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b091": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b092": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b093": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b094": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b095": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b096": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b097": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b098": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b099": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b100": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b101": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b102": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b103": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b104": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b105": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b106": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b107": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b108": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b109": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b110": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b111": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b112": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b113": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b114": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b115": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b116": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b117": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b118": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b119": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b120": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b121": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b122": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b123": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b124": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b125": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b126": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b127": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b128": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b129": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    }
+  ],
+  "b130": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b131": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b132": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b133": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b134": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b135": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b136": [
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 1
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b (local)",
+      "repeat": 3
+    }
+  ],
+  "b137": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b138": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b139": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b140": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    }
+  ],
+  "b141": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b142": [
+    {
+      "config": "llama3.2:3b (local)",
+      "repeat": 1
+    }
+  ],
+  "b143": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 1
+    }
+  ],
+  "b144": [
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 1
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 2
+    },
+    {
+      "config": "claude-haiku-4.5 (API)",
+      "repeat": 3
+    }
+  ],
+  "b145": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ],
+  "b146": [
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 2
+    },
+    {
+      "config": "qwen3:14b + thinking (local)",
+      "repeat": 3
+    }
+  ]
+}
