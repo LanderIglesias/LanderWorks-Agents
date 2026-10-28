@@ -3,6 +3,12 @@
 from __future__ import annotations
 
 from backend.agents.rag_pdf_agent.eval.blind import blind_export
+from backend.agents.rag_pdf_agent.eval.grades_report import (
+    join,
+    mode,
+    question_diff,
+    summary,
+)
 from backend.agents.rag_pdf_agent.eval.run_eval import grade, retrieval_metrics
 
 Q_INGRESOS = {"numbers": ["23729459", "6062"], "terms": []}
@@ -94,3 +100,71 @@ def test_blind_export_agrupa_respuestas_iguales_y_oculta_la_configuracion():
     ]
     # Semilla fija: el mismo orden en cada ejecución
     assert blind_export(records) == (items, key)
+
+
+def _report_fixture():
+    # b1 (Q1, parcial) aparece en A, B y C; la regla puso más nota en A, menos en B, igual en C.
+    # Q2: A y B dieron la misma respuesta (b2, correcta); C otra (b3, incorrecta).
+    auto = {("A", 1): "correcta", ("B", 1): "incorrecta", ("C", 1): "parcial"}
+    records = [{"config": c, "repeat": r, "id": 1, "auto_grade": g} for (c, r), g in auto.items()]
+    records += [
+        {"config": "A", "repeat": 1, "id": 2, "auto_grade": "correcta"},
+        {"config": "B", "repeat": 1, "id": 2, "auto_grade": "correcta"},
+        {"config": "C", "repeat": 1, "id": 2, "auto_grade": "incorrecta"},
+    ]
+    items = [{"blind_id": "b1", "question_id": 1}, {"blind_id": "b2", "question_id": 2}]
+    items.append({"blind_id": "b3", "question_id": 2})
+    key = {
+        "b1": [{"config": c, "repeat": 1} for c in "ABC"],
+        "b2": [{"config": c, "repeat": 1} for c in "AB"],
+        "b3": [{"config": "C", "repeat": 1}],
+    }
+    grades = [
+        {"blind_id": b, "grade": g, "extra_claims": b == "b2", "rounding_only": False}
+        for b, g in [("b1", "parcial"), ("b2", "correcta"), ("b3", "incorrecta")]
+    ]
+    return records, items, key, grades
+
+
+def test_grades_report_reparte_la_nota_y_detecta_subidas_y_bajadas():
+    rows = join(*_report_fixture())
+    # La nota de b1 llega a sus 3 apariciones, y cada aparición tiene una sola fila
+    assert [(r["config"], r["grade"]) for r in rows if r["blind_id"] == "b1"] == [
+        ("A", "parcial"),
+        ("B", "parcial"),
+        ("C", "parcial"),
+    ]
+    assert len(rows) == 6
+    s = summary(rows)
+    assert (s["A"]["lower"], s["A"]["higher"]) == (1, 0)
+    assert (s["B"]["lower"], s["B"]["higher"]) == (0, 1)
+    assert (s["C"]["lower"], s["C"]["higher"]) == (0, 0)
+    assert s["A"]["n"] == 2 and s["A"]["extra_claims"] == 1 and s["C"]["incorrecta"] == 1
+    assert question_diff(rows, "A", "B") == []
+    assert question_diff(rows, "A", "C") == [(2, ["correcta"], ["incorrecta"])]
+
+
+def test_question_diff_compara_la_moda_y_las_pasadas():
+    def rows(config, qid, grades):
+        return [
+            {"config": config, "repeat": i, "qid": qid, "grade": g} for i, g in enumerate(grades)
+        ]
+
+    # L tiene 1 pasada y A y B tienen 3; en Q2 B difiere de A en una pasada, no en la moda
+    r = []
+    for qid, b_grades in [(1, ["correcta"] * 3), (2, ["correcta", "correcta", "parcial"])]:
+        r += rows("A", qid, ["correcta"] * 3) + rows("B", qid, b_grades)
+        r += rows("L", qid, ["correcta"])
+    assert question_diff(r, "A", "L") == []  # misma moda; distinto número de pasadas
+    assert question_diff(r, "A", "B") == [
+        (2, ["correcta"] * 3, ["correcta", "correcta", "parcial"])
+    ]
+    assert mode(["correcta", "parcial", "incorrecta"]) == "mixed"
+    assert mode(["correcta", "parcial", "parcial"]) == "parcial"
+
+
+def test_grades_report_exclude_quita_la_pregunta_y_ajusta_n():
+    s = summary(join(*_report_fixture(), exclude={1}))
+    assert {c: v["n"] for c, v in s.items()} == {"A": 1, "B": 1, "C": 1}
+    assert all(v["higher"] == v["lower"] == 0 for v in s.values())
+    assert s["A"]["correcta"] == 1 and s["A"]["parcial"] == 0
