@@ -216,6 +216,9 @@ machine, and that is the main limitation.
 - **min_p not set explicitly.** Qwen3 recommends min_p = 0 in thinking mode. We relied on Ollama's
   default (0.0), taken from the documentation on Ollama's main branch rather than checked against the
   installed version.
+- **Two checks can't be reproduced from the repo:** the per-batch grades behind the Q29 inconsistency
+  and the check of Haiku's extra content against the PDF text were done during the analysis, but
+  their working files are not committed.
 - **Human review pending** for Q8, Q17, Q29 and Q30.
 
 ## Reproducing it
