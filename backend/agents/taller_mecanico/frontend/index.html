@@ -1,0 +1,1242 @@
+<!--
+THESIS: a work order is a physical object with a life — it refuses the
+generic "form + JSON dump" default by making the 4 stages four real
+copies of an NCR ticket pad (white/yellow/pink/gold), not four numbered
+steps in a circle.
+OWN-WORLD: dark workbench ground, four carbonless-copy paper tones,
+rubber ink-stamp verdicts, a torn/punched ticket silhouette; workhorse
+sans for prose, a technical mono only for order numbers/part codes/money.
+STORY: a customer's problem becomes a real paper trail the visitor can
+watch get filled in, stamped, and either archived or kicked to a human.
+FIRST VIEWPORT: the white "Descripción" copy sits centered on the dark
+bench, a punch-hole tab rail to its left naming the four copies.
+FORM: single-page guided reveal over one POST /mensaje response, no
+per-step HTTP calls.
+FINISH: unreviewed and undocumented is unfinished; this build ends with
+the finish review, the verdict, and DESIGN.md.
+-->
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller Mecánico — orden de trabajo</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='4' fill='%2315171a'/%3E%3Cpath fill='%23f5a300' d='M17.7 6.3a3.5 3.5 0 0 1-4.6 4.6l-5.6 5.6a1.4 1.4 0 0 1-2-2l5.6-5.6a3.5 3.5 0 0 1 4.6-4.6l-2.3 2.3a1 1 0 0 0 0 1.4l1.3 1.3a1 1 0 0 0 1.4 0z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bench: #16181b;
+    --bench-2: #1d2023;
+    --bench-line: rgba(255,255,255,0.05);
+    --ink: #201d18;
+    --ink-soft: #514c42;
+    --amber: #f5a300;
+    --amber-ink: #7a5000;
+    --green: #2f6f4e;
+    --green-ink: #16382a;
+    --red: #b3392f;
+    --red-ink: #5e1912;
+    --paper-white: #f4efe4;
+    --paper-white-edge: #e3dcc9;
+    --paper-yellow: #f2dd8c;
+    --paper-yellow-edge: #ddc367;
+    --paper-pink: #f0c3c0;
+    --paper-pink-edge: #d99f9b;
+    --paper-gold: #e8d5a8;
+    --paper-gold-edge: #cdb37c;
+    --shadow: 0 18px 40px -12px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.35);
+    --sans: system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--bench);
+    padding: 48px 20px 96px;
+    position: relative;
+  }
+
+  /* Radial glow + pegboard texture on the bench, as a full-height layer
+     behind the content — NOT background-attachment:fixed on body: that
+     only repaints within the viewport present at load, leaving a blank
+     gap below the fold on any page taller than one screen (confirmed
+     with a full-page capture on mobile). */
+  body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% 0, var(--bench-2), transparent 60%),
+      radial-gradient(var(--bench-line) 1.4px, transparent 1.4px) 0 0/28px 28px;
+    opacity: 1;
+    z-index: 0;
+  }
+
+  svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  .rig {
+    position: relative;
+    z-index: 1;
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  header.masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .masthead h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #f2ede0;
+    margin: 0;
+  }
+
+  .masthead h1 span {
+    color: var(--amber);
+  }
+
+  .masthead p {
+    margin: 4px 0 0;
+    color: #8b9199;
+    font-size: 0.85rem;
+    max-width: 46ch;
+  }
+
+  .orden-numero {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: #cfd3d8;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 12px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .orden-numero b { color: var(--amber); font-weight: 700; }
+
+  /* ---------- layout: tab rail + pad ---------- */
+
+  .taller {
+    display: grid;
+    grid-template-columns: 168px minmax(0,1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 760px) {
+    .taller { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- tab rail ---------- */
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: sticky;
+    top: 24px;
+  }
+
+  @media (max-width: 760px) {
+    .rail {
+      position: static;
+      flex-direction: row;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  .tab {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 3px 8px 8px 3px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #7c828a;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.18s cubic-bezier(0.16,1,0.3,1), background 0.18s, color 0.18s;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 760px) {
+    .tab { border-radius: 8px; }
+  }
+
+  .tab .chip {
+    width: 9px;
+    height: 9px;
+    border-radius: 1px;
+    flex: none;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .tab[data-state="reached"] {
+    color: #d8dbdf;
+    background: rgba(255,255,255,0.05);
+    cursor: pointer;
+  }
+
+  .tab[data-state="active"] {
+    color: #17181a;
+    background: var(--tab-color, var(--amber));
+    transform: translateX(4px);
+    box-shadow: 0 8px 20px -8px rgba(0,0,0,0.6);
+  }
+
+  @media (max-width: 760px) {
+    .tab[data-state="active"] { transform: translateY(-2px); }
+  }
+
+  .tab[data-state="locked"] {
+    color: #4a4e54;
+    cursor: default;
+  }
+
+  .tab small {
+    display: block;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 0.68rem;
+    opacity: 0.85;
+    margin-top: 1px;
+  }
+
+  /* ---------- the pad + ticket sheets ---------- */
+
+  .pad {
+    position: relative;
+    min-height: 420px;
+  }
+
+  .ticket {
+    display: none;
+    position: relative;
+    padding: 34px 34px 30px;
+    border-radius: 3px 3px 10px 10px;
+    box-shadow: var(--shadow);
+    animation: settle 0.5s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  .ticket[data-visible="true"] { display: block; }
+
+  @keyframes settle {
+    from { opacity: 0; transform: translateY(14px) rotate(var(--tilt, -0.4deg)) scale(0.99); }
+    to { opacity: 1; transform: translateY(0) rotate(var(--tilt, -0.4deg)) scale(1); }
+  }
+
+  .ticket.copy-white { background: var(--paper-white); border: 1px solid var(--paper-white-edge); --tilt: -0.35deg; }
+  .ticket.copy-yellow { background: var(--paper-yellow); border: 1px solid var(--paper-yellow-edge); --tilt: 0.3deg; }
+  .ticket.copy-pink { background: var(--paper-pink); border: 1px solid var(--paper-pink-edge); --tilt: -0.25deg; }
+  .ticket.copy-gold { background: var(--paper-gold); border: 1px solid var(--paper-gold-edge); --tilt: 0.35deg; }
+
+  /* punch holes, top edge */
+  .ticket::before {
+    content: "";
+    position: absolute;
+    top: 12px; left: 24px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--bench);
+    box-shadow: 26px 0 0 var(--bench);
+    opacity: 0.85;
+  }
+
+  /* torn perforation, bottom edge */
+  .ticket::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -1px;
+    height: 10px;
+    background-image: radial-gradient(circle at 10px 0, transparent 6px, inherit 6.5px);
+    background-size: 20px 10px;
+    background-position: 0 0;
+    background-repeat: repeat-x;
+    background-color: inherit;
+    filter: drop-shadow(0 4px 3px rgba(0,0,0,0.18));
+  }
+
+  .copy-white::after { background-color: var(--paper-white); }
+  .copy-yellow::after { background-color: var(--paper-yellow); }
+  .copy-pink::after { background-color: var(--paper-pink); }
+  .copy-gold::after { background-color: var(--paper-gold); }
+
+  .ticket-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    border-bottom: 1.5px dashed rgba(32,29,24,0.28);
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+  }
+
+  .ticket-head .copia {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .ticket-head h2 {
+    margin: 2px 0 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .ticket-head .rol {
+    text-align: right;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+  }
+
+  .campo {
+    margin-bottom: 16px;
+  }
+
+  .campo label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  .campo .ayuda {
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink-soft);
+    opacity: 0.85;
+    display: block;
+    margin-top: 4px;
+    font-size: 0.76rem;
+  }
+
+  input, textarea, select {
+    width: 100%;
+    font: inherit;
+    font-size: 0.92rem;
+    color: var(--ink);
+    background: rgba(255,255,255,0.45);
+    border: 1.5px solid rgba(32,29,24,0.22);
+    border-radius: 6px;
+    padding: 10px 12px;
+    resize: vertical;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--ink);
+    background: rgba(255,255,255,0.75);
+  }
+
+  .fila-doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 520px) {
+    .fila-doble { grid-template-columns: 1fr; }
+  }
+
+  details.avanzado {
+    margin: 22px 0 6px;
+    border: 1.5px dashed rgba(32,29,24,0.25);
+    border-radius: 8px;
+    padding: 4px 14px;
+  }
+
+  details.avanzado summary {
+    cursor: pointer;
+    padding: 10px 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    list-style: none;
+  }
+
+  details.avanzado summary::-webkit-details-marker { display: none; }
+
+  details.avanzado summary::before {
+    content: "▸ ";
+    display: inline-block;
+    transition: transform 0.15s;
+  }
+
+  details.avanzado[open] summary::before {
+    transform: rotate(90deg);
+  }
+
+  details.avanzado[open] summary { padding-bottom: 4px; }
+
+  .avanzado .fila-doble { margin-top: 14px; }
+  .avanzado .campo:last-child { margin-bottom: 14px; }
+
+  .primaria {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-top: 8px;
+    background: var(--amber);
+    color: #201400;
+    font-weight: 700;
+    font-size: 0.92rem;
+    padding: 13px 22px;
+    border-radius: 999px;
+    box-shadow: 0 10px 24px -10px rgba(245,163,0,0.55);
+    transition: transform 0.15s cubic-bezier(0.16,1,0.3,1), box-shadow 0.15s;
+  }
+
+  .primaria:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(245,163,0,0.65); }
+  .primaria:active { transform: translateY(0); }
+  .primaria:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+  .secundaria {
+    all: unset;
+    cursor: pointer;
+    margin-top: 8px;
+    margin-left: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    padding: 13px 10px;
+    border-bottom: 1.5px solid transparent;
+  }
+  .secundaria:hover { border-bottom-color: var(--ink-soft); }
+
+  /* error banner on step 1 */
+  .aviso-error {
+    display: none;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(179,57,47,0.12);
+    border: 1.5px solid rgba(179,57,47,0.35);
+    color: var(--red-ink);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .aviso-error[data-visible="true"] { display: flex; }
+  .aviso-error b { font-weight: 700; }
+
+  /* ---------- processing state ---------- */
+
+  .procesando {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: rgba(32,29,24,0.06);
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  .procesando[data-visible="true"] { display: flex; }
+
+  .sello-mini {
+    width: 30px; height: 30px;
+    border: 2.5px solid var(--ink-soft);
+    border-radius: 4px;
+    flex: none;
+    animation: golpe 1.1s ease-in-out infinite;
+  }
+
+  @keyframes golpe {
+    0%, 100% { transform: translateY(-3px) rotate(-6deg); opacity: 0.55; }
+    50% { transform: translateY(0) rotate(-6deg); opacity: 1; }
+  }
+
+  .procesando .fase { font-family: var(--mono); font-weight: 600; color: var(--ink); }
+
+  /* ---------- stamps ---------- */
+
+  .sello {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 0.98rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 10px 18px;
+    border-radius: 4px;
+    border: 2.5px solid currentColor;
+    transform: rotate(-2.5deg);
+    position: relative;
+  }
+
+  .sello::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 8px;
+    filter: url(#grano);
+    background: currentColor;
+    opacity: 0.06;
+    pointer-events: none;
+  }
+
+  .sello.aprobado { color: var(--green-ink); background: rgba(47,111,78,0.1); }
+  .sello.rechazado { color: var(--red-ink); background: rgba(179,57,47,0.1); }
+  .sello.escalado_humano { color: var(--amber-ink); background: rgba(245,163,0,0.14); }
+  .sello.neutral { color: #55524a; background: rgba(85,82,74,0.08); }
+
+  /* ---------- content blocks reused across tickets ---------- */
+
+  .bloque { margin-bottom: 22px; }
+  .bloque:last-child { margin-bottom: 0; }
+
+  .bloque h3 {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+  }
+
+  .bloque p { margin: 0 0 8px; line-height: 1.55; font-size: 0.92rem; }
+  .bloque p:last-child { margin-bottom: 0; }
+
+  .lista-causas { margin: 0; padding-left: 20px; }
+  .lista-causas li { margin-bottom: 5px; line-height: 1.5; }
+  .lista-causas li:first-child { font-weight: 700; }
+
+  .confianza {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+  }
+  .confianza.alta { background: rgba(47,111,78,0.15); color: var(--green-ink); }
+  .confianza.media { background: rgba(245,163,0,0.18); color: var(--amber-ink); }
+  .confianza.baja { background: rgba(179,57,47,0.15); color: var(--red-ink); }
+
+  .aviso-caja {
+    border-left: 2px solid var(--amber-ink);
+    padding: 8px 12px;
+    background: rgba(245,163,0,0.08);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .consejo-caja {
+    border-left: 2px solid var(--ink-soft);
+    padding: 8px 12px;
+    background: rgba(32,29,24,0.05);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border-radius: 0 6px 6px 0;
+  }
+
+  table.piezas {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+  table.piezas th {
+    text-align: left;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
+    padding: 0 8px 6px 0;
+    border-bottom: 1.5px solid rgba(32,29,24,0.25);
+  }
+  table.piezas td {
+    padding: 7px 8px 7px 0;
+    border-bottom: 1px dashed rgba(32,29,24,0.15);
+    vertical-align: top;
+  }
+  table.piezas td.num, table.piezas th.num { text-align: right; font-family: var(--mono); }
+  table.piezas tr:last-child td { border-bottom: none; }
+
+  .badge-pieza {
+    font-family: var(--mono);
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: rgba(32,29,24,0.08);
+    color: var(--ink-soft);
+    margin-left: 6px;
+  }
+
+  .totales {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1.5px dashed rgba(32,29,24,0.28);
+  }
+  .fila-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    padding: 3px 0;
+  }
+  .fila-total.gran-total {
+    font-size: 1.15rem;
+    font-weight: 800;
+    font-family: var(--mono);
+    margin-top: 6px;
+  }
+  .fila-total span:last-child { font-family: var(--mono); }
+  .fila-total.descuento span:last-child { color: var(--green-ink); }
+
+  .resumen-final {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 4px;
+  }
+  @media (max-width: 520px) { .resumen-final { grid-template-columns: 1fr; } }
+  .resumen-final .celda {
+    background: rgba(255,255,255,0.35);
+    border: 1px solid rgba(32,29,24,0.15);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .resumen-final .celda .k {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .resumen-final .celda .v {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  details.tecnico {
+    margin-top: 24px;
+    border-top: 1.5px dashed rgba(32,29,24,0.28);
+    padding-top: 14px;
+  }
+  details.tecnico summary {
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    list-style: none;
+  }
+  details.tecnico summary::-webkit-details-marker { display: none; }
+  details.tecnico summary::before { content: "▸ "; }
+  details.tecnico[open] summary::before { content: "▾ "; }
+
+  table.decision-log {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.76rem;
+    margin-top: 10px;
+    font-family: var(--mono);
+  }
+  table.decision-log th {
+    text-align: left;
+    color: var(--ink-soft);
+    padding: 4px 8px 4px 0;
+    border-bottom: 1px solid rgba(32,29,24,0.2);
+  }
+  table.decision-log td {
+    padding: 5px 8px 5px 0;
+    border-bottom: 1px dashed rgba(32,29,24,0.12);
+    vertical-align: top;
+  }
+
+  .fin-bloqueado {
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: rgba(32,29,24,0.05);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  .footer-nota {
+    text-align: center;
+    color: #5c6167;
+    font-size: 0.76rem;
+    margin-top: 40px;
+  }
+
+  ::selection { background: var(--amber); color: #201400; }
+</style>
+</head>
+<body>
+
+<svg class="defs" aria-hidden="true">
+  <filter id="grano">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="ruido"/>
+    <feColorMatrix in="ruido" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.7 0"/>
+  </filter>
+</svg>
+
+<div class="rig">
+  <header class="masthead">
+    <div>
+      <h1>Taller<span>Mecánico</span> — orden de trabajo</h1>
+      <p>Un mensaje del cliente recorre Router → Diagnóstico → Evaluador → Presupuestador → Evaluador
+      en una única llamada. Esta página solo revela ese mismo resultado copia a copia.</p>
+    </div>
+    <div class="orden-numero">Nº ORDEN <b id="numero-orden">—</b></div>
+  </header>
+
+  <div class="taller">
+    <nav class="rail" id="rail">
+      <button class="tab" data-step="1" data-color="white" data-state="active" type="button">
+        <span class="chip"></span><span>Blanca<small>Descripción</small></span>
+      </button>
+      <button class="tab" data-step="2" data-color="yellow" data-state="locked" type="button">
+        <span class="chip"></span><span>Amarilla<small>Diagnóstico</small></span>
+      </button>
+      <button class="tab" data-step="3" data-color="pink" data-state="locked" type="button">
+        <span class="chip"></span><span>Rosa<small>Presupuesto</small></span>
+      </button>
+      <button class="tab" data-step="4" data-color="gold" data-state="locked" type="button">
+        <span class="chip"></span><span>Dorada<small>Confirmación</small></span>
+      </button>
+    </nav>
+
+    <div class="pad">
+
+      <!-- ================= STEP 1 — white copy ================= -->
+      <section class="ticket copy-white" id="ticket-1" data-visible="true">
+        <div class="ticket-head">
+          <div>
+            <span class="copia">Copia cliente · blanca</span>
+            <h2>Descripción del problema</h2>
+          </div>
+          <div class="rol">taller_mecanico<br>hito 9 — UI guiada</div>
+        </div>
+
+        <div class="aviso-error" id="error-banner" data-visible="false">
+          <span aria-hidden="true">⚠</span>
+          <span id="error-texto"></span>
+        </div>
+
+        <form id="form-orden">
+          <div class="campo">
+            <label for="mensaje">Mensaje del cliente</label>
+            <textarea id="mensaje" name="mensaje" rows="3" required maxlength="4000">Mi coche hace un ruido raro al frenar por las mañanas</textarea>
+          </div>
+
+          <div class="fila-doble">
+            <div class="campo">
+              <label for="cliente_id">Cliente ID</label>
+              <input id="cliente_id" name="cliente_id" type="number" min="1" required>
+              <span class="ayuda">Debe existir ya en CRM (crm.alta_cliente).</span>
+            </div>
+            <div class="campo">
+              <label for="vehiculo_id">Vehículo ID</label>
+              <input id="vehiculo_id" name="vehiculo_id" type="number" min="1" required>
+              <span class="ayuda">Debe pertenecer a ese cliente.</span>
+            </div>
+          </div>
+
+          <details class="avanzado" id="detalles-avanzado">
+            <summary>Datos de cita y presupuesto (solo si el diagnóstico se aprueba)</summary>
+            <p class="ayuda" style="margin-top:0">Opcionales al enviar — si el diagnóstico se aprueba y faltan,
+            el taller te los pedirá aquí mismo antes de continuar.</p>
+            <div class="fila-doble">
+              <div class="campo">
+                <label for="fecha_cita">Fecha de la cita</label>
+                <input id="fecha_cita" type="date">
+              </div>
+              <div class="campo">
+                <label for="hora_cita">Hora</label>
+                <input id="hora_cita" type="time">
+              </div>
+            </div>
+            <div class="fila-doble">
+              <div class="campo">
+                <label for="duracion_cita">Duración (min)</label>
+                <input id="duracion_cita" type="number" min="1" max="480" value="60">
+              </div>
+              <div class="campo">
+                <label for="horas_mano_obra">Horas de mano de obra</label>
+                <input id="horas_mano_obra" type="number" min="0" max="100" step="0.25">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="piezas_candidatas">Piezas candidatas</label>
+              <input id="piezas_candidatas" placeholder="p. ej. 1, 2">
+              <span class="ayuda">IDs de inventario separados por coma (inventario.py — no se crean piezas desde aquí).</span>
+            </div>
+          </details>
+
+          <button class="primaria" type="submit" id="btn-enviar">
+            Abrir orden de trabajo
+          </button>
+
+          <div class="procesando" id="procesando" data-visible="false">
+            <div class="sello-mini" aria-hidden="true"></div>
+            <div>
+              <div>Procesando en el taller…</div>
+              <div class="fase" id="fase-actual">Router clasificando el mensaje</div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- ================= STEP 2 — yellow copy ================= -->
+      <section class="ticket copy-yellow" id="ticket-2" data-visible="false">
+        <div class="ticket-head">
+          <div>
+            <span class="copia">Copia taller · amarilla</span>
+            <h2>Diagnóstico</h2>
+          </div>
+          <div class="rol" id="veredicto-diagnostico-rol">Evaluador</div>
+        </div>
+        <div id="contenido-diagnostico"></div>
+      </section>
+
+      <!-- ================= STEP 3 — pink copy ================= -->
+      <section class="ticket copy-pink" id="ticket-3" data-visible="false">
+        <div class="ticket-head">
+          <div>
+            <span class="copia">Copia contabilidad · rosa</span>
+            <h2>Presupuesto</h2>
+          </div>
+          <div class="rol">Presupuestador</div>
+        </div>
+        <div id="contenido-presupuesto"></div>
+      </section>
+
+      <!-- ================= STEP 4 — gold copy ================= -->
+      <section class="ticket copy-gold" id="ticket-4" data-visible="false">
+        <div class="ticket-head">
+          <div>
+            <span class="copia">Copia archivo · dorada</span>
+            <h2>Confirmación</h2>
+          </div>
+          <div class="rol">Orden cerrada</div>
+        </div>
+        <div id="contenido-confirmacion"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <p class="footer-nota">GET /decisiones expone decision_log completo · GET /health para comprobar el proceso</p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+  const rail = $("#rail");
+  const tabs = $$(".tab", rail);
+  const tickets = { 1: $("#ticket-1"), 2: $("#ticket-2"), 3: $("#ticket-3"), 4: $("#ticket-4") };
+  const form = $("#form-orden");
+  const btnEnviar = $("#btn-enviar");
+  const procesando = $("#procesando");
+  const faseActual = $("#fase-actual");
+  const errorBanner = $("#error-banner");
+  const errorTexto = $("#error-texto");
+  const detallesAvanzado = $("#detalles-avanzado");
+  const numeroOrden = $("#numero-orden");
+
+  let reached = { 1: true, 2: false, 3: false, 4: false };
+  let ultimoPayload = null;
+
+  numeroOrden.textContent = "TM-" + Math.floor(100000 + Math.random() * 899999);
+
+  function mostrarTicket(paso) {
+    for (const p of [1, 2, 3, 4]) {
+      tickets[p].dataset.visible = String(p === paso);
+    }
+    for (const tab of tabs) {
+      const paso_tab = Number(tab.dataset.step);
+      if (paso_tab === paso) tab.dataset.state = "active";
+      else if (reached[paso_tab]) tab.dataset.state = "reached";
+      else tab.dataset.state = "locked";
+    }
+  }
+
+  for (const tab of tabs) {
+    tab.addEventListener("click", () => {
+      const paso = Number(tab.dataset.step);
+      if (reached[paso]) mostrarTicket(paso);
+    });
+  }
+
+  function euros(n) {
+    return new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(n);
+  }
+
+  function escapar(s) {
+    const d = document.createElement("div");
+    d.textContent = s == null ? "" : String(s);
+    return d.innerHTML;
+  }
+
+  function sello(veredicto, extraClase) {
+    const etiquetas = {
+      aprobado: "Aprobado",
+      rechazado: "Rechazado",
+      escalado_humano: "Escalado a humano",
+    };
+    const clase = extraClase || veredicto;
+    return `<span class="sello ${clase}">${etiquetas[veredicto] || veredicto}</span>`;
+  }
+
+  function confianzaChip(nivel) {
+    return `<span class="confianza ${nivel}">Confianza ${nivel}</span>`;
+  }
+
+  // ---- fases cosméticas durante la espera (una sola llamada HTTP real;
+  // esto NO refleja progreso real del servidor, solo mantiene legible
+  // qué está haciendo el pipeline mientras se espera la respuesta) ----
+  const FASES = [
+    "Router clasificando el mensaje",
+    "Diagnóstico evaluando síntomas",
+    "Evaluador verificando el diagnóstico",
+    "Presupuestador calculando piezas y mano de obra",
+    "Evaluador verificando el presupuesto",
+  ];
+  let faseTimer = null;
+  function iniciarFases() {
+    let i = 0;
+    faseActual.textContent = FASES[0];
+    faseTimer = setInterval(() => {
+      i = (i + 1) % FASES.length;
+      faseActual.textContent = FASES[i];
+    }, 1400);
+  }
+  function pararFases() {
+    clearInterval(faseTimer);
+  }
+
+  function mostrarError(mensaje) {
+    errorTexto.textContent = mensaje;
+    errorBanner.dataset.visible = "true";
+  }
+  function ocultarError() {
+    errorBanner.dataset.visible = "false";
+  }
+
+  // ---------------- diagnóstico (paso 2) ----------------
+
+  function renderDiagnostico(data) {
+    const cont = $("#contenido-diagnostico");
+    const rf = data.resultado_final;
+
+    if (rf === "escalado_humano_inmediato") {
+      $("#veredicto-diagnostico-rol").textContent = "Router";
+      cont.innerHTML = `
+        <div class="bloque">${sello("escalado_humano", "escalado_humano")}</div>
+        <div class="bloque">
+          <h3>Motivo</h3>
+          <p>El Router clasificó este mensaje como urgencia y lo deriva directo a un mecánico
+          humano — Diagnóstico y Evaluador no llegan a intervenir.</p>
+          <div class="aviso-caja">${escapar(data.router.razonamiento)}</div>
+        </div>
+        <div class="fin-bloqueado">La orden termina aquí. Las copias rosa y dorada no se generan
+        para este caso — no hay diagnóstico ni presupuesto que mostrar.</div>`;
+      return;
+    }
+
+    if (rf === "sin_conectar") {
+      $("#veredicto-diagnostico-rol").textContent = "Router";
+      cont.innerHTML = `
+        <div class="bloque">${sello("neutral", "neutral")}</div>
+        <div class="bloque">
+          <h3>Motivo</h3>
+          <p>El Router clasificó la intención como <b>${escapar(data.router.intencion)}</b>,
+          destino <b>${escapar(data.router.agente_destino)}</b> — un camino que este flujo aún
+          no conecta con Diagnóstico automático.</p>
+          <div class="aviso-caja">${escapar(data.router.razonamiento)}</div>
+        </div>
+        <div class="fin-bloqueado">La orden termina aquí. Las copias rosa y dorada no se generan
+        para este caso.</div>`;
+      return;
+    }
+
+    const dx = data.diagnostico;
+    const ev = data.evaluador_diagnostico;
+    $("#veredicto-diagnostico-rol").textContent = "Evaluador";
+
+    let html = `
+      <div class="bloque">${sello(ev.veredicto)} ${confianzaChip(dx.confianza)}</div>
+      <div class="bloque">
+        <h3>Causas probables</h3>
+        <ol class="lista-causas">${dx.causas_probables.map((c) => `<li>${escapar(c)}</li>`).join("")}</ol>
+        <p><b>Revisar primero:</b> ${escapar(dx.revisar_primero)}</p>
+      </div>
+      <div class="bloque">
+        <h3>Razonamiento del Evaluador</h3>
+        <p>${escapar(ev.razonamiento)}</p>
+      </div>`;
+
+    if (ev.advertencia) {
+      html += `<div class="bloque"><div class="aviso-caja">${escapar(ev.advertencia)}</div></div>`;
+    }
+
+    if (ev.veredicto !== "aprobado") {
+      if (ev.feedback_para_reintento) {
+        html += `<div class="bloque"><h3>Qué cambiaría el resultado</h3>
+          <div class="consejo-caja">${escapar(ev.feedback_para_reintento)}</div></div>`;
+      }
+      html += `<div class="fin-bloqueado">La orden termina aquí — el Evaluador no aprobó el
+        diagnóstico, así que no se pide cita ni se genera presupuesto (copias rosa y dorada
+        no se generan para este caso).</div>`;
+    }
+
+    cont.innerHTML = html;
+  }
+
+  // ---------------- presupuesto (paso 3) ----------------
+
+  function renderPresupuesto(data) {
+    const cont = $("#contenido-presupuesto");
+    const p = data.presupuestador;
+    const ev = data.evaluador_presupuesto;
+
+    const filasPiezas = p.piezas.map((linea) => `
+      <tr>
+        <td>${escapar(linea.nombre)}${linea.es_compatible ? '<span class="badge-pieza">compatible</span>' : ""}</td>
+        <td class="num">${linea.cantidad}</td>
+        <td class="num">${euros(linea.precio_unitario)}</td>
+        <td class="num">${euros(linea.precio_unitario * linea.cantidad)}</td>
+      </tr>`).join("");
+
+    let html = `
+      <div class="bloque">${sello(ev.veredicto)}</div>
+      <div class="bloque">
+        <h3>Piezas</h3>
+        <table class="piezas">
+          <thead><tr><th>Pieza</th><th class="num">Cant.</th><th class="num">Precio ud.</th><th class="num">Subtotal</th></tr></thead>
+          <tbody>${filasPiezas}</tbody>
+        </table>
+        <div class="totales">
+          <div class="fila-total"><span>Coste piezas</span><span>${euros(p.coste_piezas)}</span></div>
+          <div class="fila-total"><span>Margen aplicado</span><span>${(p.margen_aplicado * 100).toFixed(0)}%</span></div>
+          <div class="fila-total"><span>Venta piezas</span><span>${euros(p.precio_venta_piezas)}</span></div>
+          <div class="fila-total"><span>Mano de obra (${p.mano_obra_horas} h)</span><span>${euros(p.mano_obra_total)}</span></div>
+          ${p.descuento_porcentaje > 0
+            ? `<div class="fila-total descuento"><span>Descuento (${p.descuento_tipo}${p.criterio_excepcional ? ", " + escapar(p.criterio_excepcional) : ""}, ${(p.descuento_porcentaje * 100).toFixed(0)}%)</span><span>−${euros(p.precio_venta_piezas * p.descuento_porcentaje / (1 - p.descuento_porcentaje))}</span></div>`
+            : ""}
+          <div class="fila-total gran-total"><span>Total</span><span>${euros(p.total)}</span></div>
+        </div>
+      </div>`;
+
+    if (p.descuento_justificacion) {
+      html += `<div class="bloque"><h3>Justificación del descuento</h3>
+        <p>${escapar(p.descuento_justificacion)}</p></div>`;
+    }
+
+    html += `<div class="bloque"><h3>Razonamiento del Evaluador</h3><p>${escapar(ev.razonamiento)}</p></div>`;
+
+    if (ev.advertencia) {
+      html += `<div class="bloque"><div class="aviso-caja">${escapar(ev.advertencia)}</div></div>`;
+    }
+
+    if (ev.veredicto !== "aprobado") {
+      if (ev.feedback_para_reintento) {
+        html += `<div class="bloque"><h3>Qué cambiaría el resultado</h3>
+          <div class="consejo-caja">${escapar(ev.feedback_para_reintento)}</div></div>`;
+      }
+      html += `<div class="fin-bloqueado">La orden termina aquí — el Evaluador no aprobó el
+        presupuesto. La cita creada para esta orden se cancela automáticamente
+        (agenda.cancelar_cita); la copia dorada no se genera.</div>`;
+    }
+
+    cont.innerHTML = html;
+  }
+
+  // ---------------- confirmación (paso 4) ----------------
+
+  async function renderConfirmacion(data, payload) {
+    const cont = $("#contenido-confirmacion");
+    const p = data.presupuestador;
+
+    cont.innerHTML = `
+      <div class="bloque">${sello("aprobado")}</div>
+      <div class="bloque resumen-final">
+        <div class="celda"><span class="k">Cita creada</span><span class="v">#${data.cita_id}</span></div>
+        <div class="celda"><span class="k">Fecha</span><span class="v">${escapar(payload.fecha_hora_cita || "—")}</span></div>
+        <div class="celda"><span class="k">Total presupuestado</span><span class="v">${euros(p.total)}</span></div>
+        <div class="celda"><span class="k">Nº orden</span><span class="v">${numeroOrden.textContent}</span></div>
+      </div>
+      <div class="bloque">
+        <p>Diagnóstico aprobado, cita reservada y presupuesto verificado por el Evaluador dos
+        veces — una vez en la copia amarilla, una vez en la rosa. Esta copia dorada es el
+        archivo de la orden completa.</p>
+      </div>
+      <details class="tecnico">
+        <summary>Ver detalle técnico (decision_log)</summary>
+        <div id="log-tecnico">Cargando…</div>
+      </details>`;
+
+    try {
+      const idsRelevantes = new Set(
+        [
+          data.router && data.router.decision_id,
+          data.diagnostico && data.diagnostico.decision_id,
+          data.evaluador_diagnostico && data.evaluador_diagnostico.decision_id,
+          p && p.decision_id,
+          data.evaluador_presupuesto && data.evaluador_presupuesto.decision_id,
+        ].filter((v) => v != null)
+      );
+      const resp = await fetch("/decisiones?limite=50");
+      const filas = await resp.json();
+      const relevantes = filas.filter((f) => idsRelevantes.has(f.id));
+      const filasHtml = relevantes.map((f) => `
+        <tr>
+          <td>${f.id}</td>
+          <td>${escapar(f.agent)}</td>
+          <td>${escapar(f.verdict || "")}</td>
+          <td>${escapar((f.output || "").slice(0, 60))}</td>
+        </tr>`).join("");
+      $("#log-tecnico").innerHTML = relevantes.length
+        ? `<table class="decision-log">
+            <thead><tr><th>id</th><th>agent</th><th>verdict</th><th>output</th></tr></thead>
+            <tbody>${filasHtml}</tbody>
+          </table>`
+        : `<p class="ayuda">No se encontraron filas de decision_log para esta orden.</p>`;
+    } catch (e) {
+      $("#log-tecnico").innerHTML = `<p class="ayuda">No se pudo cargar decision_log.</p>`;
+    }
+  }
+
+  // ---------------- envío ----------------
+
+  function construirPayload() {
+    const fecha = $("#fecha_cita").value;
+    const hora = $("#hora_cita").value;
+    const piezasRaw = $("#piezas_candidatas").value.trim();
+    return {
+      mensaje: $("#mensaje").value,
+      cliente_id: Number($("#cliente_id").value),
+      vehiculo_id: Number($("#vehiculo_id").value),
+      fecha_hora_cita: fecha && hora ? `${fecha} ${hora}` : null,
+      duracion_cita_minutos: Number($("#duracion_cita").value || 60),
+      piezas_candidatas: piezasRaw
+        ? piezasRaw.split(",").map((s) => s.trim()).filter((s) => s !== "").map(Number).filter((n) => !Number.isNaN(n))
+        : null,
+      horas_mano_obra: $("#horas_mano_obra").value !== "" ? Number($("#horas_mano_obra").value) : null,
+    };
+  }
+
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    ocultarError();
+    btnEnviar.disabled = true;
+    procesando.dataset.visible = "true";
+    iniciarFases();
+
+    const payload = construirPayload();
+    ultimoPayload = payload;
+
+    let resp, data;
+    try {
+      resp = await fetch("/mensaje", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      data = await resp.json();
+    } catch (e) {
+      pararFases();
+      procesando.dataset.visible = "false";
+      btnEnviar.disabled = false;
+      mostrarError("No se pudo contactar con el taller (¿está el servidor arrancado?).");
+      return;
+    }
+
+    pararFases();
+    procesando.dataset.visible = "false";
+    btnEnviar.disabled = false;
+
+    if (!resp.ok) {
+      const detalle = (data && data.detail) || "Error desconocido.";
+      if (resp.status === 400 && /fecha_hora_cita|piezas_candidatas|horas_mano_obra/.test(detalle)) {
+        detallesAvanzado.open = true;
+        mostrarError("El diagnóstico se aprobaría, pero faltan datos de cita/presupuesto: " + detalle);
+      } else if (resp.status === 404) {
+        mostrarError("Cliente o vehículo no encontrado: " + detalle);
+      } else if (resp.status === 502) {
+        mostrarError("El proveedor de IA devolvió una respuesta inválida: " + detalle);
+      } else {
+        mostrarError(detalle);
+      }
+      return;
+    }
+
+    // --- revelación progresiva del mismo resultado, copia a copia ---
+    reached[2] = true;
+    renderDiagnostico(data);
+    mostrarTicket(2);
+
+    const rf = data.resultado_final;
+    const diagnosticoAprobado = data.evaluador_diagnostico && data.evaluador_diagnostico.veredicto === "aprobado";
+
+    if (!diagnosticoAprobado) return;
+
+    await new Promise((r) => setTimeout(r, 550));
+    reached[3] = true;
+    renderPresupuesto(data);
+    mostrarTicket(3);
+
+    if (rf !== "aprobado") return;
+
+    await new Promise((r) => setTimeout(r, 550));
+    reached[4] = true;
+    await renderConfirmacion(data, payload);
+    mostrarTicket(4);
+  });
+})();
+</script>
+</body>
+</html>

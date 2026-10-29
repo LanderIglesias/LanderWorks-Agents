@@ -42,6 +42,7 @@ no solo en la conversación que las decidió):
 from __future__ import annotations
 
 import sqlite3
+from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -200,97 +201,17 @@ def listar_decisiones(limite: int = 20, conn: sqlite3.Connection = Depends(get_d
     return [dict(fila) for fila in filas]
 
 
-_INDEX_HTML = """<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<title>Taller Mecánico — wrapper HTTP</title>
-<style>
-  body { font: 14px system-ui, sans-serif; max-width: 720px; margin: 32px auto; padding: 0 16px; color: #201d18; }
-  h1 { font-size: 1.2rem; }
-  label { display: block; margin-top: 12px; font-weight: 600; }
-  input, textarea { width: 100%; padding: 6px 8px; margin-top: 4px; box-sizing: border-box; font: inherit; }
-  button { margin-top: 16px; padding: 8px 16px; cursor: pointer; }
-  pre { background: #f2f0ec; padding: 12px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
-  .aviso { color: #6c6659; font-size: 0.85rem; }
-  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.85rem; }
-  th, td { text-align: left; border-bottom: 1px solid #eeece6; padding: 4px 6px; }
-</style>
-</head>
-<body>
-<h1>Taller Mecánico — interfaz mínima</h1>
-<p class="aviso">taller_mecanico nunca tuvo UI hasta este hito -- esta página es
-solo para escribir un mensaje de cliente y ver el resultado real de
-<code>flujo_completo.procesar_flujo_completo()</code>. cliente_id/vehiculo_id deben
-existir ya en la base de datos (se crean con <code>crm.py</code>, no desde aquí).</p>
-
-<form id="f">
-  <label>Mensaje del cliente
-    <textarea name="mensaje" rows="2" required>Mi coche hace un ruido raro al frenar por las mañanas</textarea>
-  </label>
-  <label>cliente_id <input name="cliente_id" type="number" required></label>
-  <label>vehiculo_id <input name="vehiculo_id" type="number" required></label>
-  <label>fecha_hora_cita (opcional, "YYYY-MM-DD HH:MM") <input name="fecha_hora_cita" placeholder="2026-09-01 10:00"></label>
-  <label>piezas_candidatas (opcional, ids separados por coma) <input name="piezas_candidatas" placeholder="1,2"></label>
-  <label>horas_mano_obra (opcional) <input name="horas_mano_obra" type="number" step="0.25"></label>
-  <button type="submit">Enviar</button>
-</form>
-<h2>Resultado</h2>
-<pre id="resultado">(nada enviado todavía)</pre>
-
-<h2>Últimas decisiones (decision_log)</h2>
-<table id="decisiones"><thead><tr><th>id</th><th>agent</th><th>output</th></tr></thead><tbody></tbody></table>
-
-<script>
-async function cargarDecisiones() {
-  const resp = await fetch('/decisiones?limite=10');
-  const filas = await resp.json();
-  const tbody = document.querySelector('#decisiones tbody');
-  tbody.innerHTML = '';
-  for (const fila of filas) {
-    const tr = document.createElement('tr');
-    // textContent, no innerHTML: fila.output es texto de decision_log,
-    // que en el camino de "respuesta del modelo no parseable" guarda el
-    // texto crudo del modelo verbatim (hallazgo de la revisión de
-    // seguridad de este hito) -- innerHTML lo ejecutaria como HTML/JS.
-    for (const valor of [fila.id, fila.agent, (fila.output || '').slice(0, 80)]) {
-      const td = document.createElement('td');
-      td.textContent = valor == null ? '' : String(valor);
-      tr.appendChild(td);
-    }
-    tbody.appendChild(tr);
-  }
-}
-
-document.querySelector('#f').addEventListener('submit', async (ev) => {
-  ev.preventDefault();
-  const form = new FormData(ev.target);
-  const piezas = form.get('piezas_candidatas');
-  const payload = {
-    mensaje: form.get('mensaje'),
-    cliente_id: Number(form.get('cliente_id')),
-    vehiculo_id: Number(form.get('vehiculo_id')),
-    fecha_hora_cita: form.get('fecha_hora_cita') || null,
-    piezas_candidatas: piezas ? piezas.split(',').map((s) => Number(s.trim())) : null,
-    horas_mano_obra: form.get('horas_mano_obra') ? Number(form.get('horas_mano_obra')) : null,
-  };
-  const resp = await fetch('/mensaje', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  const data = await resp.json();
-  document.querySelector('#resultado').textContent = JSON.stringify(data, null, 2);
-  cargarDecisiones();
-});
-
-cargarDecisiones();
-</script>
-</body>
-</html>
-"""
+# UI guiada de 4 pasos (hito 9): un único POST a /mensaje, revelación
+# progresiva del mismo resultado en el cliente -- ver
+# frontend/index.html. Igual que pdf_translator_v2/router.py, el HTML
+# vive en su propio fichero (no como string Python) para que se pueda
+# editar/formatear como HTML real; esto NO añade una capa de build ni
+# StaticFiles -- sigue siendo un único fichero autocontenido (CSS/JS
+# inline), servido tal cual, mismo espíritu "wrapper deliberadamente
+# mínimo" del resto de este módulo.
+_FRONTEND_INDEX = Path(__file__).resolve().parent / "frontend" / "index.html"
 
 
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
-    return _INDEX_HTML
+    return _FRONTEND_INDEX.read_text(encoding="utf-8")
