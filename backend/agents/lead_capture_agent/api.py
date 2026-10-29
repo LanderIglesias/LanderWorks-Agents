@@ -19,6 +19,7 @@ from .echo_runtime import EchoAgentRuntime
 from .event_service import EventService
 from .lead_service import LeadService
 from .mailer import FakeMailer, Mailer, load_prod_mailer
+from .rate_limit import is_rate_limited
 from .scaffold_runtime import ScaffoldAgentRuntime
 from .session_service import SessionService
 from .settings import load_settings
@@ -121,6 +122,7 @@ def chat_stream(
     Solo disponible para tenants con knowledge_text (motor LLM).
     """
     widget_token = x_widget_token or token
+    client_ip = request.client.host if request.client else "unknown"
 
     tenant = _tenant_service.resolve_by_widget_token(widget_token)
     if not tenant:
@@ -128,6 +130,9 @@ def chat_stream(
 
     if not tenant.knowledge_text:
         raise HTTPException(status_code=400, detail="Streaming only available for LLM tenants")
+
+    if is_rate_limited(tenant.tenant_id, client_ip):
+        raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
     state = _session_service.get_state(tenant.tenant_id, payload.session_id)
 

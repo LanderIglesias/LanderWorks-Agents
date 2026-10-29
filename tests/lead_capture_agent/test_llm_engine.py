@@ -176,6 +176,275 @@ class TestLlmEngine:
         assert new_state.step != Step.SEND
 
 
+class TestRedaccionTranscripcionParaLangfuse:
+    """Decisión de producto confirmada explícitamente por el usuario tras
+    la auditoría de PII (ver README_lead_capture_agent.md): antes de
+    mandar la transcripción completa a Langfuse en cualquiera de las dos
+    rutas, se redacta cualquier email detectado (reutilizando
+    `_EMAIL_RE`, no un mecanismo nuevo). No cubre teléfono/nombre en
+    texto libre -- riesgo residual documentado, no un descuido."""
+
+    def test_redacta_el_email_en_el_contenido(self):
+        from backend.agents.lead_capture_agent.llm_engine import (
+            _redactar_transcripcion_para_langfuse,
+        )
+
+        mensajes = [
+            {"role": "user", "content": "Mi email es juan@empresa.com, llamadme"},
+            {"role": "assistant", "content": "Perfecto, ¿en qué puedo ayudarte?"},
+        ]
+        redactados = _redactar_transcripcion_para_langfuse(mensajes)
+
+        assert redactados[0]["content"] == "Mi email es [EMAIL_REDACTADO], llamadme"
+        assert redactados[1]["content"] == "Perfecto, ¿en qué puedo ayudarte?"
+
+    def test_no_muta_la_lista_original(self):
+        from backend.agents.lead_capture_agent.llm_engine import (
+            _redactar_transcripcion_para_langfuse,
+        )
+
+        original = [{"role": "user", "content": "contacto: ana@empresa.com"}]
+        _redactar_transcripcion_para_langfuse(original)
+
+        assert original[0]["content"] == "contacto: ana@empresa.com"
+
+    def test_sin_email_deja_el_contenido_igual(self):
+        from backend.agents.lead_capture_agent.llm_engine import (
+            _redactar_transcripcion_para_langfuse,
+        )
+
+        mensajes = [{"role": "user", "content": "Quiero información sobre precios"}]
+        redactados = _redactar_transcripcion_para_langfuse(mensajes)
+
+        assert redactados == mensajes
+
+
+class TestObservabilidadLangfuseUnificada:
+    """Verifica el requisito explícito de esta corrección: ambas rutas
+    (streaming y no-streaming) deben mandar el MISMO nivel de detalle a
+    Langfuse -- la transcripción completa, redactada igual en las dos."""
+
+    def test_ruta_no_streaming_manda_la_transcripcion_completa_redactada(self, monkeypatch):
+        from backend.agents.lead_capture_agent import langfuse_utils
+        from backend.agents.lead_capture_agent.llm_engine import handle_user_message_llm
+        from tests.lead_capture_agent.conftest import FakeLangfuseClient
+
+        fake = FakeLangfuseClient()
+        monkeypatch.setattr(langfuse_utils, "_get_client", lambda: fake)
+
+        state = SessionState()
+        fake_response = make_fake_anthropic_response("Encantado de ayudarte.")
+
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            mock_cls.return_value.messages.create.return_value = fake_response
+            handle_user_message_llm(state, "Mi email es juan@empresa.com", knowledge_text="k")
+
+        evento = fake.eventos[0]
+        assert evento["name"] == "lead-capture-chat"
+        # La transcripción completa (lista de mensajes), no solo {"user_text": ...}.
+        assert isinstance(evento["input"], list)
+        assert evento["input"][0]["role"] == "user"
+        assert "[EMAIL_REDACTADO]" in evento["input"][0]["content"]
+        assert "juan@empresa.com" not in evento["input"][0]["content"]
+
+    def test_ambas_rutas_mandan_el_mismo_formato_de_input(self, monkeypatch):
+        from backend.agents.lead_capture_agent import langfuse_utils
+        from backend.agents.lead_capture_agent.llm_engine import (
+            handle_user_message_llm,
+            stream_user_message_llm,
+        )
+        from tests.lead_capture_agent.conftest import FakeLangfuseClient
+
+        fake = FakeLangfuseClient()
+        monkeypatch.setattr(langfuse_utils, "_get_client", lambda: fake)
+
+        mensaje = "Mi email es lead@empresa.com, quiero información"
+
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            mock_cls.return_value.messages.create.return_value = make_fake_anthropic_response("ok")
+            handle_user_message_llm(SessionState(), mensaje, knowledge_text="k")
+
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            mock_cls.return_value.messages.stream.return_value = FakeStreamManager(["ok"])
+            list(stream_user_message_llm(SessionState(), mensaje, knowledge_text="k"))
+
+        evento_no_streaming = fake.eventos[0]
+        obs_streaming = fake.observaciones_abiertas[0]
+
+        for input_data in (evento_no_streaming["input"], obs_streaming["input"]):
+            assert isinstance(input_data, list)
+            assert input_data[0]["role"] == "user"
+            assert "[EMAIL_REDACTADO]" in input_data[0]["content"]
+            assert "lead@empresa.com" not in input_data[0]["content"]
+
+        # Mismo formato exacto en ambas rutas -- eso es "unificar el nivel
+        # de detalle": no solo "las dos redactan", sino "las dos mandan
+        # la misma estructura de transcripción".
+        assert evento_no_streaming["input"] == obs_streaming["input"]
+
+    def test_email_repetido_por_el_llm_en_su_propia_respuesta_tambien_se_redacta(self, monkeypatch):
+        """Regresión directa de un hallazgo real al verificar contra el
+        servidor real de Langfuse (no un test mockeado): Claude a veces
+        repite el email del visitante en su respuesta para confirmarlo
+        ("Veo que eres tú@ejemplo.com..."). Redactar solo `input` dejaba
+        el email intacto en `output` -- ningún test mockeado lo detectó
+        porque ninguna respuesta de prueba anterior incluía un email."""
+        from backend.agents.lead_capture_agent import langfuse_utils
+        from backend.agents.lead_capture_agent.llm_engine import handle_user_message_llm
+        from tests.lead_capture_agent.conftest import FakeLangfuseClient
+
+        fake = FakeLangfuseClient()
+        monkeypatch.setattr(langfuse_utils, "_get_client", lambda: fake)
+
+        state = SessionState()
+        fake_response = make_fake_anthropic_response(
+            "¡Genial! Veo que tu email es juan@empresa.com, te contactaremos ahí."
+        )
+
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            mock_cls.return_value.messages.create.return_value = fake_response
+            handle_user_message_llm(state, "Mi email es juan@empresa.com", knowledge_text="k")
+
+        evento = fake.eventos[0]
+        assert "[EMAIL_REDACTADO]" in evento["output"]["reply"]
+        assert "juan@empresa.com" not in evento["output"]["reply"]
+
+    def test_email_repetido_por_el_llm_en_streaming_tambien_se_redacta(self, monkeypatch):
+        from backend.agents.lead_capture_agent import langfuse_utils
+        from backend.agents.lead_capture_agent.llm_engine import stream_user_message_llm
+        from tests.lead_capture_agent.conftest import FakeLangfuseClient
+
+        fake = FakeLangfuseClient()
+        monkeypatch.setattr(langfuse_utils, "_get_client", lambda: fake)
+
+        state = SessionState()
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            mock_cls.return_value.messages.stream.return_value = FakeStreamManager(
+                ["Veo que tu email es juan@empresa.com, gracias."]
+            )
+            list(stream_user_message_llm(state, "Mi email es juan@empresa.com", knowledge_text="k"))
+
+        actualizacion = fake.actualizaciones[0]
+        assert "[EMAIL_REDACTADO]" in actualizacion["output"]
+        assert "juan@empresa.com" not in actualizacion["output"]
+
+
+class FakeStreamManager:
+    """Doble de `anthropic.Anthropic().messages.stream(...)` -- un context
+    manager cuyo `.text_stream` es un iterable de chunks de texto, igual
+    que el SDK real. Sin esto no había ninguna forma de probar
+    `stream_user_message_llm` con la API de Anthropic mockeada -- por
+    eso esta función nunca tuvo tests hasta esta corrección."""
+
+    def __init__(self, chunks: list[str]):
+        self._chunks = chunks
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    @property
+    def text_stream(self):
+        return iter(self._chunks)
+
+
+class TestStreamUserMessageLlm:
+    """`stream_user_message_llm` no tenía NINGÚN test antes de esta
+    corrección -- ni siquiera uno que confirmara que produce chunks SSE
+    válidos, mucho menos que ejercitara su integración con Langfuse (el
+    bug real que motivó esta corrección: `langfuse.trace().generation()`,
+    inexistente en la versión fijada, fallaba en silencio en CADA
+    respuesta y ningún test lo detectaba)."""
+
+    def _consumir(self, generator):
+        return list(generator)
+
+    def test_produce_chunks_sse_y_evento_final(self):
+        from backend.agents.lead_capture_agent.llm_engine import stream_user_message_llm
+
+        state = SessionState()
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            mock_cls.return_value.messages.stream.return_value = FakeStreamManager(
+                ["Hola, ", "encantado ", "de ayudarte."]
+            )
+            eventos = self._consumir(stream_user_message_llm(state, "Hola", knowledge_text="k"))
+
+        assert any('"chunk"' in e for e in eventos)
+        assert '"done": true' in eventos[-1]
+
+    def test_on_complete_recibe_el_estado_y_la_respuesta_limpia(self):
+        from backend.agents.lead_capture_agent.llm_engine import stream_user_message_llm
+
+        state = SessionState()
+        recibido = {}
+
+        def on_complete(new_state, clean_reply):
+            recibido["state"] = new_state
+            recibido["reply"] = clean_reply
+
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            mock_cls.return_value.messages.stream.return_value = FakeStreamManager(
+                ["Perfecto, lo envío ahora.\n<<<SEND_LEAD>>>"]
+            )
+            self._consumir(
+                stream_user_message_llm(
+                    state, "Sí, adelante", knowledge_text="k", on_complete=on_complete
+                )
+            )
+
+        assert recibido["reply"] == "Perfecto, lo envío ahora."
+        assert recibido["state"].step == Step.SEND
+
+    def test_langfuse_activo_registra_la_generacion_de_streaming(self, monkeypatch):
+        """Verifica la corrección del bug real: con Langfuse "activo" (un
+        FakeLangfuseClient inyectado), la observación de streaming se
+        abre y se completa con el output real -- ya no con
+        langfuse.trace().generation(), inexistente."""
+        from backend.agents.lead_capture_agent import langfuse_utils
+        from backend.agents.lead_capture_agent.llm_engine import stream_user_message_llm
+        from tests.lead_capture_agent.conftest import FakeLangfuseClient
+
+        fake_langfuse = FakeLangfuseClient()
+        monkeypatch.setattr(langfuse_utils, "_get_client", lambda: fake_langfuse)
+
+        state = SessionState()
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            mock_cls.return_value.messages.stream.return_value = FakeStreamManager(["Hola."])
+            self._consumir(stream_user_message_llm(state, "Hola", knowledge_text="k"))
+
+        assert fake_langfuse.actualizaciones == [{"output": "Hola.", "usage_details": None}]
+
+    def test_fallo_de_langfuse_no_rompe_la_respuesta_al_visitante(self, monkeypatch, caplog):
+        """Requisito no negociable de la corrección: un fallo de Langfuse
+        durante el streaming nunca debe impedir que el visitante reciba
+        su respuesta completa."""
+        import logging
+
+        from backend.agents.lead_capture_agent import langfuse_utils
+        from backend.agents.lead_capture_agent.llm_engine import stream_user_message_llm
+        from tests.lead_capture_agent.conftest import FakeLangfuseClient
+
+        fake_langfuse = FakeLangfuseClient(fallar_al_abrir=True)
+        monkeypatch.setattr(langfuse_utils, "_get_client", lambda: fake_langfuse)
+
+        state = SessionState()
+        with caplog.at_level(logging.ERROR):
+            with patch(
+                "backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic"
+            ) as mock_cls:
+                mock_cls.return_value.messages.stream.return_value = FakeStreamManager(
+                    ["Respuesta completa igualmente."]
+                )
+                eventos = self._consumir(stream_user_message_llm(state, "Hola", knowledge_text="k"))
+
+        assert any("Respuesta completa igualmente." in e for e in eventos)
+        # A diferencia del bug original (except Exception: pass mudo), el
+        # fallo queda en el log del servidor.
+        assert any("abrir" in r.message for r in caplog.records)
+
+
 # ── Tests de enrutamiento en chat_service.py ─────────────────────────────────
 
 

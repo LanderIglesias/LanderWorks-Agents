@@ -22,12 +22,9 @@ from collections.abc import Generator
 from dataclasses import replace
 
 import anthropic
-from langfuse import Langfuse
 
+from . import langfuse_utils
 from .domain import SessionState, Status, Step
-
-# Cliente Langfuse — lee LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY del .env
-langfuse = Langfuse()
 
 _EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}")
 _LEAD_MARKER = "<<<SEND_LEAD>>>"
@@ -68,6 +65,37 @@ def _extract_email(text: str) -> str | None:
     return match.group(0) if match else None
 
 
+def _redactar_email(texto: str) -> str:
+    """Sustituye cualquier email detectado por `[EMAIL_REDACTADO]`,
+    reutilizando `_EMAIL_RE` (el mismo regex ya usado para capturar el
+    email del visitante) -- decisión de producto confirmada
+    explícitamente por el usuario, ver README_lead_capture_agent.md,
+    sección "Auditoría de PII: transcripción completa a Langfuse". No
+    cubre teléfono ni nombre en texto libre -- ver esa misma sección
+    para el motivo y el riesgo residual aceptado.
+
+    Se aplica tanto a la transcripción (`input`) como a la respuesta del
+    LLM (`output`) antes de mandarlas a Langfuse: hallazgo real al
+    verificar contra el servidor real (no solo con tests mockeados) --
+    Claude a veces repite el email del visitante en su propia respuesta
+    para confirmarlo ("Veo que eres tú@ejemplo.com..."), así que redactar
+    solo el input dejaba el email intacto en el output. Ningún test
+    mockeado lo detectó porque ninguna respuesta de prueba incluía un
+    email -- exactamente el tipo de cosa que solo aparece verificando
+    contra el SDK/servidor real."""
+    return _EMAIL_RE.sub("[EMAIL_REDACTADO]", texto)
+
+
+def _redactar_transcripcion_para_langfuse(messages: list[dict]) -> list[dict]:
+    """Aplica `_redactar_email` a cada mensaje de la transcripción antes
+    de mandarla a Langfuse. Devuelve una lista NUEVA (no muta
+    `messages`); `state.messages` sigue guardando la conversación real
+    sin redactar -- la redacción es solo para lo que sale hacia
+    Langfuse, nunca para lo que se persiste localmente o se envía al
+    tenant."""
+    return [{**m, "content": _redactar_email(m["content"])} for m in messages]
+
+
 def _build_lead_summary(messages: list[dict], email: str | None) -> str:
     lines = ["Lead capturado desde el chat web", "=" * 40, ""]
     for msg in messages:
@@ -87,15 +115,16 @@ def handle_user_message_llm(
     knowledge_text: str = "",
 ) -> tuple[SessionState, str]:
     """
-    Motor LLM principal con observabilidad Langfuse.
+    Motor LLM principal, con observabilidad Langfuse vía
+    `langfuse_utils.registrar_evento()` (API `create_event`, ver ese
+    módulo) -- registra input/output/tokens/metadata de cada turno.
 
-    El decorador @observe() registra automáticamente:
-    - Input (user_text, knowledge_text)
-    - Output (respuesta del agente)
-    - Latencia total de la función
-    - Cualquier error que ocurra
-
-    Dentro añadimos metadata adicional manualmente con langfuse_context.
+    Nota histórica: este docstring afirmaba antes que un decorador
+    `@observe()` hacía esto automáticamente; nunca fue así -- no hay
+    ningún `@observe()` en este archivo, y `langfuse.decorators` ni
+    siquiera existe en la versión de `langfuse` fijada en este monorepo
+    (`langfuse==4.5.1`). Corregido para describir lo que el código
+    realmente hace.
     """
     client = anthropic.Anthropic()
 
@@ -115,7 +144,7 @@ def handle_user_message_llm(
         reply = response.content[0].text.strip()
 
         # Registramos métricas del saludo en Langfuse
-        langfuse.create_event(
+        langfuse_utils.registrar_evento(
             name="lead-capture-greeting",
             input={"trigger": "greeting"},
             output={"reply": reply},
@@ -161,11 +190,15 @@ def handle_user_message_llm(
             state.data.summary = _build_lead_summary(updated_messages, state.data.email)
             state.data.status = Status.READY_TO_SEND
 
-    # Registramos métricas del turno normal en Langfuse
-    langfuse.create_event(
+    # Registramos métricas del turno normal en Langfuse. `input` manda la
+    # transcripción completa (mismo nivel de detalle que la ruta de
+    # streaming, unificado a propósito); tanto `input` como `output` pasan
+    # por `_redactar_email` -- el reply del LLM puede repetir el email del
+    # visitante para confirmarlo, no solo el mensaje del visitante en sí.
+    langfuse_utils.registrar_evento(
         name="lead-capture-chat",
-        input={"user_text": user_text},
-        output={"reply": reply},
+        input=_redactar_transcripcion_para_langfuse(messages_for_api),
+        output={"reply": _redactar_email(reply)},
         metadata={
             "tokens_input": response.usage.input_tokens,
             "tokens_output": response.usage.output_tokens,
@@ -259,18 +292,18 @@ def stream_user_message_llm(
     # Evento final — el frontend lo usa para saber que termino
     yield f"data: {json.dumps({'done': True, 'step': new_state.step.value, 'is_done': new_state.step == Step.DONE})}\n\n"
 
-    # Langfuse
-    try:
-        trace = langfuse.trace(name="lead-capture-stream")
-        trace.generation(
-            name="llm-call",
-            model="claude-haiku-4-5-20251001",
-            input=messages_for_api,
-            output=clean_reply,
-            metadata={"lead_captured": send_lead, "streaming": True},
-        )
-    except Exception:
-        pass
+    # Langfuse — API de spans (start_as_current_observation), NO
+    # trace().generation() (no existe en langfuse==4.5.1, ver
+    # langfuse_utils.py para el detalle completo del bug corregido aquí).
+    # `input_data`/`output` pasan por `_redactar_email` -- el reply del
+    # LLM puede repetir el email del visitante para confirmarlo.
+    with langfuse_utils.generacion_streaming(
+        name="lead-capture-stream",
+        model="claude-haiku-4-5-20251001",
+        input_data=_redactar_transcripcion_para_langfuse(messages_for_api),
+        metadata={"lead_captured": send_lead, "streaming": True},
+    ) as obs:
+        obs.completar(output=_redactar_email(clean_reply))
 
     # Callback para guardar estado en BD desde el endpoint
     if on_complete:
