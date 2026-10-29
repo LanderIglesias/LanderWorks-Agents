@@ -12,6 +12,7 @@ def demo_html() -> str:
   <title>Technical Debt Analyzer</title>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -316,7 +317,7 @@ def demo_html() -> str:
     document.getElementById('issuesBody').innerHTML =
       '<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:20px;">See Full Report tab for detailed issues breakdown</td></tr>';
 
-    document.getElementById('markdownReport').innerHTML = marked.parse(report.markdown || '');
+    document.getElementById('markdownReport').innerHTML = DOMPurify.sanitize(marked.parse(report.markdown || ''));
     const blob = new Blob([report.markdown||''], { type: 'text/markdown' });
     const dlBtn = document.getElementById('downloadBtn');
     dlBtn.href = URL.createObjectURL(blob);

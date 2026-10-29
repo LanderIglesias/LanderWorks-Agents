@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import math
 import signal
+import threading
 from contextlib import contextmanager
 from typing import Any
 
@@ -69,6 +70,24 @@ SAFE_BUILTINS = {
 }
 
 
+# Blocklist for attribute-based exec() sandbox escapes (e.g. ().__class__.__bases__[0].__subclasses__()) — the builtins allowlist alone does not stop these
+_DANGEROUS_PATTERNS = (
+    "__subclasses__",
+    "__bases__",
+    "__globals__",
+    "__builtins__",
+    "__import__",
+    "__class__",
+    "subprocess",
+    "os.system",
+    "os.popen",
+    "eval(",
+    "exec(",
+    "compile(",
+    "open(",
+)
+
+
 class ExecutionTimeout(Exception):
     """Se lanza cuando el código tarda más de EXECUTION_TIMEOUT_SECONDS."""
 
@@ -97,6 +116,15 @@ def execute(code: str, df: pd.DataFrame) -> dict:
     if code.startswith("```"):
         code = _strip_markdown_fences(code)
 
+    if any(pattern in code for pattern in _DANGEROUS_PATTERNS):
+        return {
+            "success": False,
+            "result": None,
+            "result_type": None,
+            "error": "Blocked: code contains a disallowed pattern",
+            "code": code,
+        }
+
     safe_builtins = {
         name: (
             __builtins__.get(name)
@@ -117,8 +145,30 @@ def execute(code: str, df: pd.DataFrame) -> dict:
     }
 
     try:
-        with _timeout(EXECUTION_TIMEOUT_SECONDS):
-            exec(code, namespace)
+        if hasattr(signal, "SIGALRM"):
+            with _timeout(EXECUTION_TIMEOUT_SECONDS):
+                exec(code, namespace)
+        else:
+            # Windows has no SIGALRM; fall back to a thread-based timeout so exec() is still bounded
+            # Daemon thread, not ThreadPoolExecutor: the executor joins its workers at interpreter
+            # exit, so a runaway exec() would block shutdown forever.
+            # ponytail: the timed-out thread can't be killed and keeps burning CPU until exit;
+            # a subprocess with kill() would be the real bound if this ever runs on Windows in prod.
+            errors: list[BaseException] = []
+
+            def _run() -> None:
+                try:
+                    exec(code, namespace)
+                except BaseException as exc:  # re-raised in the calling thread below
+                    errors.append(exc)
+
+            worker = threading.Thread(target=_run, daemon=True)
+            worker.start()
+            worker.join(EXECUTION_TIMEOUT_SECONDS)
+            if worker.is_alive():
+                raise ExecutionTimeout(f"Code execution exceeded {EXECUTION_TIMEOUT_SECONDS}s")
+            if errors:
+                raise errors[0]
 
         result = namespace.get("result")
         return {
@@ -171,7 +221,7 @@ def _clean_nan(value: Any) -> Any:
         if math.isnan(value) or math.isinf(value):
             return None
     # numpy floats también pueden ser nan
-    if isinstance(value, (np.floating,)):
+    if isinstance(value, np.floating):
         v = float(value)
         if math.isnan(v) or math.isinf(v):
             return None
@@ -183,9 +233,9 @@ def _scalar(value: Any) -> Any:
     """Convierte un valor escalar a tipo nativo de Python y limpia NaN."""
     if value is None:
         return None
-    if isinstance(value, (np.integer,)):
+    if isinstance(value, np.integer):
         return int(value)
-    if isinstance(value, (np.floating,)):
+    if isinstance(value, np.floating):
         f = float(value)
         if math.isnan(f) or math.isinf(f):
             return None
@@ -194,7 +244,7 @@ def _scalar(value: Any) -> Any:
         if math.isnan(value) or math.isinf(value):
             return None
         return value
-    if isinstance(value, (pd.Timestamp, pd.Timedelta)):
+    if isinstance(value, pd.Timestamp | pd.Timedelta):
         return str(value)
     if isinstance(value, np.ndarray):
         return [_scalar(v) for v in value.tolist()]
@@ -234,13 +284,13 @@ def _serialize_result(result: Any) -> Any:
             "truncated": len(result) > 200,
         }
 
-    if isinstance(result, (np.integer, np.floating)):
+    if isinstance(result, np.integer | np.floating):
         return _scalar(result)
 
-    if isinstance(result, (pd.Timestamp, pd.Timedelta)):
+    if isinstance(result, pd.Timestamp | pd.Timedelta):
         return str(result)
 
-    if isinstance(result, (list, tuple)):
+    if isinstance(result, list | tuple):
         return [_scalar(v) for v in result]
 
     if isinstance(result, dict):

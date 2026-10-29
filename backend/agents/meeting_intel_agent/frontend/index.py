@@ -12,6 +12,7 @@ def demo_html() -> str:
   <title>Meeting Intelligence</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -588,7 +589,7 @@ def demo_html() -> str:
       report.pending_topics.map(p => `<div class="item"><div class="item-main">${esc(p.topic)}</div><div class="item-sub">${esc(p.reason)}</div></div>`).join(''));
 
     if (report.report_markdown) {
-      document.getElementById('mdWrap').innerHTML = marked.parse(report.report_markdown);
+      document.getElementById('mdWrap').innerHTML = DOMPurify.sanitize(marked.parse(report.report_markdown));
       const blob = new Blob([report.report_markdown], { type: 'text/markdown' });
       const btn = document.getElementById('dlBtn');
       btn.href = URL.createObjectURL(blob);

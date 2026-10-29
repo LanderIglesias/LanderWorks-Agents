@@ -12,6 +12,7 @@ def demo_html() -> str:
   <title>Document Intelligence</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -382,7 +383,7 @@ def demo_html() -> str:
         <div class="chunks-panel" id="${cid}">${items}</div>`;
     }
 
-    d.innerHTML = `<div class="msg-bubble markdown">${marked.parse(text||'')}</div>${srcHtml}${chunksHtml}`;
+    d.innerHTML = `<div class="msg-bubble markdown">${DOMPurify.sanitize(marked.parse(text||''))}</div>${srcHtml}${chunksHtml}`;
     chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
   }
 
@@ -422,7 +423,7 @@ def demo_html() -> str:
           <span class="compare-card-filename" title="${esc(r.filename)}">${esc(r.filename)}</span>
           <span class="compare-card-pages">${r.chunks_used} chunks used</span>
         </div>
-        <div class="compare-card-body markdown">${marked.parse(r.answer||'')}</div>
+        <div class="compare-card-body markdown">${DOMPurify.sanitize(marked.parse(r.answer||''))}</div>
         ${srcPills ? `<div class="compare-card-sources">${srcPills}</div>` : ''}
         ${chunksHtml}
       </div>`;

@@ -18,6 +18,7 @@ del servidor — igual que el DataFrame en memoria.
 
 from __future__ import annotations
 
+import re
 import sqlite3
 import tempfile
 from pathlib import Path
@@ -95,11 +96,14 @@ def execute_sql(db_path: str, query: str) -> pd.DataFrame:
     Esto es defensa en profundidad: aunque Claude tiene instrucciones de solo
     generar SELECT, validamos aquí también.
     """
-    query_upper = query.upper().strip()
-    forbidden_keywords = ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE", "TRUNCATE"]
-    for keyword in forbidden_keywords:
-        if keyword in query_upper:
-            raise ValueError(f"Query contains forbidden keyword: {keyword}")
+    # Allowlist instead of blocklist: a keyword blocklist misses statements like
+    # ATTACH DATABASE '<path>' AS x, which can create arbitrary files.
+    query_stripped = re.sub(
+        r"^(\s*--[^\n]*\n|\s*/\*.*?\*/)*\s*", "", query, flags=re.DOTALL
+    ).strip()
+    query_upper = query_stripped.upper()
+    if not (query_upper.startswith("SELECT") or query_upper.startswith("WITH")):
+        raise ValueError("Only SELECT/WITH queries are allowed")
 
     conn = sqlite3.connect(db_path)
     try:

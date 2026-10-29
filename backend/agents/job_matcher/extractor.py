@@ -14,7 +14,10 @@ Ya lo usas en el PDF Translator — reutilizamos lo conocido.
 
 from __future__ import annotations
 
+import ipaddress
 import re
+import socket
+from urllib.parse import urlparse
 
 import fitz  # PyMuPDF
 import httpx
@@ -41,6 +44,25 @@ def extraer_texto_docx(contenido: bytes) -> str:
     return limpiar_texto(texto)
 
 
+def _validar_url_publica(url: str) -> None:
+    """Rechaza URLs que no sean http(s) o que resuelvan a redes internas/reservadas (anti-SSRF)."""
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError("URL invalida: solo se admiten http/https")
+    if not parsed.hostname:
+        raise ValueError("URL invalida: falta host")
+
+    try:
+        infos = socket.getaddrinfo(parsed.hostname, None)
+    except socket.gaierror as e:
+        raise ValueError(f"No se pudo resolver el host: {e}")  # noqa: B904
+
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved or ip.is_multicast:
+            raise ValueError("URL invalida: apunta a una red interna/reservada")
+
+
 def scrapeear_url(url: str) -> str:
     """
     Extrae el texto principal de una URL de oferta de empleo.
@@ -48,6 +70,8 @@ def scrapeear_url(url: str) -> str:
     Funciona con: Infojobs, Indeed, webs de empresa, cualquier URL publica.
     No funciona con: LinkedIn (requiere login), portales con JS pesado.
     """
+    _validar_url_publica(url)
+
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -57,7 +81,11 @@ def scrapeear_url(url: str) -> str:
     }
 
     try:
-        response = httpx.get(url, headers=headers, timeout=15, follow_redirects=True)
+        # follow_redirects=True: el destino del redirect no se revalida contra
+        # redes internas; se limita max_redirects como mitigacion parcial (gap conocido).
+        response = httpx.get(
+            url, headers=headers, timeout=15, follow_redirects=True, max_redirects=3
+        )
         response.raise_for_status()
     except httpx.HTTPError as e:
         raise ValueError(f"No se pudo acceder a la URL: {e}")  # noqa: B904

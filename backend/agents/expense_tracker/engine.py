@@ -435,6 +435,8 @@ def update_expense(db: Session, expense_id: int, patch: ExpensePatch) -> Expense
     if patch.amount is not None:
         expense.amount = round(patch.amount, 2)
     if patch.category is not None:
+        if patch.category not in CATEGORIES:
+            raise ValueError(f"category inválida: {patch.category!r} (usa una de {CATEGORIES})")
         expense.category = patch.category
         expense.needs_review = False
     if patch.needs_review is not None:

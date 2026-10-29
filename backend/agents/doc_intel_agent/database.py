@@ -36,7 +36,9 @@ load_dotenv(override=False)
 # Formato: postgresql://usuario:contraseña@host:puerto/nombre_db
 # Cuando corre en Docker: host = "db" (nombre del servicio en docker-compose)
 # Cuando corre en local sin Docker: host = "localhost"
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://lander:lander123@localhost:5432/doc_intel")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable is required but not set")
 
 # create_engine crea el "motor" de conexión
 # pool_pre_ping=True: antes de usar una conexión del pool, verifica que sigue viva

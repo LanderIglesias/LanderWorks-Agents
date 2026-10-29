@@ -29,10 +29,12 @@ load_dotenv(override=False)
 
 # ── Conexión ────────────────────────────────────────────────────────────────
 
-DATABASE_URL = os.getenv(
-    "EXPENSE_TRACKER_DATABASE_URL",
-    "postgresql://lander:lander123@localhost:5434/expense_tracker_db",
-)
+DATABASE_URL = os.getenv("EXPENSE_TRACKER_DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "EXPENSE_TRACKER_DATABASE_URL no está definida. "
+        "Configúrala (por ejemplo en .env) antes de arrancar."
+    )
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 

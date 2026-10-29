@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import html
+
 
 def demo_html(token: str) -> str:
-    safe_token = (token or "").replace('"', "").replace("'", "")
+    safe_token = html.escape(token or "")
     return f"""<!doctype html>
 <html lang="en">
   <head>

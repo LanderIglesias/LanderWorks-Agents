@@ -420,9 +420,13 @@ function onFileChange(input) {
   }
 }
 
+function escapeHtml(text) {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function md2html(text) {
   if (!text) return '';
-  const lines = text.split('\\n');
+  const lines = escapeHtml(text).split('\\n');
   let html = '';
   for (let line of lines) {
     line = line.replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>');
