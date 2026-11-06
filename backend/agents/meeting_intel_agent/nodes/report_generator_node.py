@@ -120,8 +120,8 @@ def _build_markdown(
     )
 
     # Sección de action items con prioridad
-    def priority_emoji(p: str) -> str:
-        return {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(p.lower(), "⚪")
+    def priority_emoji(p: str | None) -> str:
+        return {"high": "🔴", "medium": "🟡", "low": "🟢"}.get((p or "").lower(), "⚪")
 
     action_items_text = (
         "\n".join(

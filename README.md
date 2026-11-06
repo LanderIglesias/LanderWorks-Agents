@@ -1,6 +1,6 @@
 # AI Portfolio — Lander Iglesias
 
-Production-ready AI agents built to demonstrate real-world AI engineering skills. Each project is deployed, tested, and documented.
+Production-ready AI agents built to demonstrate real-world AI engineering skills. Each project is tested and documented.
 
 **Portfolio:** [notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d](https://www.notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d)  
 **LinkedIn:** [linkedin.com/in/lander-iglesias-aldecoa-](https://www.linkedin.com/in/lander-iglesias-aldecoa-/)  
@@ -169,6 +169,7 @@ Simulates a mechanic shop's diagnosis-to-invoice workflow with a supervisor/rout
 | Tool | Used for |
 |---|---|
 | pytest | Unit and integration tests |
+| GitHub Actions | Runs the test suite on every push and pull request |
 | Ruff + Black | Linting and formatting |
 | gitleaks | Secret scanning in pre-commit hooks |
 | pre-commit | Automated code quality checks |

@@ -135,6 +135,9 @@ def split_into_chunks(pages: list[dict]) -> list[dict]:
 
         chunk_index += 1
 
+        if end == len(word_page_pairs):
+            break
+
         # El siguiente chunk empieza CHUNK_SIZE - OVERLAP palabras después
         # Esto crea el solapamiento
         start += CHUNK_SIZE_WORDS - OVERLAP_WORDS

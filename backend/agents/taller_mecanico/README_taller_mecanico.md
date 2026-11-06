@@ -460,7 +460,7 @@ aceptada" para lo que queda deliberadamente fuera de alcance.
 - Ningún endpoint FastAPI — esto son módulos Python puros.
 - Facturación, PDFs, búsqueda vectorial.
 - Relación `presupuestos` ↔ `piezas` (línea de partida por presupuesto) —
-  sigue pendiente para el hito 7, sin cambios respecto al hito 1.
+  se añadió después, en el hito 7, como tabla `presupuesto_piezas`.
 - Migración automática de una base de datos ya creada con el esquema del
   hito 1 (`clientes` sin cifrar) al esquema cifrado de este hito — ver
   "Deuda técnica conocida y aceptada".
@@ -1886,8 +1886,8 @@ piezas — catálogo de inventario, sin FK hacia presupuestos todavía
 
 ## Desviaciones respecto al documento de arranque (hito 1, sin cambios)
 
-1. **`presupuestos` ↔ `piezas` sin tabla puente todavía** — pendiente
-   para el hito 7.
+1. **`presupuestos` ↔ `piezas` sin tabla puente en el hito 1** — resuelto
+   en el hito 7 con `presupuesto_piezas`.
 2. **`journal_mode = WAL`** en `get_conn()` — lectores concurrentes con un
    escritor, para cuando varios agentes lean/escriban `decision_log` desde
    procesos distintos.

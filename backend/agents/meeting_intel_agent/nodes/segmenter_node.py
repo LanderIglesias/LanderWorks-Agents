@@ -84,7 +84,8 @@ def _segment_by_size(words: list[str]) -> list[dict]:
         # Si el segmento es demasiado corto, lo fusionamos con el anterior
         if len(segment_words) < MIN_SEGMENT_WORDS and segments:
             prev = segments[-1]
-            prev["text"] = prev["text"] + " " + " ".join(segment_words)
+            # Solo lo que va tras el final de prev: el resto ya es overlap suyo
+            prev["text"] = prev["text"] + " " + " ".join(words[prev["end_word"] : end])
             prev["end_word"] = end
             prev["word_count"] = prev["end_word"] - prev["start_word"]
             break
@@ -98,6 +99,9 @@ def _segment_by_size(words: list[str]) -> list[dict]:
                 "end_word": end,
             }
         )
+
+        if end == len(words):
+            break
 
         # El siguiente segmento empieza SEGMENT_OVERLAP_WORDS antes del final
         # del segmento actual — así hay overlap entre segmentos

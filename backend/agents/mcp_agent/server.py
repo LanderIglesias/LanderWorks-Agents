@@ -220,7 +220,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
         all_items = row[0] or []
         owner = arguments["owner"].lower()
-        filtered = [item for item in all_items if owner in item.get("owner", "").lower()]
+        filtered = [item for item in all_items if owner in (item.get("owner") or "").lower()]
         return [TextContent(type="text", text=json.dumps(filtered, ensure_ascii=False, indent=2))]
 
     elif name == "get_current_datetime":

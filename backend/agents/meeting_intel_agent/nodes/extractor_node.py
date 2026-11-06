@@ -163,7 +163,7 @@ def _deduplicate(items: list[dict], key: str) -> list[dict]:
     seen = set()
     result = []
     for item in items:
-        value = item.get(key, "").strip().lower()
+        value = (item.get(key) or "").strip().lower()
         if value and value not in seen:
             seen.add(value)
             result.append(item)
