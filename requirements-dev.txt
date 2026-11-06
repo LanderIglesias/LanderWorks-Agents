@@ -4,4 +4,3 @@ pre-commit
 ruff
 black
 mypy
-langchain-ollama==0.2.2

@@ -224,7 +224,11 @@ machine, and that is the main limitation.
 ## Reproducing it
 
 Requires Ollama running locally with `qwen3:14b`, `llama3.2:3b` and `bge-m3`, an Anthropic API key,
-and the experiment's extra dependencies ([requirements.txt](requirements.txt)). From the repo root:
+and the experiment's extra dependencies ([requirements.txt](requirements.txt)). These need the
+langchain 1.x packages listed in Setup, which conflict with the pins in the repo's root
+`requirements.txt`, so use a separate virtualenv. The two Ollama tests in
+`tests/rag_pdf_agent/test_rag_engine.py` skip themselves without `langchain-ollama>=1.0`, as they do
+in CI. From the repo root:
 
 ```bash
 # 1. Run the 4 configurations (writes results_<stamp>.json and review_<stamp>.csv)

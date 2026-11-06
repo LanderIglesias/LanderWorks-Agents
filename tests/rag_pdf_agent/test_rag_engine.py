@@ -188,6 +188,8 @@ class TestRagEngine:
     def test_get_llm_elige_proveedor_por_variable_de_entorno(self, monkeypatch):
         """Por defecto Anthropic; con RAG_LLM_PROVIDER=ollama, ChatOllama; otro valor, error."""
         import pytest
+
+        pytest.importorskip("langchain_ollama", minversion="1.0")
         from langchain_ollama import ChatOllama
 
         import backend.agents.rag_pdf_agent.rag_engine as engine
@@ -241,6 +243,8 @@ class TestRagEngine:
     def test_get_embeddings_elige_proveedor_por_variable_de_entorno(self, monkeypatch):
         """Por defecto OpenAI; con RAG_EMBEDDINGS_PROVIDER=ollama, OllamaEmbeddings; otro valor, error."""
         import pytest
+
+        pytest.importorskip("langchain_ollama", minversion="1.0")
         from langchain_ollama import OllamaEmbeddings
 
         import backend.agents.rag_pdf_agent.rag_engine as engine
