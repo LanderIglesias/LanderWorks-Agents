@@ -20,6 +20,7 @@ jobs:
       OPENAI_API_KEY: test
       DATABASE_URL: postgresql://test:test@localhost/test
       MEETING_DATABASE_URL: postgresql://test:test@localhost/test
+      EXPENSE_TRACKER_DATABASE_URL: postgresql://test:test@localhost/test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
