@@ -17,12 +17,14 @@ from __future__ import annotations
 import ipaddress
 import re
 import socket
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import fitz  # PyMuPDF
 import httpx
 from bs4 import BeautifulSoup
 from docx import Document
+
+MAX_REDIRECTS = 3
 
 
 def extraer_texto_pdf(contenido: bytes) -> str:
@@ -70,8 +72,6 @@ def scrapeear_url(url: str) -> str:
     Funciona con: Infojobs, Indeed, webs de empresa, cualquier URL publica.
     No funciona con: LinkedIn (requiere login), portales con JS pesado.
     """
-    _validar_url_publica(url)
-
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -81,11 +81,18 @@ def scrapeear_url(url: str) -> str:
     }
 
     try:
-        # follow_redirects=True: el destino del redirect no se revalida contra
-        # redes internas; se limita max_redirects como mitigacion parcial (gap conocido).
-        response = httpx.get(
-            url, headers=headers, timeout=15, follow_redirects=True, max_redirects=3
-        )
+        # Redirecciones a mano: cada salto se revalida contra redes internas.
+        # ponytail: el DNS se resuelve dos veces (en la validacion y en httpx), asi que un
+        # DNS rebinding entre ambas sigue siendo posible; cerrarlo exige conectar a la IP
+        # ya validada con un transport propio.
+        for _ in range(MAX_REDIRECTS + 1):
+            _validar_url_publica(url)
+            response = httpx.get(url, headers=headers, timeout=15, follow_redirects=False)
+            if not response.is_redirect:
+                break
+            url = urljoin(str(response.url), response.headers["location"])
+        else:
+            raise ValueError("URL invalida: demasiadas redirecciones")
         response.raise_for_status()
     except httpx.HTTPError as e:
         raise ValueError(f"No se pudo acceder a la URL: {e}")  # noqa: B904

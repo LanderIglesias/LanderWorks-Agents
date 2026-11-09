@@ -163,7 +163,6 @@ Simulates a mechanic shop's diagnosis-to-invoice workflow with a supervisor/rout
 | Azure Container Registry (ACR) | Private Docker image registry |
 | Cloudflare R2 | S3-compatible persistent PDF storage |
 | Render | Production deployment for non-containerized agents |
-| GitHub Actions | CI/CD — auto-deploy on push |
 
 ### Dev & Quality
 | Tool | Used for |

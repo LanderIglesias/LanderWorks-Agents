@@ -1,6 +1,7 @@
 import io
 
 import fitz
+import httpx
 import pytest
 from docx import Document
 
@@ -138,3 +139,59 @@ def test_scrapeear_url_no_hace_peticion_si_la_url_es_interna(monkeypatch):
     monkeypatch.setattr(extractor.httpx, "get", falla_si_se_llama)
     with pytest.raises(ValueError):
         scrapeear_url("http://127.0.0.1:8000/admin")
+
+
+def _servidor_falso(monkeypatch, respuestas: dict) -> list[str]:
+    """Todo host resuelve a una IP publica salvo interno.example; responde por URL."""
+
+    def resolver(host, *_):
+        ip = "10.0.0.5" if host == "interno.example" else "93.184.216.34"
+        return [(2, 1, 6, "", (ip, 0))]
+
+    pedidas = []
+
+    def get(url, **kwargs):
+        assert kwargs.get("follow_redirects") is False
+        pedidas.append(url)
+        return respuestas[url]
+
+    monkeypatch.setattr(extractor.socket, "getaddrinfo", resolver)
+    monkeypatch.setattr(extractor.httpx, "get", get)
+    return pedidas
+
+
+def _redirect(origen: str, destino: str) -> httpx.Response:
+    return httpx.Response(302, headers={"location": destino}, request=httpx.Request("GET", origen))
+
+
+def _html(url: str, cuerpo: str) -> httpx.Response:
+    html = f"<html><body><article>{cuerpo}</article></body></html>"
+    return httpx.Response(200, text=html, request=httpx.Request("GET", url))
+
+
+def test_scrapeear_url_revalida_cada_redireccion(monkeypatch):
+    origen = "https://publico.example/oferta"
+    pedidas = _servidor_falso(
+        monkeypatch, {origen: _redirect(origen, "http://interno.example/admin")}
+    )
+    with pytest.raises(ValueError, match="red interna"):
+        scrapeear_url(origen)
+    assert pedidas == [origen]
+
+
+def test_scrapeear_url_sigue_redirecciones_publicas_relativas(monkeypatch):
+    _servidor_falso(
+        monkeypatch,
+        {
+            "https://publico.example/a": _redirect("https://publico.example/a", "/b"),
+            "https://publico.example/b": _html("https://publico.example/b", "Ingeniero Python"),
+        },
+    )
+    assert "Ingeniero Python" in scrapeear_url("https://publico.example/a")
+
+
+def test_scrapeear_url_corta_bucles_de_redireccion(monkeypatch):
+    url = "https://publico.example/a"
+    _servidor_falso(monkeypatch, {url: _redirect(url, "/a")})
+    with pytest.raises(ValueError, match="redirecciones"):
+        scrapeear_url(url)
