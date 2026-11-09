@@ -19,7 +19,7 @@ Conversational AI agent that handles patient inquiries on WhatsApp, collects str
 ---
 
 ### 2. AI Lead Capture SaaS Platform
-Multi-tenant SaaS platform that deploys custom AI agents on any website with a single `<script>` tag. Features streaming responses (SSE), LLM observability via Langfuse, and is deployed on both AWS EC2 and Azure App Service.
+Multi-tenant SaaS platform that deploys custom AI agents on any website with a single `<script>` tag. Features streaming responses (SSE), LLM observability via Langfuse, and runs on AWS EC2. It was also deployed on Azure App Service until the free credit ran out.
 
 **Tech:** Python · FastAPI · Claude Haiku · SQLite · Resend · Langfuse · Streaming SSE · AWS EC2 · Azure App Service  
 **[View project →](backend/agents/lead_capture_agent/)**
@@ -159,7 +159,7 @@ Simulates a mechanic shop's diagnosis-to-invoice workflow with a supervisor/rout
 | AWS EC2 | Cloud deployment — t3.micro (eu-west-1) |
 | AWS IAM | User management and access control |
 | AWS ECR | Container registry |
-| Azure App Service | PaaS deployment — Lead Capture Agent (B1, West Europe) |
+| Azure App Service | PaaS deployment — Lead Capture Agent (B1, West Europe); taken down when the free credit ran out |
 | Azure Container Registry (ACR) | Private Docker image registry |
 | Cloudflare R2 | S3-compatible persistent PDF storage |
 | Render | Production deployment for non-containerized agents |

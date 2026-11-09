@@ -1,9 +1,8 @@
 # AI Lead Capture SaaS Platform
 
-Multi-tenant SaaS platform that deploys AI-powered lead capture agents on any website with a single `<script>` tag. Features streaming responses (SSE), LLM observability via Langfuse, and is deployed on both AWS EC2 and Azure App Service.
+Multi-tenant SaaS platform that deploys AI-powered lead capture agents on any website with a single `<script>` tag. Features streaming responses (SSE), LLM observability via Langfuse, and runs on AWS EC2. It was also deployed on Azure App Service until the free credit ran out.
 
-**Portfolio:** [notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d](https://www.notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d)  
-**Live demo (Azure):** [lander-lead-capture.azurewebsites.net](https://lander-lead-capture.azurewebsites.net)
+**Portfolio:** [notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d](https://www.notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d)
 
 ---
 
@@ -101,7 +100,7 @@ The agent identifies when a visitor provides their email through natural convers
 
 **Deployed on two clouds**
 - **AWS EC2** — t3.micro, eu-west-1, IAM user, CLI configuration
-- **Azure App Service** — B1, West Europe, ACR, PaaS managed deployment
+- **Azure App Service** — B1, West Europe, ACR, PaaS managed deployment (taken down when the free credit ran out)
 
 ---
 
@@ -229,6 +228,8 @@ real, no contra mocks. Test de regresión:
 ## Deployment
 
 ### Azure App Service
+
+_No longer live: the app was taken down when the Azure free credit ran out. These are the steps that were used._
 
 ```bash
 # Login
