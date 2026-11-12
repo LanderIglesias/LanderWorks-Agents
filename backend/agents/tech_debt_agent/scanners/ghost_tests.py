@@ -9,18 +9,25 @@ from backend.agents.tech_debt_agent.tools import Cancelled
 
 logger = logging.getLogger(__name__)
 
-SOURCE_SUFFIXES = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"}
+SOURCE_SUFFIXES = {".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts"}
 MAX_BYTES = 1_000_000
 MAX_JS_BLOCK_LINES = 200
 # Sin ruta ni línea: el informe lo renderiza como "." sin ":línea".
 NO_TESTS_FILE = "."
 
 _PY_TEST = re.compile(r"(?:^|/)(?:test_[^/]*|[^/]*_test)\.py$")
-_JS_TEST = re.compile(r"\.(?:test|spec)\.[jt]sx?$")
+_JS_TEST = re.compile(r"\.(?:test|spec|cy)\.[cm]?[jt]sx?$")
+_JS_TEST_DIRS = {"__tests__", "test", "tests", "cypress", "e2e"}
+_NON_SOURCE_DIRS = {"scripts", "config", "docs", "migrations"}
+_NON_SOURCE_NAME = re.compile(
+    r"(?:^|/)(?:setup\.py|conftest\.py|__init__\.py|manage\.py)$|\.config\.[cm]?[jt]s$|\.d\.[cm]?ts$"
+)
+_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 _JS_START = re.compile(r"^\s*(?:it|test)(?:\.(?:only|concurrent|each|failing))*\s*[(`]")
 _JS_ASSERT = re.compile(r"\bexpect\s*[(.]|\bassert\w*\b|\.should\b")
 _STRING = re.compile(r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`")
 _MOCK_FACTORIES = {"Mock", "MagicMock", "AsyncMock", "NonCallableMock", "create_autospec", "patch"}
+_PYTEST_CHECKS = {"raises", "warns", "fail", "deprecated_call"}
 _MOCK_ASSERT_PREFIXES = (
     "assert_called",
     "assert_any_call",
@@ -85,8 +92,13 @@ def _call_name(node: ast.Call) -> str:
 
 
 def _mock_names(fn: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
-    names = {a.arg for a in fn.args.args if a.arg.startswith("mock")}
+    names: set[str] = set()
     for node in ast.walk(fn):
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+            if node.attr in {"return_value", "side_effect"} or node.attr.startswith(
+                _MOCK_ASSERT_PREFIXES
+            ):
+                names.add(node.value.id)
         if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
             if _call_name(node.value) in _MOCK_FACTORIES:
                 names |= {t.id for t in node.targets if isinstance(t, ast.Name)}
@@ -101,6 +113,8 @@ def _mock_names(fn: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
 def _classify_call(node: ast.Call) -> str | None:
     f = node.func
     if isinstance(f, ast.Name):
+        if f.id in _PYTEST_CHECKS:
+            return "real"
         return "real" if f.id.lower().startswith(("assert", "expect")) else None
     if not isinstance(f, ast.Attribute):
         return None
@@ -108,10 +122,7 @@ def _classify_call(node: ast.Call) -> str | None:
     if attr.startswith(_MOCK_ASSERT_PREFIXES):
         return "mock"
     recv = f.value
-    is_name = isinstance(recv, ast.Name)
-    if is_name and recv.id == "pytest" and attr in {"raises", "warns", "fail"}:
-        return "real"
-    if is_name and recv.id == "self" and attr == "fail":
+    if isinstance(recv, ast.Name) and attr in _PYTEST_CHECKS:
         return "real"
     return "real" if attr.startswith(("assert", "expect")) else None
 
@@ -150,10 +161,11 @@ def _scan_python(rel: str, text: str) -> list[Finding]:
         tree = ast.parse(text)
     except (SyntaxError, ValueError, RecursionError, MemoryError):
         return []
+    methods = {id(m) for c in ast.walk(tree) if isinstance(c, ast.ClassDef) for m in c.body}
     out: list[Finding] = []
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and node.name.startswith(
-            "test_"
+            "test" if id(node) in methods else "test_"
         ):
             kind = _verdict(node)
             if kind:
@@ -169,6 +181,7 @@ def _strip_js(line: str) -> str:
 def _scan_js(rel: str, text: str) -> list[Finding]:
     # ponytail: strings y comentarios de una línea se ignoran al contar delimitadores; un template
     # literal o un /* */ multilínea con llaves puede desajustar el bloque (tope de 200 líneas).
+    text = _BLOCK_COMMENT.sub(lambda m: "\n" * m.group().count("\n"), text)
     lines = [_strip_js(x) for x in text.splitlines()]
     out: list[Finding] = []
     for i, line in enumerate(lines):
@@ -192,6 +205,18 @@ def _scan_js(rel: str, text: str) -> list[Finding]:
     return out
 
 
+def _is_test(rel: str) -> bool:
+    if _PY_TEST.search(rel):
+        return True
+    if rel.endswith(".py"):
+        return False
+    return bool(_JS_TEST.search(rel)) or bool(_JS_TEST_DIRS & set(rel.split("/")[:-1]))
+
+
+def _is_source(rel: str) -> bool:
+    return not _NON_SOURCE_NAME.search(rel) and not (_NON_SOURCE_DIRS & set(rel.split("/")[:-1]))
+
+
 def scan_ghost_tests(
     repo_root: Path, files: list[Path], cancel: threading.Event
 ) -> list[FamilyResult]:
@@ -202,9 +227,9 @@ def scan_ghost_tests(
         rel = _relative(root, f)
         if rel is None or f.suffix not in SOURCE_SUFFIXES:
             continue
-        if _PY_TEST.search(rel) or _JS_TEST.search(rel):
+        if _is_test(rel):
             tests.append((rel, root / rel))
-        else:
+        elif _is_source(rel):
             has_source = True
     if not tests and not has_source:
         return [FamilyResult(Family.GHOST_TESTS, "not_analyzed", "sin código fuente")]

@@ -113,3 +113,54 @@ def test_cancelado(tmp_path):
     ev.set()
     with pytest.raises(Cancelled):
         _scan(tmp_path, ev)
+
+
+def test_raises_importado_y_alias(tmp_path):
+    _write(
+        tmp_path,
+        "test_r.py",
+        "import pytest as pt\nfrom pytest import raises, warns\n"
+        "def test_a():\n    with raises(ValueError):\n        int('x')\n"
+        "def test_b():\n    with pt.raises(ValueError):\n        int('x')\n"
+        "def test_c():\n    with warns(UserWarning):\n        pass\n",
+    )
+    assert _scan(tmp_path).findings == []
+
+
+def test_layouts_js_sin_critical(tmp_path):
+    _write(tmp_path, "main.py", "x = 1\n")
+    _write(tmp_path, "cypress/e2e/a.cy.ts", "it('a', () => {\n  cy.get('x');\n});\n")
+    r = _scan(tmp_path)
+    assert [(f.file, f.line_start) for f in r.findings] == [("cypress/e2e/a.cy.ts", 1)]
+    other = tmp_path / "o"
+    _write(other, "app.js", "x = 1\n")
+    _write(other, "__tests__/b.mjs", "test('b', () => { expect(1).toBe(1) })\n")
+    assert _scan(other).findings == []
+
+
+def test_solo_config_no_es_codigo(tmp_path):
+    _write(tmp_path, "vite.config.ts", "export default {}\n")
+    _write(tmp_path, "setup.py", "x = 1\n")
+    _write(tmp_path, "scripts/run.py", "x = 1\n")
+    _write(tmp_path, "types.d.ts", "declare const a: number\n")
+    r = _scan(tmp_path)
+    assert r.status == "not_analyzed" and r.reason == "sin código fuente"
+
+
+def test_fixtures_mocker_no_son_mock(tmp_path):
+    _write(
+        tmp_path,
+        "test_f.py",
+        "def test_a(mock_user):\n    assert mock_user.name == 'x'\n",
+    )
+    assert _scan(tmp_path).findings == []
+
+
+def test_unittest_testfoo(tmp_path):
+    _write(tmp_path, "test_u.py", "class T:\n    def testFoo(self):\n        pass\n")
+    assert [f.line_start for f in _scan(tmp_path).findings] == [2]
+
+
+def test_comentario_de_bloque_no_cuenta(tmp_path):
+    _write(tmp_path, "a.test.js", "it('a', () => {\n  /* expect(1) */\n  run();\n});\n")
+    assert [f.line_start for f in _scan(tmp_path).findings] == [1]
