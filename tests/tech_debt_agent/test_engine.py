@@ -4,6 +4,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -214,3 +215,31 @@ def test_emit_roto_no_aborta(tmp_path, monkeypatch, tmp_dirs):
 
     report, _ = engine.run_analysis(META, threading.Event(), broken, FakeClient())
     assert len(report["families"]) == 8
+
+
+def test_hallazgo_de_diseno_del_llm_va_a_familia_5(tmp_path, monkeypatch, tmp_dirs):
+    monkeypatch.setattr(engine, "clone_repo", _clone_from(_py_repo(tmp_path)))
+    _fast_scanners(monkeypatch)
+    design = _finding(Family.MONOLITH, Severity.MEDIUM, file="a.py", line=1)
+
+    def fake_review(*_a, **_kw):
+        return SimpleNamespace(
+            family_results=[
+                FamilyResult(Family.AI_TELLS, "ok", None, []),
+                FamilyResult(Family.MONOLITH, "ok", None, [design]),
+            ],
+            executive_summary=None,
+            cost_usd=0.01,
+        )
+
+    monkeypatch.setattr(engine, "review", fake_review)
+    report, _ = engine.run_analysis(META, threading.Event(), lambda _e: None, FakeClient())
+    fam5 = next(f for f in report["families"] if f["id"] == 5)
+    assert fam5["status"] == "ok" and [x["line_start"] for x in fam5["findings"]] == [1]
+
+
+def test_diseno_no_convierte_familia_5_en_ok():
+    llm = [FamilyResult(Family.MONOLITH, "ok", None, [_finding(Family.MONOLITH, Severity.LOW)])]
+    out = engine.attach_design([FamilyResult(Family.MONOLITH, "not_analyzed", "sin lizard")], llm)
+    assert out[0].status == "not_analyzed" and len(out[0].findings) == 1
+    assert "1 hallazgos de la revisión con IA" in out[0].reason

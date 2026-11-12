@@ -121,6 +121,26 @@ def merge_results(results: list[FamilyResult]) -> list[FamilyResult]:
     return merged
 
 
+def attach_design(
+    results: list[FamilyResult], llm_results: list[FamilyResult]
+) -> list[FamilyResult]:
+    """Hallazgos de diseño del LLM en la familia 5; el estado lo sigue fijando el escáner."""
+    extra = [f for r in llm_results if r.family == Family.MONOLITH for f in r.findings]
+    if not extra:
+        return results
+    out = []
+    for r in results:
+        if r.family != Family.MONOLITH:
+            out.append(r)
+            continue
+        reason = r.reason
+        if r.status != "ok":
+            note = f"{len(extra)} hallazgos de la revisión con IA"
+            reason = f"{reason}; {note}" if reason else note
+        out.append(FamilyResult(r.family, r.status, reason, _dedupe(r.findings + extra)))
+    return out
+
+
 def combine_ai_tells(static: FamilyResult | None, llm: FamilyResult | None) -> FamilyResult:
     """Estado del LLM; hallazgos de reglas automáticas + LLM. Semgrep solo nunca da un ok."""
     found = (static.findings if static else []) + (llm.findings if llm else [])
@@ -246,7 +266,7 @@ def _node_report(state: State, config) -> dict:
         meta.owner,
         meta.repo,
         meta.head_sha,
-        rest + [combine_ai_tells(static, llm)],
+        attach_design(rest, state["llm_results"]) + [combine_ai_tells(static, llm)],
         state["kloc"],
         state.get("summary"),
         len(state["files"]),
