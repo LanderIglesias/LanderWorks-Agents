@@ -1,5 +1,6 @@
 import json
 import logging
+import tempfile
 import threading
 from pathlib import Path
 
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 OSV_SCANNER_VERSION = "2.7.1"
 TIMEOUT_SECONDS = 180
 DEFAULT_SCORE = 5.0
+NO_PACKAGES_EXIT = 128
 
 
 def _not_analyzed(reason: str) -> list[FamilyResult]:
@@ -50,27 +52,56 @@ def _line_of(manifest: Path, name: str) -> int | None:
 
 
 def scan_deps(repo_root: Path, files: list[Path], cancel: threading.Event) -> list[FamilyResult]:
+    # osv-scanner consulta osv.dev: sin red falla y la familia queda not_analyzed.
+    with tempfile.TemporaryDirectory() as tmp:
+        config = Path(tmp) / "osv-scanner.toml"
+        config.write_text("", encoding="utf-8")
+        try:
+            out = run_tool(
+                [
+                    "osv-scanner",
+                    "scan",
+                    "source",
+                    "--format",
+                    "json",
+                    # Config propia: un osv-scanner.toml del repo analizado no puede ignorar CVEs.
+                    "--config",
+                    str(config),
+                    "-r",
+                    str(repo_root),
+                ],
+                cwd=repo_root,
+                timeout=TIMEOUT_SECONDS,
+                cancel=cancel,
+                ok_codes={0, 1, NO_PACKAGES_EXIT},
+            )
+        except ToolUnavailable:
+            return _not_analyzed("Escáner de dependencias no disponible")
+        except ToolTimeout:
+            return _not_analyzed("El escáner de dependencias agotó el tiempo")
+        except RuntimeError:
+            logger.exception("osv-scanner falló")
+            return _not_analyzed("El escáner de dependencias falló")
+    if not out.strip():
+        return [FamilyResult(Family.CVE, "ok", "sin manifiestos de dependencias", [])]
     try:
-        out = run_tool(
-            ["osv-scanner", "scan", "source", "--format", "json", "-r", str(repo_root)],
-            cwd=repo_root,
-            timeout=TIMEOUT_SECONDS,
-            cancel=cancel,
-            ok_codes={0, 1},
-        )
-        data = json.loads(out) if out.strip() else {}
-    except ToolUnavailable:
-        return _not_analyzed("Escáner de dependencias no disponible")
-    except ToolTimeout:
-        return _not_analyzed("El escáner de dependencias agotó el tiempo")
-    except (RuntimeError, ValueError):
-        logger.exception("osv-scanner falló")
+        findings = _parse(repo_root, json.loads(out))
+    except (ValueError, TypeError, AttributeError):
+        logger.exception("salida de osv-scanner inesperada")
         return _not_analyzed("El escáner de dependencias falló")
+    return [FamilyResult(Family.CVE, "ok", None, findings)]
 
+
+def _parse(repo_root: Path, data: object) -> list[Finding]:
+    if not isinstance(data, dict):
+        raise ValueError("forma inesperada")
     root = repo_root.resolve()
     findings: list[Finding] = []
     for result in data.get("results") or []:
-        manifest = Path(result.get("source", {}).get("path", "")).resolve()
+        src = result["source"]["path"]
+        if not src:
+            continue
+        manifest = Path(src).resolve()
         if not manifest.is_relative_to(root):
             continue
         rel = manifest.relative_to(root).as_posix()
@@ -78,7 +109,7 @@ def scan_deps(repo_root: Path, files: list[Path], cancel: threading.Event) -> li
             groups = pkg.get("groups") or []
             if not groups:
                 continue
-            info = pkg.get("package", {})
+            info = pkg["package"]
             name, version = info.get("name", "?"), info.get("version", "?")
             score = max(_score(g) for g in groups)
             ids = sorted({a for g in groups for a in g.get("aliases", []) if a.startswith("CVE-")})
@@ -97,4 +128,4 @@ def scan_deps(repo_root: Path, files: list[Path], cancel: threading.Event) -> li
                     source="osv-scanner",
                 )
             )
-    return [FamilyResult(Family.CVE, "ok", None, findings)]
+    return findings

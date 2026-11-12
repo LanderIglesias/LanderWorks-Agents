@@ -18,29 +18,62 @@ def _not_analyzed(reason: str) -> list[FamilyResult]:
     return [FamilyResult(Family.SECRETS, "not_analyzed", reason)]
 
 
-def scan_secrets(repo_root: Path, files: list[Path], cancel: threading.Event) -> list[FamilyResult]:
-    with tempfile.TemporaryDirectory() as tmp:
-        report = Path(tmp) / "gitleaks.json"
+def _leaks(repo_root: Path, tmp: Path, name: str, extra: list[str], cancel) -> list[dict]:
+    report = tmp / f"{name}.json"
+    run_tool(
+        [
+            "gitleaks",
+            "detect",
+            "--source",
+            str(repo_root),
+            "--report-format",
+            "json",
+            "--report-path",
+            str(report),
+            "--redact",
+            "--no-banner",
+            "--exit-code",
+            "2",
+            # Config e ignore propios: un .gitleaks.toml o .gitleaksignore del repo analizado no puede silenciar hallazgos.
+            "--config",
+            str(tmp / "gitleaks.toml"),
+            "--gitleaks-ignore-path",
+            str(tmp / "sin-ignore"),
+            "--ignore-gitleaks-allow",
+            *extra,
+        ],
+        cwd=repo_root,
+        timeout=TIMEOUT_SECONDS,
+        cancel=cancel,
+        ok_codes={0, 2},
+    )
+    leaks = json.loads(report.read_text(encoding="utf-8"))
+    if not isinstance(leaks, list) or not all(isinstance(x, dict) for x in leaks):
+        raise ValueError("informe de gitleaks inesperado")
+    return leaks
+
+
+def _key(leak: dict, root: Path) -> tuple[str, str]:
+    path = Path(str(leak.get("File", "")))
+    if path.is_absolute():
+        # Con --no-git gitleaks informa rutas absolutas.
         try:
-            run_tool(
-                [
-                    "gitleaks",
-                    "detect",
-                    "--source",
-                    str(repo_root),
-                    "--report-format",
-                    "json",
-                    "--report-path",
-                    str(report),
-                    "--redact",
-                    "--no-banner",
-                ],
-                cwd=repo_root,
-                timeout=TIMEOUT_SECONDS,
-                cancel=cancel,
-                ok_codes={0, 1},
-            )
-            leaks = json.loads(report.read_text(encoding="utf-8")) if report.exists() else []
+            path = path.resolve().relative_to(root.resolve())
+        except ValueError:
+            pass
+    return path.as_posix(), str(leak.get("RuleID", ""))
+
+
+def scan_secrets(repo_root: Path, files: list[Path], cancel: threading.Event) -> list[FamilyResult]:
+    with tempfile.TemporaryDirectory() as tmp_name:
+        tmp = Path(tmp_name)
+        (tmp / "gitleaks.toml").write_text("[extend]\nuseDefault = true\n", encoding="utf-8")
+        (tmp / "sin-ignore").mkdir()
+        try:
+            leaks = _leaks(repo_root, tmp, "history", [], cancel)
+            current = {
+                _key(x, repo_root) for x in _leaks(repo_root, tmp, "tree", ["--no-git"], cancel)
+            }
         except ToolUnavailable:
             return _not_analyzed("Escáner de secretos no disponible")
         except ToolTimeout:
@@ -53,18 +86,15 @@ def scan_secrets(repo_root: Path, files: list[Path], cancel: threading.Event) ->
     seen: set[tuple[str, int, str]] = set()
     for leak in leaks:
         # Solo se leen campos no sensibles; Secret y Match nunca se copian.
-        rel = str(leak.get("File", "")).replace("\\", "/")
+        rel, rule = _key(leak, repo_root)
         line = leak.get("StartLine")
-        rule = str(leak.get("RuleID", ""))
-        if not rel or (rel, line, rule) in seen:
+        if rel in ("", ".") or (rel, line, rule) in seen:
             continue
         seen.add((rel, line, rule))
-        in_head = (repo_root / rel).is_file()
-        why = (
-            "Hay una credencial en el historial de git."
-            if in_head
-            else "La credencial ya no está en el código actual pero sigue en el historial de git."
-        )
+        if (rel, rule) in current:
+            why = "Hay una credencial en el código actual del repo. Cualquiera con acceso puede leerla: rótala."
+        else:
+            why = "La credencial ya no está en el código actual, solo en el historial de git; sigue expuesta, rótala."
         findings.append(
             Finding(
                 family=Family.SECRETS,
@@ -73,7 +103,7 @@ def scan_secrets(repo_root: Path, files: list[Path], cancel: threading.Event) ->
                 line_start=line,
                 line_end=leak.get("EndLine", line),
                 title=f"Secreto expuesto ({rule})",
-                why=f"{why} Cualquiera con acceso al repo puede leerla: hay que rotar la clave.",
+                why=why,
                 fix="Rota la clave en el proveedor, muévela a una variable de entorno y purga el historial si el repo es público.",
                 source="gitleaks",
             )
