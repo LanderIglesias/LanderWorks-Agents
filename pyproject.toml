@@ -5,6 +5,7 @@ target-version = ["py312"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+extend-exclude = ["tests/tech_debt_agent/fixtures"]
 exclude = [
   ".venv",
   "backend/agents/dental_agent/data", "backend/agents/scaffold_web_agent/data",
