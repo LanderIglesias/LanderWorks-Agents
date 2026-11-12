@@ -18,8 +18,10 @@ repos:
 
   - repo: local
     hooks:
+      # Solo los tests afectados por lo staged (la suite completa tarda ~25 min);
+      # la CI ejecuta la suite entera en cada PR.
       - id: pytest
-        name: pytest
-        entry: pytest
+        name: pytest (tests afectados)
+        entry: python scripts/pytest_changed.py
         language: system
-        pass_filenames: false
+        pass_filenames: true
