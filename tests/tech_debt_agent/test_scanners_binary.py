@@ -110,3 +110,28 @@ def test_osv_sin_manifiestos_es_ok(tmp_path):
     [res] = deps.scan_deps(tmp_path, [], threading.Event())
     assert res.status == "ok" and res.findings == []
     assert res.reason == "sin manifiestos de dependencias"
+
+
+@pytest.mark.parametrize(
+    "out",
+    [
+        '{"results": [{}]}',
+        '{"results": [{"source": {}}]}',
+        '{"results": [{"source": {"path": "x"}, "packages": [{"groups": [{}]}]}]}',
+        '{"results": [{"source": {"path": "x"}, "packages": [{"package": {}, "groups": [{"ids": []}]}]}]}',
+        '{"results": [{"source": {"path": "x"}, "packages": [1]}]}',
+    ],
+)
+def test_osv_formas_incompletas_son_not_analyzed(monkeypatch, tmp_path, out):
+    (tmp_path / "x").write_text("", encoding="utf-8")
+    out = out.replace('"path": "x"', '"path": ' + json.dumps(str(tmp_path / "x")))
+    monkeypatch.setattr(deps, "run_tool", lambda *a, **k: out)
+    [res] = deps.scan_deps(tmp_path, [], threading.Event())
+    assert res.status == "not_analyzed"
+
+
+def test_osv_salida_vacia_con_manifiesto_es_not_analyzed(monkeypatch, tmp_path):
+    (tmp_path / "package-lock.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(deps, "run_tool", lambda *a, **k: "")
+    [res] = deps.scan_deps(tmp_path, [], threading.Event())
+    assert res.status == "not_analyzed"

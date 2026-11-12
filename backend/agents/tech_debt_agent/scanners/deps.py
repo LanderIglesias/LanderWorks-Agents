@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import tempfile
 import threading
 from pathlib import Path
@@ -14,6 +15,18 @@ OSV_SCANNER_VERSION = "2.7.1"
 TIMEOUT_SECONDS = 180
 DEFAULT_SCORE = 5.0
 NO_PACKAGES_EXIT = 128
+# ponytail: lista parcial de manifiestos (Python/JS); si falta uno, un 128 se reporta como fallo (lado seguro).
+MANIFESTS = {
+    "package-lock.json",
+    "package.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "poetry.lock",
+    "Pipfile.lock",
+    "pyproject.toml",
+    "uv.lock",
+    "pdm.lock",
+}
 
 
 def _not_analyzed(reason: str) -> list[FamilyResult]:
@@ -51,6 +64,14 @@ def _line_of(manifest: Path, name: str) -> int | None:
     return None
 
 
+def _has_manifest(repo_root: Path) -> bool:
+    for _dir, dirs, names in os.walk(repo_root):
+        dirs[:] = [d for d in dirs if d not in (".git", "node_modules")]
+        if any(n in MANIFESTS or n.startswith("requirements") for n in names):
+            return True
+    return False
+
+
 def scan_deps(repo_root: Path, files: list[Path], cancel: threading.Event) -> list[FamilyResult]:
     # osv-scanner consulta osv.dev: sin red falla y la familia queda not_analyzed.
     with tempfile.TemporaryDirectory() as tmp:
@@ -83,10 +104,14 @@ def scan_deps(repo_root: Path, files: list[Path], cancel: threading.Event) -> li
             logger.exception("osv-scanner falló")
             return _not_analyzed("El escáner de dependencias falló")
     if not out.strip():
+        # 128 = "No package sources found"; run_tool no devuelve stderr, así que se confirma buscando manifiestos conocidos.
+        if _has_manifest(repo_root):
+            logger.error("osv-scanner sin salida pese a haber manifiestos")
+            return _not_analyzed("El escáner de dependencias falló")
         return [FamilyResult(Family.CVE, "ok", "sin manifiestos de dependencias", [])]
     try:
         findings = _parse(repo_root, json.loads(out))
-    except (ValueError, TypeError, AttributeError):
+    except (ValueError, TypeError, AttributeError, KeyError, IndexError):
         logger.exception("salida de osv-scanner inesperada")
         return _not_analyzed("El escáner de dependencias falló")
     return [FamilyResult(Family.CVE, "ok", None, findings)]
