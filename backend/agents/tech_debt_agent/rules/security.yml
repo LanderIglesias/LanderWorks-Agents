@@ -24,6 +24,8 @@ rules:
           - pattern: eval($X)
           - pattern: new Function(...)
       - pattern-not: eval("...")
+      - pattern-not: new Function("...")
+      - pattern-not: new Function("...", "...")
     metadata:
       family: 2
       critical: true
@@ -34,16 +36,44 @@ rules:
     languages: [python]
     severity: ERROR
     message: "Consulta SQL construida con f-string, concatenación o formato"
-    pattern-either:
-      - pattern: $X.execute(f"...{$Y}...")
-      - pattern: $X.execute("..." + $Y)
-      - pattern: $X.execute("..." % $Y)
-      - pattern: $X.execute("...".format(...))
+    patterns:
+      - pattern-either:
+          - pattern: $X.$M(f"...{$Y}...", ...)
+          - pattern: $X.$M("..." + $Y, ...)
+          - pattern: $X.$M("..." + $Y + "...", ...)
+          - pattern: $X.$M("..." % $Y, ...)
+          - pattern: $X.$M("...".format(..., $Y, ...), ...)
+      - metavariable-regex:
+          metavariable: $M
+          regex: ^(execute|executemany|executescript|exec_driver_sql)$
+      - metavariable-regex:
+          metavariable: $Y
+          regex: '^(?![A-Z][A-Z0-9_]*$)(?!\w*placeholders?\w*$)(?!.*join\(\s*\[?\s*["''](\?|%s)["'']).*'
     metadata:
       family: 2
       critical: true
       why: "Interpolar datos en la consulta permite inyección SQL: quien controle el valor controla la base de datos."
       fix: "Usa parámetros: conn.execute('SELECT ... WHERE name = ?', (name,))."
+
+  - id: sql-text-por-string
+    languages: [python]
+    severity: ERROR
+    message: "text() de SQLAlchemy construido con f-string, concatenación o formato"
+    patterns:
+      - pattern-either:
+          - pattern: text(f"...{$Y}...")
+          - pattern: text("..." + $Y)
+          - pattern: text("..." + $Y + "...")
+          - pattern: text("..." % $Y)
+          - pattern: text("...".format(..., $Y, ...))
+      - metavariable-regex:
+          metavariable: $Y
+          regex: '^(?![A-Z][A-Z0-9_]*$)(?!\w*placeholders?\w*$)(?!.*join\(\s*\[?\s*["''](\?|%s)["'']).*'
+    metadata:
+      family: 2
+      critical: true
+      why: "Interpolar datos en text() permite inyección SQL igual que en execute."
+      fix: "Usa parámetros con nombre: text('... WHERE name = :name') y pásalos al ejecutar."
 
   - id: pickle-load
     languages: [python]
@@ -62,11 +92,17 @@ rules:
     severity: ERROR
     message: "yaml.load sin SafeLoader"
     patterns:
-      - pattern: yaml.load(...)
+      - pattern-either:
+          - pattern: yaml.load(...)
+          - pattern: yaml.unsafe_load(...)
       - pattern-not: yaml.load(..., Loader=yaml.SafeLoader)
       - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader)
+      - pattern-not: yaml.load(..., Loader=SafeLoader)
+      - pattern-not: yaml.load(..., Loader=CSafeLoader)
       - pattern-not: yaml.load($X, yaml.SafeLoader)
       - pattern-not: yaml.load($X, yaml.CSafeLoader)
+      - pattern-not: yaml.load($X, SafeLoader)
+      - pattern-not: yaml.load($X, CSafeLoader)
     metadata:
       family: 2
       why: "yaml.load con el loader por defecto puede instanciar objetos arbitrarios y ejecutar código."
@@ -75,54 +111,127 @@ rules:
   - id: subprocess-shell-variable
     languages: [python]
     severity: ERROR
-    message: "subprocess con shell=True y comando no literal"
+    message: "Comando de shell no literal"
     patterns:
-      - pattern: subprocess.$F($CMD, ..., shell=True, ...)
-      - pattern-not: subprocess.$F("...", ..., shell=True, ...)
-      - metavariable-regex:
-          metavariable: $F
-          regex: ^(run|call|Popen|check_call|check_output)$
+      - pattern-either:
+          - pattern: subprocess.run($CMD, ..., shell=True, ...)
+          - pattern: subprocess.call($CMD, ..., shell=True, ...)
+          - pattern: subprocess.Popen($CMD, ..., shell=True, ...)
+          - pattern: subprocess.check_call($CMD, ..., shell=True, ...)
+          - pattern: subprocess.check_output($CMD, ..., shell=True, ...)
+          - pattern: os.system($CMD)
+          - pattern: os.popen($CMD, ...)
+          - pattern: asyncio.create_subprocess_shell($CMD, ...)
+      - pattern-not: subprocess.run("...", ..., shell=True, ...)
+      - pattern-not: subprocess.call("...", ..., shell=True, ...)
+      - pattern-not: subprocess.Popen("...", ..., shell=True, ...)
+      - pattern-not: subprocess.check_call("...", ..., shell=True, ...)
+      - pattern-not: subprocess.check_output("...", ..., shell=True, ...)
+      - pattern-not: os.system("...")
+      - pattern-not: os.popen("...", ...)
+      - pattern-not: asyncio.create_subprocess_shell("...", ...)
     metadata:
       family: 2
       critical: true
-      why: "Con shell=True el comando pasa por la shell; si incluye datos externos permite inyección de comandos."
+      why: "El comando pasa por la shell; si incluye datos externos permite inyección de comandos."
       fix: "Pasa una lista de argumentos y shell=False: subprocess.run([prog, arg])."
 
   - id: subprocess-shell-literal
     languages: [python]
     severity: WARNING
-    message: "subprocess con shell=True"
-    patterns:
-      - pattern: subprocess.$F("...", ..., shell=True, ...)
-      - metavariable-regex:
-          metavariable: $F
-          regex: ^(run|call|Popen|check_call|check_output)$
+    message: "Comando de shell literal"
+    pattern-either:
+      - pattern: subprocess.run("...", ..., shell=True, ...)
+      - pattern: subprocess.call("...", ..., shell=True, ...)
+      - pattern: subprocess.Popen("...", ..., shell=True, ...)
+      - pattern: subprocess.check_call("...", ..., shell=True, ...)
+      - pattern: subprocess.check_output("...", ..., shell=True, ...)
+      - pattern: os.system("...")
     metadata:
       family: 2
-      why: "shell=True es frágil y se convierte en inyección en cuanto el comando deja de ser constante."
+      why: "La shell es frágil y se convierte en inyección en cuanto el comando deja de ser constante."
       fix: "Pasa una lista de argumentos y shell=False."
 
   - id: cors-fastapi-abierto
     languages: [python]
-    severity: ERROR
+    severity: WARNING
     message: "CORS abierto a cualquier origen"
-    pattern-either:
-      - pattern: $APP.add_middleware(CORSMiddleware, ..., allow_origins=["*"], ...)
-      - pattern: CORSMiddleware(..., allow_origins=["*"], ...)
+    patterns:
+      - pattern-either:
+          - pattern: $APP.add_middleware(CORSMiddleware, ..., allow_origins=["*"], ...)
+          - pattern: $APP.add_middleware(CORSMiddleware, ..., allow_origin_regex=".*", ...)
+          - pattern: CORSMiddleware(..., allow_origins=["*"], ...)
+      - pattern-not: $APP.add_middleware(CORSMiddleware, ..., allow_credentials=True, ...)
+      - pattern-not: CORSMiddleware(..., allow_credentials=True, ...)
     metadata:
       family: 2
-      why: "allow_origins=['*'] deja que cualquier web llame a tu API desde el navegador del usuario."
+      why: "Permitir cualquier origen deja que cualquier web llame a tu API desde el navegador del usuario."
       fix: "Lista solo los orígenes de tu frontend en allow_origins."
+
+  - id: cors-fastapi-credenciales
+    languages: [python]
+    severity: ERROR
+    message: "CORS abierto a cualquier origen con credenciales"
+    pattern-either:
+      - pattern: $APP.add_middleware(CORSMiddleware, ..., allow_origins=["*"], ..., allow_credentials=True, ...)
+      - pattern: $APP.add_middleware(CORSMiddleware, ..., allow_origin_regex=".*", ..., allow_credentials=True, ...)
+    metadata:
+      family: 2
+      why: "Cualquier web puede hacer peticiones con las cookies y credenciales del usuario a tu API."
+      fix: "Lista solo los orígenes de tu frontend; con credenciales nunca uses comodín."
+
+  - id: cors-flask-abierto
+    languages: [python]
+    severity: WARNING
+    message: "CORS abierto a cualquier origen"
+    patterns:
+      - pattern-either:
+          - pattern: CORS($APP)
+          - pattern: CORS($APP, ..., origins="*", ...)
+      - pattern-not: CORS($APP, ..., supports_credentials=True, ...)
+    metadata:
+      family: 2
+      why: "Sin lista de orígenes, flask-cors acepta cualquier web."
+      fix: "Pasa origins con los dominios de tu frontend."
+
+  - id: cors-flask-credenciales
+    languages: [python]
+    severity: ERROR
+    message: "CORS abierto a cualquier origen con credenciales"
+    patterns:
+      - pattern: CORS($APP, ..., supports_credentials=True, ...)
+      - pattern-not: 'CORS($APP, ..., origins=[...], ...)'
+    metadata:
+      family: 2
+      why: "Cualquier web puede hacer peticiones con las cookies y credenciales del usuario a tu API."
+      fix: "Pasa origins con los dominios de tu frontend."
 
   - id: cors-express-abierto
     languages: [javascript, typescript]
-    severity: ERROR
+    severity: WARNING
     message: "CORS abierto a cualquier origen"
-    pattern: 'cors({..., origin: "*", ...})'
+    patterns:
+      - pattern-either:
+          - pattern: cors()
+          - pattern: 'cors({..., origin: "*", ...})'
+          - pattern: 'cors({..., origin: true, ...})'
+      - pattern-not: 'cors({..., credentials: true, ...})'
     metadata:
       family: 2
-      why: "origin: '*' deja que cualquier web llame a tu API desde el navegador del usuario."
+      why: "Permitir cualquier origen deja que cualquier web llame a tu API desde el navegador del usuario."
       fix: "Indica solo los orígenes de tu frontend en la opción origin."
+
+  - id: cors-express-credenciales
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "CORS abierto a cualquier origen con credenciales"
+    pattern-either:
+      - pattern: 'cors({..., origin: "*", ..., credentials: true, ...})'
+      - pattern: 'cors({..., origin: true, ..., credentials: true, ...})'
+    metadata:
+      family: 2
+      why: "Cualquier web puede hacer peticiones con las cookies y credenciales del usuario a tu API."
+      fix: "Indica solo los orígenes de tu frontend; con credenciales nunca uses comodín."
 
   - id: react-dangerously-set-inner-html
     languages: [javascript, typescript]
@@ -131,6 +240,9 @@ rules:
     patterns:
       - pattern: '<$EL ... dangerouslySetInnerHTML={{__html: $X}} ... />'
       - pattern-not: '<$EL ... dangerouslySetInnerHTML={{__html: "..."}} ... />'
+      - pattern-not: '<$EL ... dangerouslySetInnerHTML={{__html: sanitize(...)}} ... />'
+      - pattern-not: '<$EL ... dangerouslySetInnerHTML={{__html: $S.sanitize(...)}} ... />'
+      - pattern-not: '<$EL ... dangerouslySetInnerHTML={{__html: JSON.stringify(...)}} ... />'
     metadata:
       family: 2
       critical: true
@@ -144,6 +256,8 @@ rules:
     patterns:
       - pattern: $E.innerHTML = $X
       - pattern-not: $E.innerHTML = "..."
+      - pattern-not: $E.innerHTML = $S.sanitize(...)
+      - pattern-not: $E.innerHTML = sanitize(...)
     metadata:
       family: 2
       why: "Asignar HTML sin sanear abre XSS."

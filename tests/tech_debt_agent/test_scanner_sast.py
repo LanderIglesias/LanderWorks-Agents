@@ -1,3 +1,4 @@
+import json
 import shutil
 import threading
 
@@ -73,3 +74,85 @@ def _write(args, content):
 
     Path(args[0][args[0].index("--output") + 1]).write_text(content, encoding="utf-8")
     return ""
+
+
+def _fake_report(monkeypatch, payload: dict):
+    monkeypatch.setattr(sast, "run_tool", lambda *a, **k: _write(a, json.dumps(payload)) or "")
+
+
+def _item(**extra):
+    base = {
+        "path": "app/a.py",
+        "start": {"line": 1},
+        "end": {"line": 1},
+        "extra": {
+            "severity": "ERROR",
+            "message": "m",
+            "metadata": {"family": 2, "why": "w", "fix": "f"},
+        },
+    }
+    base["extra"].update(extra)
+    return base
+
+
+def test_errores_de_semgrep_dan_analisis_parcial(monkeypatch, tmp_path):
+    payload = {
+        "results": [_item()],
+        "errors": [{"level": "warn", "path": "app/rota.py", "message": "Syntax error"}],
+        "paths": {"scanned": ["app/a.py", "app/rota.py"]},
+    }
+    _fake_report(monkeypatch, payload)
+    results = sast.scan_sast(tmp_path, [], threading.Event())
+    assert all(r.status == "ok" and "análisis parcial: 1 archivos" in r.reason for r in results)
+    assert len(results[0].findings) == 1
+
+
+def test_todos_los_archivos_fallidos_da_not_analyzed(monkeypatch, tmp_path):
+    payload = {
+        "results": [],
+        "errors": [{"level": "error", "path": "app/rota.py", "message": "timeout"}],
+        "paths": {"scanned": ["app/rota.py"]},
+    }
+    _fake_report(monkeypatch, payload)
+    assert all(r.status == "not_analyzed" for r in sast.scan_sast(tmp_path, [], threading.Event()))
+
+
+def test_item_malformado_se_descarta_y_severidad_desconocida_es_low(monkeypatch, tmp_path):
+    payload = {"results": [{"path": 1}, _item(severity="EXPERIMENTAL")]}
+    _fake_report(monkeypatch, payload)
+    results = sast.scan_sast(tmp_path, [], threading.Event())
+    [finding] = results[0].findings
+    assert finding.severity == "low" and results[0].status == "ok"
+
+
+@pytest.mark.skipif(shutil.which("semgrep") is None, reason="semgrep no instalado")
+def test_tests_y_min_js_se_analizan(vibe_repo):
+    (vibe_repo / "tests").mkdir(exist_ok=True)
+    py_code = "def f(x):\n    return eval(x)\n"
+    (vibe_repo / "tests" / "test_x.py").write_text(py_code, encoding="utf-8")
+    js_code = "function f(x){return eval(x)}\n"
+    (vibe_repo / "web" / "a.min.js").write_text(js_code, encoding="utf-8")
+    results = {r.family: r for r in sast.scan_sast(vibe_repo, [], threading.Event())}
+    files = {f.file for f in results[Family.SAST].findings}
+    assert {"tests/test_x.py", "web/a.min.js"} <= files
+
+
+@pytest.mark.skipif(shutil.which("semgrep") is None, reason="semgrep no instalado")
+def test_reglas_pasan_sus_tests_anotados():
+    import subprocess
+
+    proc = subprocess.run(
+        [
+            "semgrep",
+            "--test",
+            "--config",
+            str(sast.RULES_DIR),
+            str(sast.RULES_DIR.parent / "rule_tests"),
+            "--metrics=off",
+            "--disable-version-check",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=300,
+    )
+    assert proc.returncode == 0, proc.stdout[-2000:] + proc.stderr[-2000:]

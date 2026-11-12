@@ -14,7 +14,7 @@ rules:
     severity: INFO
     message: "print() de depuración"
     paths:
-      exclude: ["test_*.py", "*_test.py", "conftest.py"]
+      exclude: ["tests", "scripts", "__tests__", "test_*.py", "*_test.py", "conftest.py"]
     patterns:
       - pattern: print(...)
       - pattern-not-inside: |
@@ -30,7 +30,7 @@ rules:
     severity: INFO
     message: "console.log/debug de depuración"
     paths:
-      exclude: ["*.test.*", "*.spec.*"]
+      exclude: ["tests", "scripts", "__tests__", "*.test.*", "*.spec.*"]
     pattern-either:
       - pattern: console.log(...)
       - pattern: console.debug(...)
@@ -43,7 +43,7 @@ rules:
     languages: [javascript, typescript]
     severity: WARNING
     message: "Sentencia debugger olvidada"
-    pattern-regex: '\bdebugger\s*;'
+    pattern-regex: '(?m)^[ \t]*debugger\b'
     metadata:
       family: 6
       why: "Una sentencia debugger detiene la ejecución cuando hay DevTools abiertas."

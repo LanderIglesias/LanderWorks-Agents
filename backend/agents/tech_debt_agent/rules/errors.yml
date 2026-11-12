@@ -29,6 +29,16 @@ rules:
       why: "El error desaparece sin rastro: el fallo se esconde y es muy difícil de diagnosticar."
       fix: "Registra el error (console.error o tu logger) o gestiónalo de forma explícita."
 
+  - id: promise-catch-vacio
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: ".catch() con callback vacío"
+    pattern-regex: '\.catch\(\s*(async\s*)?((\(\s*\w*\s*\)|\w+)\s*=>|function\s*\w*\s*\(\s*\w*\s*\))\s*\{\s*\}\s*\)'
+    metadata:
+      family: 4
+      why: "La promesa rechazada se descarta sin rastro: el fallo se esconde y es muy difícil de diagnosticar."
+      fix: "Registra el error en el callback de catch o propágalo."
+
   - id: error-expuesto-en-respuesta
     languages: [python]
     severity: ERROR
@@ -37,7 +47,17 @@ rules:
       - pattern-either:
           - pattern: 'return {..., $K: str($E), ...}'
           - pattern: 'return {..., $K: repr($E), ...}'
-          - pattern: raise HTTPException(..., detail=str($E), ...)
+          - pattern: 'return {..., $K: f"...{$E}...", ...}'
+          - pattern: 'return {..., $K: str($E), ...}, $CODE'
+          - pattern: 'return {..., $K: f"...{$E}...", ...}, $CODE'
+          - pattern: HTTPException(..., detail=str($E), ...)
+          - pattern: HTTPException(..., detail=f"...{$E}...", ...)
+          - pattern: 'jsonify({..., $K: str($E), ...})'
+          - pattern: jsonify(..., error=str($E), ...)
+          - pattern: jsonify(..., message=str($E), ...)
+          - pattern: jsonify(..., detail=str($E), ...)
+          - pattern: 'JSONResponse(..., content={..., $K: str($E), ...}, ...)'
+          - pattern: 'JSONResponse(..., content={..., $K: f"...{$E}...", ...}, ...)'
       - pattern-inside: |
           try:
               ...
@@ -85,3 +105,33 @@ rules:
       family: 4
       why: "El stack revela rutas y estructura interna del servidor."
       fix: "Registra el stack en el servidor y responde con un mensaje genérico."
+
+  - id: express-error-expuesto
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Mensaje de error devuelto al cliente"
+    patterns:
+      - pattern-either:
+          - pattern: $RES.send($E.message)
+          - pattern: $RES.send($E)
+          - pattern: $RES.status(...).send($E.message)
+          - pattern: $RES.status(...).send($E)
+          - pattern: '$RES.json({..., $K: $E.message, ...})'
+          - pattern: '$RES.status(...).json({..., $K: $E.message, ...})'
+          - pattern: '$RES.json({..., $K: $E, ...})'
+          - pattern: '$RES.status(...).json({..., $K: $E, ...})'
+      - pattern-either:
+          - pattern-inside: |
+              try { ... } catch ($E) { ... }
+          - pattern-inside: |
+              try { ... } catch ($E: $T) { ... }
+          - pattern-inside: |
+              ($E, $REQ, $RES2, $NEXT) => { ... }
+          - pattern-inside: |
+              function ($E, $REQ, $RES2, $NEXT) { ... }
+          - pattern-inside: |
+              $P.catch(($E) => { ... })
+    metadata:
+      family: 4
+      why: "El mensaje del error filtra detalles internos (consultas, rutas, versiones) a quien llame a la API."
+      fix: "Registra el error en el servidor y responde con un mensaje genérico."

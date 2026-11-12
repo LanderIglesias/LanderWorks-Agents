@@ -32,7 +32,7 @@ def _finding(item: dict) -> Finding | None:
     if meta.get("critical") is True:
         severity = Severity.CRITICAL
     else:
-        severity = SEVERITY[item["extra"]["severity"]]
+        severity = SEVERITY.get(item["extra"]["severity"], Severity.LOW)
     return Finding(
         family=family,
         severity=severity,
@@ -51,22 +51,42 @@ def _parse(repo_root: Path, data: object) -> list[Finding]:
         raise ValueError("forma inesperada")
     root = repo_root.resolve()
     findings: list[Finding] = []
-    for item in data.get("results") or []:
-        found = _finding(item)
-        if found is None:
+    items = data.get("results") or []
+    bad = 0
+    for item in items:
+        try:
+            found = _finding(item)
+            if found is not None and Path(found.file).is_absolute():
+                rel = Path(found.file).resolve().relative_to(root).as_posix()
+                found = dataclasses.replace(found, file=rel)
+        except (ValueError, TypeError, AttributeError, KeyError, IndexError):
+            # Ruta fuera del repo o item ilegible: se descarta ese resultado.
+            bad += 1
             continue
-        path = Path(found.file)
-        if path.is_absolute():
-            try:
-                rel = path.resolve().relative_to(root).as_posix()
-            except ValueError:
-                continue
-            found = dataclasses.replace(found, file=rel)
-        findings.append(found)
+        if found is not None:
+            findings.append(found)
+    if bad:
+        logger.warning("semgrep: %s resultados descartados por forma inesperada", bad)
+        if not findings and bad == len(items):
+            raise ValueError("todos los resultados de semgrep son ilegibles")
     return findings
 
 
+def _failed_files(data: dict) -> int:
+    # Errores de parseo o de tiempo por archivo (semgrep los marca "warn" o "error").
+    paths = set()
+    for err in data.get("errors") or []:
+        if isinstance(err, dict) and err.get("path"):
+            logger.warning("semgrep: %s", str(err.get("message", ""))[:300])
+            paths.add(str(err["path"]))
+    scanned = (data.get("paths") or {}).get("scanned") or []
+    if paths and len(paths) >= len(scanned):
+        raise ValueError("semgrep no pudo analizar ningún archivo")
+    return len(paths)
+
+
 def scan_sast(repo_root: Path, files: list[Path], cancel: threading.Event) -> list[FamilyResult]:
+    # `files` se ignora: semgrep recorre repo_root entero salvo los directorios de EXCLUDED.
     with tempfile.TemporaryDirectory() as tmp_name:
         report = Path(tmp_name) / "semgrep.json"
         args = [
@@ -95,7 +115,9 @@ def scan_sast(repo_root: Path, files: list[Path], cancel: threading.Event) -> li
                 cancel=cancel,
                 ok_codes={0, 1},
             )
-            findings = _parse(repo_root, json.loads(report.read_text(encoding="utf-8")))
+            data = json.loads(report.read_text(encoding="utf-8"))
+            findings = _parse(repo_root, data)
+            failed = _failed_files(data)
         except ToolUnavailable:
             return _not_analyzed("Escáner SAST no disponible")
         except ToolTimeout:
@@ -106,4 +128,5 @@ def scan_sast(repo_root: Path, files: list[Path], cancel: threading.Event) -> li
         except (ValueError, TypeError, AttributeError, KeyError, IndexError):
             logger.exception("salida de semgrep inesperada")
             return _not_analyzed("El escáner SAST falló")
-    return [FamilyResult(f, "ok", None, [x for x in findings if x.family == f]) for f in FAMILIES]
+    reason = f"análisis parcial: {failed} archivos no se pudieron analizar" if failed else None
+    return [FamilyResult(f, "ok", reason, [x for x in findings if x.family == f]) for f in FAMILIES]

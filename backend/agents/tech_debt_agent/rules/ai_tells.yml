@@ -4,8 +4,8 @@ rules:
     severity: WARNING
     message: "useEffect sin array de dependencias que hace fetch"
     patterns:
-      - pattern: useEffect(() => { ... fetch(...); ... })
-      - pattern-not: useEffect($F, [...])
+      - pattern: fetch(...)
+      - pattern-inside: useEffect(() => { ... })
     metadata:
       family: 8
       why: "Sin array de dependencias el efecto corre en cada render; si cambia estado provoca un bucle y repite peticiones."
@@ -16,8 +16,8 @@ rules:
     severity: WARNING
     message: "useEffect sin array de dependencias que cambia estado"
     patterns:
-      - pattern: useEffect(() => { ... $SET(...); ... })
-      - pattern-not: useEffect($F, [...])
+      - pattern: $SET(...)
+      - pattern-inside: useEffect(() => { ... })
       - metavariable-regex:
           metavariable: $SET
           regex: ^set[A-Z]\w*$
