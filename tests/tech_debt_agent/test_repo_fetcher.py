@@ -18,6 +18,7 @@ from backend.agents.tech_debt_agent.tools import Cancelled
         "https://github.com/o/r/",
         "https://www.github.com/o/r",
         "http://github.com/o/r",
+        "https://GitHub.com/o/r",
     ],
 )
 def test_normalize_accepts(url):
@@ -35,6 +36,8 @@ def test_normalize_accepts(url):
         "https://github.com/o/r;rm",
         "file:///etc",
         "https://user:pw@github.com/o/r",
+        "https://github.com:443/o/r",
+        "https://github.com./o/r",
         "https://github.com/o/r?x=1",
         "https://github.com/o/r#frag",
     ],
@@ -63,7 +66,7 @@ def test_meta_ok_and_token(monkeypatch):
     def h(req):
         seen.append(req.headers.get("authorization"))
         if req.url.path.endswith("/commits/dev"):
-            return httpx.Response(200, json={"sha": "abc123"})
+            return httpx.Response(200, json={"sha": "abc123" + "0" * 34})
         return httpx.Response(200, json={"size": 10, "default_branch": "dev", "private": False})
 
     meta = rf.get_repo_meta("o", "r", _client(h))
@@ -71,7 +74,7 @@ def test_meta_ok_and_token(monkeypatch):
         "o",
         "r",
         "dev",
-        "abc123",
+        "abc123" + "0" * 34,
     )
     assert meta.size_kb == 10
     assert seen == ["Bearer tok123", "Bearer tok123"]
@@ -219,6 +222,69 @@ def test_clone_too_big(tmp_path, meta, monkeypatch):
         return real(args, cwd, timeout, cancel, **kw)
 
     monkeypatch.setattr(rf, "run_tool", slow)
+    with pytest.raises(rf.FetchError, match="demasiado grande"):
+        rf.clone_repo(meta, dest, threading.Event(), _url_override=src.as_uri())
+    assert not dest.exists()
+
+
+def test_normalize_leading_dash_owner_is_safe():
+    assert rf.normalize_github_url("https://github.com/-flag/r") == ("-flag", "r")
+
+
+def test_meta_non_object_json():
+    with pytest.raises(rf.FetchError):
+        rf.get_repo_meta("o", "r", _client(lambda req: httpx.Response(200, json=[1])))
+
+
+def test_meta_commit_non_object_json():
+    def h(req):
+        if "/commits/" in req.url.raw_path.decode():
+            return httpx.Response(200, json=[1])
+        return httpx.Response(200, json={"size": 1, "default_branch": "m", "private": False})
+
+    with pytest.raises(rf.FetchError):
+        rf.get_repo_meta("o", "r", _client(h))
+
+
+def test_meta_bad_sha():
+    def h(req):
+        if "/commits/" in req.url.raw_path.decode():
+            return httpx.Response(200, json={"sha": "zzz"})
+        return httpx.Response(200, json={"size": 1, "default_branch": "m", "private": False})
+
+    with pytest.raises(rf.FetchError):
+        rf.get_repo_meta("o", "r", _client(h))
+
+
+def test_meta_branch_is_quoted():
+    paths = []
+
+    def h(req):
+        paths.append(req.url.raw_path.decode())
+        if "/commits/" in paths[-1]:
+            return httpx.Response(200, json={"sha": "a" * 40})
+        return httpx.Response(200, json={"size": 1, "default_branch": "f/x?y#z", "private": False})
+
+    rf.get_repo_meta("o", "r", _client(h))
+    assert paths[1] == "/repos/o/r/commits/f%2Fx%3Fy%23z"
+
+
+@pytest.mark.skipif(shutil.which("git") is None, reason="git no disponible")
+def test_clone_rejects_nonempty_dest(tmp_path, meta):
+    dest = tmp_path / "dest"
+    dest.mkdir()
+    (dest / "mine.txt").write_text("x")
+    with pytest.raises(ValueError):
+        rf.clone_repo(meta, dest, threading.Event(), _url_override="file:///x")
+    assert (dest / "mine.txt").exists()
+
+
+@pytest.mark.skipif(shutil.which("git") is None, reason="git no disponible")
+def test_clone_post_check_size(tmp_path, meta, monkeypatch):
+    src = tmp_path / "src"
+    _make_repo(src)
+    dest = tmp_path / "dest"
+    monkeypatch.setattr(rf, "MAX_CLONE_BYTES", 0)
     with pytest.raises(rf.FetchError, match="demasiado grande"):
         rf.clone_repo(meta, dest, threading.Event(), _url_override=src.as_uri())
     assert not dest.exists()

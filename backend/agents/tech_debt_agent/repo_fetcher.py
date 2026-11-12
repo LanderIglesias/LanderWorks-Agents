@@ -135,7 +135,7 @@ import os  # noqa: E402
 import re  # noqa: E402
 import threading  # noqa: E402
 from dataclasses import dataclass  # noqa: E402
-from urllib.parse import urlsplit  # noqa: E402
+from urllib.parse import quote, urlsplit  # noqa: E402
 
 import httpx  # noqa: E402
 
@@ -171,7 +171,8 @@ EXCLUDED_DIRS = {
 _WATCH_SECONDS = 1.0
 _HTTP_TIMEOUT_S = 10
 _GITHUB_HOSTS = {"github.com", "www.github.com"}
-_SEGMENT_RE = re.compile(r"^[A-Za-z0-9_.-]{1,100}$")
+_SEGMENT_RE = re.compile(r"[A-Za-z0-9_.-]{1,100}")
+_SHA_RE = re.compile(r"[0-9a-f]{40}")
 _NOT_FOUND = "El repositorio no existe o es privado"
 
 
@@ -209,7 +210,7 @@ def normalize_github_url(url: str) -> tuple[str, str]:
         raise invalid
     owner, repo = segments
     repo = repo.removesuffix(".git")
-    if not (_SEGMENT_RE.match(owner) and _SEGMENT_RE.match(repo)) or repo in {".", ".."}:
+    if not (_SEGMENT_RE.fullmatch(owner) and _SEGMENT_RE.fullmatch(repo)) or repo in {".", ".."}:
         raise invalid
     if owner in {".", ".."}:
         raise invalid
@@ -241,19 +242,38 @@ def get_repo_meta(owner: str, repo: str, client: httpx.Client | None = None) -> 
     client = client or httpx.Client()
     try:
         data = _github_get(client, f"/repos/{owner}/{repo}", headers).json()
+        if not isinstance(data, dict):
+            raise TypeError
         if data.get("private"):
             raise FetchError(_NOT_FOUND)
         size_kb = int(data.get("size", 0))
         if size_kb > MAX_REPO_KB:
             raise FetchError("El repositorio es demasiado grande para analizarlo")
         branch = data["default_branch"]
-        commit = _github_get(client, f"/repos/{owner}/{repo}/commits/{branch}", headers)
-        return RepoMeta(owner, repo, size_kb, branch, commit.json()["sha"])
+        if not isinstance(branch, str) or not branch:
+            raise TypeError
+        path = f"/repos/{owner}/{repo}/commits/{quote(branch, safe='')}"
+        commit = _github_get(client, path, headers).json()
+        if not isinstance(commit, dict):
+            raise TypeError
+        sha = commit["sha"]
+        if not isinstance(sha, str) or not _SHA_RE.fullmatch(sha):
+            raise TypeError
+        return RepoMeta(owner, repo, size_kb, branch, sha)
     except (KeyError, TypeError, ValueError):
         raise FetchError("GitHub devolvió una respuesta inesperada") from None
     finally:
         if own_client:
             client.close()
+
+
+def _rmtree(path: Path) -> None:
+    def force(func, p, _exc):
+        os.chmod(p, 0o700)
+        func(p)
+
+    if path.exists():
+        shutil.rmtree(path, onerror=force)
 
 
 def _dir_bytes(path: Path) -> int:
@@ -276,6 +296,8 @@ def clone_repo(
     url = _url_override or f"https://github.com/{meta.owner}/{meta.repo}.git"
     if cancel.is_set():
         raise Cancelled("clone")
+    if dest.exists() and (not dest.is_dir() or any(dest.iterdir())):
+        raise ValueError("dest debe no existir o estar vacío")
     dest.parent.mkdir(parents=True, exist_ok=True)
     internal = threading.Event()
     stop = threading.Event()
@@ -303,8 +325,7 @@ def clone_repo(
         *protocols,
         "clone",
         "--no-tags",
-        "--single-branch",
-        "--filter=blob:limit=1m",
+        "--single-branch",  # solo el historial de la rama por defecto; el resto queda fuera de alcance
         "--",
         url,
         str(dest),
@@ -312,19 +333,25 @@ def clone_repo(
     env = {"GIT_LFS_SKIP_SMUDGE": "1", "GIT_TERMINAL_PROMPT": "0"}
     try:
         run_tool(args, dest.parent, CLONE_TIMEOUT_S, internal, env=env)
+        if _dir_bytes(dest) > MAX_CLONE_BYTES:
+            raise FetchError("El repositorio es demasiado grande para analizarlo")
+    except FetchError:
+        _rmtree(dest)
+        raise
     except Cancelled:
-        shutil.rmtree(dest, ignore_errors=True)
+        _rmtree(dest)
         if too_big.is_set():
             raise FetchError("El repositorio es demasiado grande para analizarlo") from None
         raise
     except ToolTimeout:
-        shutil.rmtree(dest, ignore_errors=True)
+        _rmtree(dest)
         raise FetchError("La descarga del repositorio tardó demasiado") from None
-    except (ToolUnavailable, RuntimeError):
-        shutil.rmtree(dest, ignore_errors=True)
+    except (ToolUnavailable, RuntimeError) as e:
+        logger.warning("Clonado fallido: %s", type(e).__name__)
+        _rmtree(dest)
         raise FetchError("No se pudo clonar el repositorio") from None
     except BaseException:
-        shutil.rmtree(dest, ignore_errors=True)
+        _rmtree(dest)
         raise
     finally:
         stop.set()
