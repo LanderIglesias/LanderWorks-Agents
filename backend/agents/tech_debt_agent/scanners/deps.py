@@ -51,16 +51,16 @@ def _score(group: dict) -> float:
 
 
 def _line_of(manifest: Path, name: str) -> int | None:
-    # Es un grep barato: en lockfiles puede apuntar a otra aparición del nombre.
-    needle = name.lower()
+    # Grep barato; en package-lock.json la entrada "node_modules/<name>" va antes que las menciones sueltas.
+    needles = (f'node_modules/{name.lower()}"', name.lower())
     try:
-        for n, line in enumerate(
-            manifest.read_text(encoding="utf-8", errors="replace").splitlines(), 1
-        ):
-            if needle in line.lower():
-                return n
+        lines = manifest.read_text(encoding="utf-8", errors="replace").lower().splitlines()
     except OSError:
-        pass
+        return None
+    for needle in needles:
+        for n, line in enumerate(lines, 1):
+            if needle in line:
+                return n
     return None
 
 

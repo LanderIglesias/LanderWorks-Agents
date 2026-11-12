@@ -1,183 +1,285 @@
-"""
-engine.py — Orquestador LangGraph del Technical Debt Analyzer
+import logging
+import operator
+import tempfile
+import threading
+import time
+from collections.abc import Callable
+from itertools import chain
+from pathlib import Path
+from typing import Annotated, TypedDict
 
-Pipeline:
-repo_fetcher → code_analyzer → dependency_scanner → test_analyzer
-            → llm_interpreter → report_generator → END
-"""
+from langgraph.graph import END, START, StateGraph
 
-from __future__ import annotations
+from .findings import Family, FamilyResult, Finding
+from .llm_reviewer import review
+from .repo_fetcher import RepoMeta, _rmtree, clone_repo, list_source_files
+from .report_generator import build_report
+from .scanners.complexity import scan_complexity
+from .scanners.deps import scan_deps
+from .scanners.ghost_tests import scan_ghost_tests
+from .scanners.python_lint import scan_python_lint
+from .scanners.sast import scan_sast
+from .scanners.secrets import scan_secrets
+from .scoring import SEVERITY_ORDER
+from .tools import Cancelled
 
-from typing import TypedDict
+logger = logging.getLogger(__name__)
 
-from langgraph.graph import END, StateGraph
+ProgressEvent = dict
 
-from .code_analyzer import analyze_files
-from .dependency_scanner import scan_dependencies
-from .llm_interpreter import interpret_findings
-from .repo_fetcher import cleanup_repo, fetch_repo
-from .report_generator import calculate_health_score, generate_report
-from .test_analyzer import analyze_tests
+SCANNERS: dict[str, tuple[Callable, tuple[Family, ...]]] = {
+    "secrets": (scan_secrets, (Family.SECRETS,)),
+    "deps": (scan_deps, (Family.CVE,)),
+    "sast": (scan_sast, (Family.SAST, Family.ERRORS, Family.DEBUG)),
+    "python_lint": (scan_python_lint, (Family.SAST, Family.ERRORS, Family.DEBUG)),
+    "complexity": (scan_complexity, (Family.MONOLITH,)),
+    "ghost_tests": (scan_ghost_tests, (Family.GHOST_TESTS,)),
+}
 
-
-class TechDebtState(TypedDict):
-    github_url: str
-    repo_name: str
-    repo_path: str
-    python_files: list[str]
-    total_files: int
-    python_file_count: int
-    languages: list[str]
-    code_analysis: dict
-    dependency_analysis: dict
-    test_analysis: dict
-    health_score: int
-    llm_interpretation: dict
-    report: dict
-    error: str | None
-
-
-def node_fetch_repo(state: TechDebtState) -> dict:
-    print(f"[Engine] Nodo 1: Clonando repositorio {state['github_url']}...")
-    try:
-        result = fetch_repo(state["github_url"])
-        return {
-            "repo_name": result["repo_name"],
-            "repo_path": result["repo_path"],
-            "python_files": result["python_files"],
-            "total_files": result["total_files"],
-            "python_file_count": result["python_file_count"],
-            "languages": result["languages"],
-            "error": None,
-        }
-    except Exception as e:
-        return {"error": str(e)}
+SCANNER_LABELS = {
+    "secrets": "secretos",
+    "deps": "dependencias",
+    "sast": "vulnerabilidades",
+    "python_lint": "manejo de errores y depuración",
+    "complexity": "complejidad",
+    "ghost_tests": "tests fantasma",
+}
+SCAN_START, SCAN_END = 10, 70
 
 
-def node_analyze_code(state: TechDebtState) -> dict:
-    if state.get("error"):
-        return {}
-    print(f"[Engine] Nodo 2: Analizando {state['python_file_count']} archivos Python...")
-    try:
-        return {"code_analysis": analyze_files(state["python_files"])}
-    except Exception as e:
-        return {"error": str(e)}
+class State(TypedDict, total=False):
+    meta: RepoMeta
+    root: str
+    files: list[Path]
+    kloc: float
+    results: Annotated[list[FamilyResult], operator.add]
+    merged: list[FamilyResult]
+    llm_results: list[FamilyResult]
+    summary: str | None
+    cost: float
+    final_report: dict
 
 
-def node_scan_dependencies(state: TechDebtState) -> dict:
-    if state.get("error"):
-        return {}
-    print("[Engine] Nodo 3: Escaneando dependencias...")
-    try:
-        return {"dependency_analysis": scan_dependencies(state["repo_path"], state["python_files"])}
-    except Exception as e:
-        return {"error": str(e)}
+class _Progress:
+    """Emisión serializada y monótona: los escáneres terminan en hilos distintos."""
+
+    def __init__(self, emit: Callable[[ProgressEvent], None]):
+        self._emit = emit
+        self._lock = threading.Lock()
+        self._last = 0
+        self._scanners_done = 0
+
+    def step(self, step: str, message: str, progress: int) -> None:
+        with self._lock:
+            self._send(step, message, progress)
+
+    def scanner_done(self, step: str, message: str) -> None:
+        with self._lock:
+            self._scanners_done += 1
+            span = SCAN_END - SCAN_START
+            self._send(step, message, SCAN_START + span * self._scanners_done // len(SCANNERS))
+
+    def _send(self, step: str, message: str, progress: int) -> None:
+        self._last = max(self._last, progress)
+        self._emit({"step": step, "message": message, "progress": self._last})
 
 
-def node_analyze_tests(state: TechDebtState) -> dict:
-    if state.get("error"):
-        return {}
-    print("[Engine] Nodo 4: Analizando cobertura de tests...")
-    try:
-        return {"test_analysis": analyze_tests(state["repo_path"], state["python_files"])}
-    except Exception as e:
-        return {"error": str(e)}
-
-
-def node_interpret(state: TechDebtState) -> dict:
-    if state.get("error"):
-        return {}
-    print("[Engine] Nodo 5: Claude interpretando hallazgos...")
-    try:
-        health_score = calculate_health_score(
-            code_analysis=state["code_analysis"],
-            test_analysis=state["test_analysis"],
-            dependency_analysis=state["dependency_analysis"],
+def merge_results(results: list[FamilyResult]) -> list[FamilyResult]:
+    # La familia 8 solo la decide el revisor LLM: un escáner estático no la cubre.
+    groups: dict[Family, list[FamilyResult]] = {}
+    for r in results:
+        if r.family != Family.AI_TELLS:
+            groups.setdefault(r.family, []).append(r)
+    merged = []
+    for family, group in groups.items():
+        ok = [r for r in group if r.status == "ok"]
+        failed = [r.reason for r in group if r.status != "ok" and r.reason]
+        if not ok:
+            reason = "; ".join(dict.fromkeys(failed)) or "sin resultados"
+            merged.append(FamilyResult(family, "not_analyzed", reason))
+            continue
+        best: dict[tuple, Finding] = {}
+        for f in chain.from_iterable(r.findings for r in ok):
+            key = (f.family, f.file, f.line_start)
+            if key not in best or SEVERITY_ORDER[f.severity] < SEVERITY_ORDER[best[key].severity]:
+                best[key] = f
+        findings = sorted(
+            best.values(),
+            key=lambda f: (SEVERITY_ORDER[f.severity], f.file, f.line_start or 0),
         )
-        result = interpret_findings(
-            repo_name=state["repo_name"],
-            code_analysis=state["code_analysis"],
-            dependency_analysis=state["dependency_analysis"],
-            test_analysis=state["test_analysis"],
-            health_score=health_score,
-        )
-        return {"health_score": health_score, "llm_interpretation": result}
-    except Exception as e:
-        return {"error": str(e)}
+        notes = [r.reason for r in ok if r.reason] + [f"fuente no disponible: {x}" for x in failed]
+        merged.append(FamilyResult(family, "ok", "; ".join(dict.fromkeys(notes)) or None, findings))
+    return merged
 
 
-def node_generate_report(state: TechDebtState) -> dict:
-    if state.get("error"):
-        return {}
-    print("[Engine] Nodo 6: Generando informe final...")
-    try:
-        result = generate_report(
-            repo_name=state["repo_name"],
-            github_url=state["github_url"],
-            health_score=state["health_score"],
-            code_analysis=state["code_analysis"],
-            dependency_analysis=state["dependency_analysis"],
-            test_analysis=state["test_analysis"],
-            llm_interpretation=state["llm_interpretation"],
-        )
-        return {"report": result}
-    except Exception as e:
-        return {"error": str(e)}
+def _count_kloc(files: list[Path]) -> float:
+    lines = 0
+    for path in files:
+        try:
+            with path.open("rb") as fh:
+                while chunk := fh.read(1 << 20):
+                    lines += chunk.count(b"\n")
+        except OSError:
+            continue
+    return lines / 1000
 
 
-def build_graph():
-    graph = StateGraph(TechDebtState)
+def _ctx(config) -> tuple[threading.Event, _Progress]:
+    conf = config["configurable"]
+    if conf["cancel"].is_set():
+        raise Cancelled()
+    return conf["cancel"], conf["progress"]
 
-    graph.add_node("fetch_repo", node_fetch_repo)
-    graph.add_node("analyze_code", node_analyze_code)
-    graph.add_node("scan_dependencies", node_scan_dependencies)
-    graph.add_node("analyze_tests", node_analyze_tests)
-    graph.add_node("interpret", node_interpret)
-    graph.add_node("generate_report", node_generate_report)
 
-    graph.set_entry_point("fetch_repo")
-    graph.add_edge("fetch_repo", "analyze_code")
-    graph.add_edge("analyze_code", "scan_dependencies")
-    graph.add_edge("scan_dependencies", "analyze_tests")
-    graph.add_edge("analyze_tests", "interpret")
-    graph.add_edge("interpret", "generate_report")
-    graph.add_edge("generate_report", END)
+def _node_clone(state: State, config) -> dict:
+    cancel, progress = _ctx(config)
+    progress.step("clone", "Clonando el repositorio", 2)
+    root = Path(config["configurable"]["workdir"]) / "repo"
+    clone_repo(state["meta"], root, cancel)
+    files = list_source_files(root)
+    progress.step("clone", "Repositorio clonado", SCAN_START)
+    return {"root": str(root), "files": files, "kloc": _count_kloc(files)}
 
+
+def _make_scanner_node(name: str):
+    def node(state: State, config) -> dict:
+        cancel, progress = _ctx(config)
+        label = SCANNER_LABELS[name]
+        progress.step(name, f"Analizando {label}", SCAN_START)
+        fn, families = SCANNERS[name]
+        files = state["files"]
+        if not files:
+            results = [FamilyResult(f, "not_analyzed", "sin código fuente") for f in families]
+        else:
+            try:
+                results = fn(Path(state["root"]), files, cancel)
+            except Cancelled:
+                raise
+            except Exception as exc:  # noqa: BLE001 - solo el tipo: el mensaje puede traer rutas
+                logger.warning("escáner %s fallido: %s", name, type(exc).__name__)
+                results = [
+                    FamilyResult(f, "not_analyzed", "error interno del analizador")
+                    for f in families
+                ]
+        progress.scanner_done(name, f"Análisis de {label} terminado")
+        return {"results": results}
+
+    return node
+
+
+def _node_dedupe(state: State, config) -> dict:
+    _, progress = _ctx(config)
+    progress.step("dedupe", "Unificando hallazgos", 72)
+    merged = merge_results(state["results"])
+    progress.step("dedupe", "Hallazgos unificados", 75)
+    return {"merged": merged}
+
+
+def _node_llm(state: State, config) -> dict:
+    cancel, progress = _ctx(config)
+    progress.step("llm_review", "Revisión con IA", 76)
+    unavailable = {
+        "llm_results": [FamilyResult(Family.AI_TELLS, "not_analyzed", "no disponible")],
+        "summary": None,
+        "cost": 0.0,
+    }
+    if not state["files"]:
+        out = unavailable
+    else:
+        prior = [f for r in state["merged"] for f in r.findings]
+        try:
+            res = review(
+                Path(state["root"]),
+                state["files"],
+                prior,
+                cancel,
+                config["configurable"].get("llm_client"),
+            )
+            out = {
+                "llm_results": res.family_results,
+                "summary": res.executive_summary,
+                "cost": res.cost_usd,
+            }
+        except Cancelled:
+            raise
+        except Exception as exc:  # noqa: BLE001 - solo el tipo
+            logger.warning("revisor LLM fallido: %s", type(exc).__name__)
+            out = unavailable
+    progress.step("llm_review", "Revisión con IA terminada", 92)
+    return out
+
+
+def _node_report(state: State, config) -> dict:
+    _, progress = _ctx(config)
+    progress.step("report", "Generando el informe", 94)
+    meta = state["meta"]
+    llm = [r for r in state["llm_results"] if r.family == Family.AI_TELLS]
+    report = build_report(
+        meta.owner,
+        meta.repo,
+        meta.head_sha,
+        state["merged"] + llm,
+        state["kloc"],
+        state.get("summary"),
+        len(state["files"]),
+    )
+    progress.step("report", "Informe listo", 100)
+    return {"final_report": report}
+
+
+def _build_graph():
+    graph = StateGraph(State)
+    graph.add_node("clone", _node_clone)
+    for name in SCANNERS:
+        graph.add_node(name, _make_scanner_node(name))
+        graph.add_edge("clone", name)
+    graph.add_node("dedupe", _node_dedupe)
+    graph.add_node("llm_review", _node_llm)
+    graph.add_node("report", _node_report)
+    graph.add_edge(START, "clone")
+    graph.add_edge(list(SCANNERS), "dedupe")
+    graph.add_edge("dedupe", "llm_review")
+    graph.add_edge("llm_review", "report")
+    graph.add_edge("report", END)
     return graph.compile()
 
 
-app_graph = build_graph()
+_GRAPH = _build_graph()
+
+
+def _cleanup(path: Path) -> None:
+    # En Windows un proceso hijo recién cancelado puede seguir sujetando el directorio.
+    for attempt in range(10):
+        try:
+            _rmtree(path)
+            return
+        except OSError:
+            if attempt == 9:
+                logger.warning("no se pudo borrar el directorio temporal")
+                return
+            time.sleep(0.3)
+
+
+def run_analysis(
+    meta: RepoMeta,
+    cancel: threading.Event,
+    emit: Callable[[ProgressEvent], None],
+    llm_client=None,
+) -> tuple[dict, float]:
+    workdir = tempfile.mkdtemp(prefix="tech_debt_")
+    try:
+        configurable = {
+            "cancel": cancel,
+            "progress": _Progress(emit),
+            "llm_client": llm_client,
+            "workdir": workdir,
+        }
+        final = _GRAPH.invoke({"meta": meta, "results": []}, {"configurable": configurable})
+        return final["final_report"], final.get("cost", 0.0)
+    finally:
+        _cleanup(Path(workdir))
 
 
 def analyze_repository(github_url: str) -> dict:
-    """Ejecuta el pipeline completo de análisis de deuda técnica."""
-    initial_state: TechDebtState = {
-        "github_url": github_url,
-        "repo_name": "",
-        "repo_path": "",
-        "python_files": [],
-        "total_files": 0,
-        "python_file_count": 0,
-        "languages": [],
-        "code_analysis": {},
-        "dependency_analysis": {},
-        "test_analysis": {},
-        "health_score": 0,
-        "llm_interpretation": {},
-        "report": {},
-        "error": None,
-    }
-
-    try:
-        final_state = app_graph.invoke(initial_state)
-
-        if final_state.get("repo_path"):
-            cleanup_repo(final_state["repo_path"])
-
-        if final_state.get("error"):
-            return {"error": final_state["error"]}
-
-        return final_state.get("report", {"error": "No report generated"})
-
-    except Exception as e:
-        return {"error": str(e)}
+    """Atajo del API antiguo; la Task 13 lo elimina junto con el api.py heredado."""
+    raise NotImplementedError("sustituido por run_analysis")
