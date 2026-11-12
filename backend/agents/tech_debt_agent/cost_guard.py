@@ -1,5 +1,6 @@
 import hashlib
 import json
+import math
 import os
 import sqlite3
 import threading
@@ -40,7 +41,14 @@ def default_db_path() -> Path:
 
 
 def _utc(now: datetime | None) -> datetime:
-    return (now or datetime.now(UTC)).astimezone(UTC)
+    if now is None:
+        return datetime.now(UTC)
+    return now.replace(tzinfo=UTC) if now.tzinfo is None else now.astimezone(UTC)
+
+
+def _check_cost(value: float) -> None:
+    if not math.isfinite(value) or value < 0:
+        raise ValueError("el coste debe ser finito y >= 0")
 
 
 class CostGuard:
@@ -49,6 +57,7 @@ class CostGuard:
         db_path: Path,
         daily_limit: int = 20,
         monthly_budget_eur: float = 20.0,
+        # el valor por defecto lee la variable de entorno al importar el módulo
         eur_per_usd: float = float(os.getenv("TECH_DEBT_EUR_PER_USD", "0.92")),
     ):
         self.db_path = Path(db_path)
@@ -66,6 +75,7 @@ class CostGuard:
         return conn
 
     def reserve(self, max_cost_usd: float, now: datetime | None = None) -> str:
+        _check_cost(max_cost_usd)
         moment = _utc(now)
         day, month = moment.strftime("%Y-%m-%d"), moment.strftime("%Y-%m")
         with _LOCK, closing(self._connect()) as conn:
@@ -86,6 +96,8 @@ class CostGuard:
                     " ON CONFLICT(day) DO UPDATE SET count = count + 1",
                     (day,),
                 )
+                # una reserva huérfana sin settle/release se queda contada al máximo: tras una
+                # caída puede haberse gastado dinero, así que sobrecontar es el lado seguro
                 rid = uuid.uuid4().hex
                 conn.execute(
                     "INSERT INTO reservations VALUES(?, ?, ?, NULL, ?)",
@@ -98,6 +110,7 @@ class CostGuard:
                 raise
 
     def _settle(self, reservation_id: str, cost_usd: float) -> None:
+        _check_cost(cost_usd)
         with _LOCK, closing(self._connect()) as conn:
             conn.execute(
                 "UPDATE reservations SET settled_usd=? WHERE id=? AND settled_usd IS NULL",

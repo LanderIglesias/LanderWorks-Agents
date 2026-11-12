@@ -1,10 +1,12 @@
+import math
 import sqlite3
 import threading
-from contextlib import closing
+from contextlib import closing, nullcontext
 from datetime import UTC, datetime, timedelta
 
 import pytest
 
+from backend.agents.tech_debt_agent import cost_guard
 from backend.agents.tech_debt_agent.cost_guard import (
     BUDGET_MSG,
     DAILY_MSG,
@@ -144,3 +146,54 @@ def test_default_db_path(monkeypatch):
     assert p.is_absolute() and p.name == "tech_debt.sqlite3" and p.parent.name == "data"
     monkeypatch.setenv("TECH_DEBT_DB_PATH", "/x/y.sqlite3")
     assert default_db_path().name == "y.sqlite3"
+
+
+def test_concurrencia_atomica_solo_con_transaccion_sqlite(tmp_path, monkeypatch):
+    guards = [make(tmp_path) for _ in range(10)]
+    for _ in range(19):
+        guards[0].reserve(0.01, T0)
+    monkeypatch.setattr(cost_guard, "_LOCK", nullcontext())
+    ok, fail, errors = [], [], []
+    barrier = threading.Barrier(10)
+
+    def work(g):
+        barrier.wait()
+        try:
+            g.reserve(0.01, T0)
+            ok.append(1)
+        except LimitExceeded:
+            fail.append(1)
+        except Exception as exc:
+            errors.append(exc)
+
+    ts = [threading.Thread(target=work, args=(g,)) for g in guards]
+    [t.start() for t in ts]
+    [t.join() for t in ts]
+    assert not errors
+    assert len(ok) == 1 and len(fail) == 9
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf, -1.0])
+def test_costes_invalidos_lanzan_valueerror(tmp_path, bad):
+    g = make(tmp_path)
+    with pytest.raises(ValueError):
+        g.reserve(bad, T0)
+    rid = g.reserve(1, T0)
+    with pytest.raises(ValueError):
+        g.settle(rid, bad)
+
+
+def test_datetime_naive_se_asume_utc(tmp_path):
+    g = make(tmp_path, daily_limit=1)
+    g.reserve(0.01, datetime(2026, 11, 12, 23, 30))
+    with pytest.raises(LimitExceeded):
+        g.reserve(0.01, datetime(2026, 11, 12, 23, 40, tzinfo=UTC))
+    g.put_cached("k", {"a": 1}, datetime(2026, 11, 12, 10, 0))
+    assert g.get_cached("k", T0 + timedelta(hours=1)) == {"a": 1}
+
+
+def test_cache_expira_exactamente_a_24h(tmp_path):
+    g = make(tmp_path)
+    g.put_cached("k", {"a": 1}, T0)
+    assert g.get_cached("k", T0 + timedelta(hours=24)) is None
+    assert g.get_cached("k", T0 + timedelta(hours=24) - timedelta(seconds=1)) == {"a": 1}
