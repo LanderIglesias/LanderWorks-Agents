@@ -4,7 +4,7 @@ rules:
     severity: WARNING
     message: "useEffect sin array de dependencias que hace fetch"
     patterns:
-      - pattern: useEffect(() => { ... fetch(...) ... })
+      - pattern: useEffect(() => { ... fetch(...); ... })
       - pattern-not: useEffect($F, [...])
     metadata:
       family: 8
@@ -16,7 +16,7 @@ rules:
     severity: WARNING
     message: "useEffect sin array de dependencias que cambia estado"
     patterns:
-      - pattern: useEffect(() => { ... $SET(...) ... })
+      - pattern: useEffect(() => { ... $SET(...); ... })
       - pattern-not: useEffect($F, [...])
       - metavariable-regex:
           metavariable: $SET

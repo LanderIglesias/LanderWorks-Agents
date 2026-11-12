@@ -31,6 +31,13 @@ def test_semgrep_detecta_plantados(vibe_repo):
     assert any(f.severity == "critical" for f in evals)
 
 
+@pytest.mark.skipif(shutil.which("semgrep") is None, reason="semgrep no instalado")
+def test_semgrepignore_del_repo_no_oculta_hallazgos(vibe_repo):
+    (vibe_repo / ".semgrepignore").write_text("*\n", encoding="utf-8")
+    results = {r.family: r for r in sast.scan_sast(vibe_repo, [], threading.Event())}
+    assert any(f.file == "app/utils.py" for f in results[Family.SAST].findings)
+
+
 def test_reglas_tienen_metadata_valida():
     import yaml
 

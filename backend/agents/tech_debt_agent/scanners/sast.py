@@ -80,6 +80,8 @@ def scan_sast(repo_root: Path, files: list[Path], cancel: threading.Event) -> li
             str(report),
             "--metrics=off",
             "--disable-version-check",
+            # Un .semgrepignore del repo analizado no puede ocultar hallazgos.
+            "--x-ignore-semgrepignore-files",
             "--timeout",
             str(RULE_TIMEOUT_SECONDS),
         ]
