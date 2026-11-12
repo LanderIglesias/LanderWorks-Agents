@@ -1,0 +1,173 @@
+rules:
+  - id: eval-exec-dinamico
+    languages: [python]
+    severity: ERROR
+    message: "eval/exec sobre una expresión no literal"
+    patterns:
+      - pattern-either:
+          - pattern: eval($X)
+          - pattern: exec($X)
+      - pattern-not: eval("...")
+      - pattern-not: exec("...")
+    metadata:
+      family: 2
+      critical: true
+      why: "eval/exec ejecuta como código lo que recibe; si el dato llega de fuera, cualquiera ejecuta código en tu servidor."
+      fix: "Evita eval/exec; usa ast.literal_eval para literales o una tabla de operaciones permitidas."
+
+  - id: eval-js
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "eval o new Function sobre una expresión no literal"
+    patterns:
+      - pattern-either:
+          - pattern: eval($X)
+          - pattern: new Function(...)
+      - pattern-not: eval("...")
+    metadata:
+      family: 2
+      critical: true
+      why: "eval ejecuta como código lo que recibe; si el dato llega de fuera, permite ejecutar código arbitrario."
+      fix: "Elimina eval; usa JSON.parse para datos o un mapa de funciones permitidas."
+
+  - id: sql-por-string
+    languages: [python]
+    severity: ERROR
+    message: "Consulta SQL construida con f-string, concatenación o formato"
+    pattern-either:
+      - pattern: $X.execute(f"...{$Y}...")
+      - pattern: $X.execute("..." + $Y)
+      - pattern: $X.execute("..." % $Y)
+      - pattern: $X.execute("...".format(...))
+    metadata:
+      family: 2
+      critical: true
+      why: "Interpolar datos en la consulta permite inyección SQL: quien controle el valor controla la base de datos."
+      fix: "Usa parámetros: conn.execute('SELECT ... WHERE name = ?', (name,))."
+
+  - id: pickle-load
+    languages: [python]
+    severity: ERROR
+    message: "Deserialización con pickle"
+    pattern-either:
+      - pattern: pickle.load(...)
+      - pattern: pickle.loads(...)
+    metadata:
+      family: 2
+      why: "pickle ejecuta código al deserializar; con datos no confiables equivale a ejecución remota."
+      fix: "Usa JSON u otro formato de datos, o firma y verifica el contenido antes de cargarlo."
+
+  - id: yaml-load-inseguro
+    languages: [python]
+    severity: ERROR
+    message: "yaml.load sin SafeLoader"
+    patterns:
+      - pattern: yaml.load(...)
+      - pattern-not: yaml.load(..., Loader=yaml.SafeLoader)
+      - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader)
+      - pattern-not: yaml.load($X, yaml.SafeLoader)
+      - pattern-not: yaml.load($X, yaml.CSafeLoader)
+    metadata:
+      family: 2
+      why: "yaml.load con el loader por defecto puede instanciar objetos arbitrarios y ejecutar código."
+      fix: "Usa yaml.safe_load o pasa Loader=yaml.SafeLoader."
+
+  - id: subprocess-shell-variable
+    languages: [python]
+    severity: ERROR
+    message: "subprocess con shell=True y comando no literal"
+    patterns:
+      - pattern: subprocess.$F($CMD, ..., shell=True, ...)
+      - pattern-not: subprocess.$F("...", ..., shell=True, ...)
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^(run|call|Popen|check_call|check_output)$
+    metadata:
+      family: 2
+      critical: true
+      why: "Con shell=True el comando pasa por la shell; si incluye datos externos permite inyección de comandos."
+      fix: "Pasa una lista de argumentos y shell=False: subprocess.run([prog, arg])."
+
+  - id: subprocess-shell-literal
+    languages: [python]
+    severity: WARNING
+    message: "subprocess con shell=True"
+    patterns:
+      - pattern: subprocess.$F("...", ..., shell=True, ...)
+      - metavariable-regex:
+          metavariable: $F
+          regex: ^(run|call|Popen|check_call|check_output)$
+    metadata:
+      family: 2
+      why: "shell=True es frágil y se convierte en inyección en cuanto el comando deja de ser constante."
+      fix: "Pasa una lista de argumentos y shell=False."
+
+  - id: cors-fastapi-abierto
+    languages: [python]
+    severity: ERROR
+    message: "CORS abierto a cualquier origen"
+    pattern-either:
+      - pattern: $APP.add_middleware(CORSMiddleware, ..., allow_origins=["*"], ...)
+      - pattern: CORSMiddleware(..., allow_origins=["*"], ...)
+    metadata:
+      family: 2
+      why: "allow_origins=['*'] deja que cualquier web llame a tu API desde el navegador del usuario."
+      fix: "Lista solo los orígenes de tu frontend en allow_origins."
+
+  - id: cors-express-abierto
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "CORS abierto a cualquier origen"
+    pattern: 'cors({..., origin: "*", ...})'
+    metadata:
+      family: 2
+      why: "origin: '*' deja que cualquier web llame a tu API desde el navegador del usuario."
+      fix: "Indica solo los orígenes de tu frontend en la opción origin."
+
+  - id: react-dangerously-set-inner-html
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "dangerouslySetInnerHTML con dato no literal"
+    patterns:
+      - pattern: '<$EL ... dangerouslySetInnerHTML={{__html: $X}} ... />'
+      - pattern-not: '<$EL ... dangerouslySetInnerHTML={{__html: "..."}} ... />'
+    metadata:
+      family: 2
+      critical: true
+      why: "Inyectar HTML sin sanear abre XSS: un atacante puede ejecutar scripts en el navegador de tus usuarios."
+      fix: "Renderiza el contenido como texto o sanéalo antes (por ejemplo con DOMPurify)."
+
+  - id: inner-html-asignado
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "Asignación a innerHTML con dato no literal"
+    patterns:
+      - pattern: $E.innerHTML = $X
+      - pattern-not: $E.innerHTML = "..."
+    metadata:
+      family: 2
+      why: "Asignar HTML sin sanear abre XSS."
+      fix: "Usa textContent o sanea el HTML antes de asignarlo."
+
+  - id: jwt-sin-verificacion
+    languages: [python]
+    severity: ERROR
+    message: "JWT sin verificar la firma"
+    pattern-either:
+      - pattern: jwt.decode(..., verify=False, ...)
+      - pattern: 'jwt.decode(..., options={..., "verify_signature": False, ...}, ...)'
+      - pattern: jwt.decode(..., algorithms=["none"], ...)
+    metadata:
+      family: 2
+      why: "Sin verificar la firma cualquiera puede fabricar un token y hacerse pasar por otro usuario."
+      fix: "Verifica siempre la firma con la clave y una lista cerrada de algoritmos (por ejemplo HS256 o RS256)."
+
+  - id: jwt-algoritmo-none-js
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "JWT con algoritmo none"
+    pattern: 'jwt.verify($T, $K, {..., algorithms: ["none"], ...})'
+    metadata:
+      family: 2
+      why: "El algoritmo none acepta tokens sin firma: cualquiera puede fabricarlos."
+      fix: "Fija una lista cerrada de algoritmos firmados."

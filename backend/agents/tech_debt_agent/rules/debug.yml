@@ -1,0 +1,50 @@
+rules:
+  - id: debug-true
+    languages: [python]
+    severity: WARNING
+    message: "DEBUG = True fijado en el código"
+    pattern: DEBUG = True
+    metadata:
+      family: 6
+      why: "Un DEBUG activado en el repositorio acaba en producción y expone trazas y configuración."
+      fix: "Lee DEBUG de una variable de entorno con valor False por defecto."
+
+  - id: print-suelto
+    languages: [python]
+    severity: INFO
+    message: "print() de depuración"
+    paths:
+      exclude: ["test_*.py", "*_test.py", "conftest.py"]
+    patterns:
+      - pattern: print(...)
+      - pattern-not-inside: |
+          if __name__ == "__main__":
+              ...
+    metadata:
+      family: 6
+      why: "Los print quedan como ruido en producción y no llegan a los logs estructurados."
+      fix: "Sustitúyelo por logging con el nivel adecuado o bórralo."
+
+  - id: console-log
+    languages: [javascript, typescript]
+    severity: INFO
+    message: "console.log/debug de depuración"
+    paths:
+      exclude: ["*.test.*", "*.spec.*"]
+    pattern-either:
+      - pattern: console.log(...)
+      - pattern: console.debug(...)
+    metadata:
+      family: 6
+      why: "Los console.log olvidados ensucian la consola del usuario y pueden filtrar datos."
+      fix: "Bórralo o usa un logger con niveles que se desactive en producción."
+
+  - id: debugger-olvidado
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "Sentencia debugger olvidada"
+    pattern-regex: '\bdebugger\s*;'
+    metadata:
+      family: 6
+      why: "Una sentencia debugger detiene la ejecución cuando hay DevTools abiertas."
+      fix: "Elimínala antes de publicar."

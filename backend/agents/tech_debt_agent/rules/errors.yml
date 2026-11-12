@@ -1,0 +1,87 @@
+rules:
+  - id: except-pass-tragado
+    languages: [python]
+    severity: WARNING
+    message: "Excepción tragada con pass"
+    pattern-regex: 'except(\s+(Base)?Exception)?(\s+as\s+\w+)?\s*:[ \t]*(#[^\n]*)?\n\s*pass\b'
+    metadata:
+      family: 4
+      why: "El error desaparece sin rastro: el fallo se esconde y luego aparece como un bug imposible de reproducir."
+      fix: "Captura la excepción concreta y regístrala con logging, o deja que se propague."
+
+  - id: except-print-tragado
+    languages: [python]
+    severity: WARNING
+    message: "Excepción tragada con print"
+    pattern-regex: 'except\s+(Base)?Exception\s+as\s+(\w+)\s*:[ \t]*\n\s*print\(\s*\2\s*\)'
+    metadata:
+      family: 4
+      why: "Imprimir el error y seguir lo deja fuera de los logs y el programa continúa en un estado dudoso."
+      fix: "Usa logging.exception(...) y decide si recuperar o relanzar."
+
+  - id: catch-vacio
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "catch vacío"
+    pattern-regex: 'catch\s*(\(\s*\w+\s*(:\s*\w+)?\s*\))?\s*\{\s*\}'
+    metadata:
+      family: 4
+      why: "El error desaparece sin rastro: el fallo se esconde y es muy difícil de diagnosticar."
+      fix: "Registra el error (console.error o tu logger) o gestiónalo de forma explícita."
+
+  - id: error-expuesto-en-respuesta
+    languages: [python]
+    severity: ERROR
+    message: "Mensaje de excepción devuelto al cliente"
+    patterns:
+      - pattern-either:
+          - pattern: 'return {..., $K: str($E), ...}'
+          - pattern: 'return {..., $K: repr($E), ...}'
+          - pattern: raise HTTPException(..., detail=str($E), ...)
+      - pattern-inside: |
+          try:
+              ...
+          except $T as $E:
+              ...
+    metadata:
+      family: 4
+      why: "El texto de la excepción filtra rutas, consultas y detalles internos a quien llame a la API."
+      fix: "Devuelve un mensaje genérico y registra el detalle en el servidor."
+
+  - id: traceback-en-respuesta
+    languages: [python]
+    severity: ERROR
+    message: "Traceback devuelto al cliente"
+    pattern-either:
+      - pattern: 'return {..., $K: traceback.format_exc(), ...}'
+      - pattern: return traceback.format_exc()
+      - pattern: HTTPException(..., detail=traceback.format_exc(), ...)
+      - pattern: JSONResponse(..., content=traceback.format_exc(), ...)
+    metadata:
+      family: 4
+      why: "El traceback revela la estructura interna del código y facilita atacarlo."
+      fix: "Registra el traceback con logging y devuelve un error genérico."
+
+  - id: flask-debug-activo
+    languages: [python]
+    severity: ERROR
+    message: "app.run con debug=True"
+    pattern: $APP.run(..., debug=True, ...)
+    metadata:
+      family: 4
+      why: "El modo debug muestra tracebacks interactivos y permite ejecutar código desde el navegador."
+      fix: "Desactiva debug en producción y léelo de una variable de entorno."
+
+  - id: express-stack-en-respuesta
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Stack del error devuelto al cliente"
+    pattern-either:
+      - pattern: $RES.send($E.stack)
+      - pattern: $RES.status(...).send($E.stack)
+      - pattern: '$RES.status(...).json({..., $K: $E.stack, ...})'
+      - pattern: '$RES.json({..., $K: $E.stack, ...})'
+    metadata:
+      family: 4
+      why: "El stack revela rutas y estructura interna del servidor."
+      fix: "Registra el stack en el servidor y responde con un mensaje genérico."

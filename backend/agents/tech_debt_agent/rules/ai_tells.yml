@@ -1,0 +1,39 @@
+rules:
+  - id: use-effect-fetch-sin-dependencias
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "useEffect sin array de dependencias que hace fetch"
+    patterns:
+      - pattern: useEffect(() => { ... fetch(...) ... })
+      - pattern-not: useEffect($F, [...])
+    metadata:
+      family: 8
+      why: "Sin array de dependencias el efecto corre en cada render; si cambia estado provoca un bucle y repite peticiones."
+      fix: "Añade el array de dependencias (o [] para una sola vez) y revisa que el efecto sea necesario."
+
+  - id: use-effect-estado-sin-dependencias
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "useEffect sin array de dependencias que cambia estado"
+    patterns:
+      - pattern: useEffect(() => { ... $SET(...) ... })
+      - pattern-not: useEffect($F, [...])
+      - metavariable-regex:
+          metavariable: $SET
+          regex: ^set[A-Z]\w*$
+    metadata:
+      family: 8
+      why: "Sin array de dependencias el efecto corre en cada render; si cambia estado provoca un bucle y repite peticiones."
+      fix: "Añade el array de dependencias (o [] para una sola vez) y revisa que el efecto sea necesario."
+
+  - id: parseo-manual-de-url
+    languages: [python, javascript, typescript]
+    severity: INFO
+    message: "Parseo manual de URL con split"
+    pattern-either:
+      - pattern: $X.split("?")
+      - pattern: $X.split("://")
+    metadata:
+      family: 8
+      why: "Trocear URLs a mano falla con fragmentos, puertos, credenciales o parámetros con ?; la librería estándar ya lo resuelve."
+      fix: "Usa urllib.parse.urlparse en Python o new URL(...) en JavaScript."
