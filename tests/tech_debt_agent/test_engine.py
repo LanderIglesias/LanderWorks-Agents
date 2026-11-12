@@ -168,6 +168,8 @@ def test_fusion_por_familia():
     hi = _finding(Family.SAST, Severity.HIGH)
     lo = _finding(Family.SAST, Severity.LOW)
     other = _finding(Family.SAST, Severity.LOW, line=2)
+    ai = _finding(Family.AI_TELLS, Severity.LOW, line=5)
+    ai_hi = _finding(Family.AI_TELLS, Severity.MEDIUM, line=5)
     merged = engine.merge_results(
         [
             FamilyResult(Family.SAST, "ok", None, [lo, other]),
@@ -175,7 +177,7 @@ def test_fusion_por_familia():
             FamilyResult(Family.SAST, "not_analyzed", "semgrep ausente"),
             FamilyResult(Family.CVE, "not_analyzed", "a"),
             FamilyResult(Family.CVE, "not_analyzed", "b"),
-            FamilyResult(Family.AI_TELLS, "ok", None, []),
+            FamilyResult(Family.AI_TELLS, "ok", None, [ai, ai_hi]),
         ]
     )
     by = {r.family: r for r in merged}
@@ -184,4 +186,31 @@ def test_fusion_por_familia():
     assert [f.severity for f in sast.findings] == [Severity.HIGH, Severity.LOW]
     assert "semgrep ausente" in sast.reason and "nota" in sast.reason
     assert by[Family.CVE].status == "not_analyzed"
-    assert Family.AI_TELLS not in by
+    assert by[Family.AI_TELLS].status == "not_analyzed"
+    assert [f.severity for f in by[Family.AI_TELLS].findings] == [Severity.MEDIUM]
+
+
+def test_familia_8_estado_del_llm_hallazgos_de_ambos():
+    sem = FamilyResult(
+        Family.AI_TELLS, "not_analyzed", "pendiente", [_finding(Family.AI_TELLS, Severity.LOW)]
+    )
+    llm_f = _finding(Family.AI_TELLS, Severity.HIGH, line=9)
+    down = engine.combine_ai_tells(
+        sem, FamilyResult(Family.AI_TELLS, "not_analyzed", "no disponible")
+    )
+    assert down.status == "not_analyzed" and len(down.findings) == 1
+    assert "1 hallazgos de reglas automáticas" in down.reason
+    up = engine.combine_ai_tells(sem, FamilyResult(Family.AI_TELLS, "ok", None, [llm_f]))
+    assert up.status == "ok" and len(up.findings) == 2
+    assert engine.combine_ai_tells(sem, None).status == "not_analyzed"
+
+
+def test_emit_roto_no_aborta(tmp_path, monkeypatch, tmp_dirs):
+    monkeypatch.setattr(engine, "clone_repo", _clone_from(_py_repo(tmp_path)))
+    _fast_scanners(monkeypatch)
+
+    def broken(_e):
+        raise RuntimeError("cola cerrada")
+
+    report, _ = engine.run_analysis(META, threading.Event(), broken, FakeClient())
+    assert len(report["families"]) == 8

@@ -12,7 +12,7 @@ from langgraph.graph import END, START, StateGraph
 
 from .findings import Family, FamilyResult, Finding
 from .llm_reviewer import review
-from .repo_fetcher import RepoMeta, _rmtree, clone_repo, list_source_files
+from .repo_fetcher import MAX_FILE_BYTES, RepoMeta, _rmtree, clone_repo, list_source_files
 from .report_generator import build_report
 from .scanners.complexity import scan_complexity
 from .scanners.deps import scan_deps
@@ -30,7 +30,7 @@ ProgressEvent = dict
 SCANNERS: dict[str, tuple[Callable, tuple[Family, ...]]] = {
     "secrets": (scan_secrets, (Family.SECRETS,)),
     "deps": (scan_deps, (Family.CVE,)),
-    "sast": (scan_sast, (Family.SAST, Family.ERRORS, Family.DEBUG)),
+    "sast": (scan_sast, (Family.SAST, Family.ERRORS, Family.DEBUG, Family.AI_TELLS)),
     "python_lint": (scan_python_lint, (Family.SAST, Family.ERRORS, Family.DEBUG)),
     "complexity": (scan_complexity, (Family.MONOLITH,)),
     "ghost_tests": (scan_ghost_tests, (Family.GHOST_TESTS,)),
@@ -81,41 +81,67 @@ class _Progress:
 
     def _send(self, step: str, message: str, progress: int) -> None:
         self._last = max(self._last, progress)
-        self._emit({"step": step, "message": message, "progress": self._last})
+        try:
+            self._emit({"step": step, "message": message, "progress": self._last})
+        except Exception as exc:  # noqa: BLE001 - un consumidor roto no debe abortar el análisis
+            logger.warning("emit fallido: %s", type(exc).__name__)
+
+
+def _dedupe(findings) -> list[Finding]:
+    best: dict[tuple, Finding] = {}
+    for f in findings:
+        key = (f.family, f.file, f.line_start)
+        if key not in best or SEVERITY_ORDER[f.severity] < SEVERITY_ORDER[best[key].severity]:
+            best[key] = f
+    return sorted(
+        best.values(), key=lambda f: (SEVERITY_ORDER[f.severity], f.file, f.line_start or 0)
+    )
 
 
 def merge_results(results: list[FamilyResult]) -> list[FamilyResult]:
-    # La familia 8 solo la decide el revisor LLM: un escáner estático no la cubre.
+    """La familia 8 sale siempre not_analyzed: su estado lo decide solo el revisor LLM."""
     groups: dict[Family, list[FamilyResult]] = {}
     for r in results:
-        if r.family != Family.AI_TELLS:
-            groups.setdefault(r.family, []).append(r)
+        groups.setdefault(r.family, []).append(r)
     merged = []
     for family, group in groups.items():
         ok = [r for r in group if r.status == "ok"]
         failed = [r.reason for r in group if r.status != "ok" and r.reason]
+        if family == Family.AI_TELLS:
+            findings = _dedupe(chain.from_iterable(r.findings for r in ok))
+            merged.append(FamilyResult(family, "not_analyzed", "pendiente de revisión", findings))
+            continue
         if not ok:
             reason = "; ".join(dict.fromkeys(failed)) or "sin resultados"
             merged.append(FamilyResult(family, "not_analyzed", reason))
             continue
-        best: dict[tuple, Finding] = {}
-        for f in chain.from_iterable(r.findings for r in ok):
-            key = (f.family, f.file, f.line_start)
-            if key not in best or SEVERITY_ORDER[f.severity] < SEVERITY_ORDER[best[key].severity]:
-                best[key] = f
-        findings = sorted(
-            best.values(),
-            key=lambda f: (SEVERITY_ORDER[f.severity], f.file, f.line_start or 0),
-        )
+        findings = _dedupe(chain.from_iterable(r.findings for r in ok))
         notes = [r.reason for r in ok if r.reason] + [f"fuente no disponible: {x}" for x in failed]
         merged.append(FamilyResult(family, "ok", "; ".join(dict.fromkeys(notes)) or None, findings))
     return merged
 
 
-def _count_kloc(files: list[Path]) -> float:
+def combine_ai_tells(static: FamilyResult | None, llm: FamilyResult | None) -> FamilyResult:
+    """Estado del LLM; hallazgos de reglas automáticas + LLM. Semgrep solo nunca da un ok."""
+    found = (static.findings if static else []) + (llm.findings if llm else [])
+    findings = _dedupe(found)
+    if llm is None:
+        return FamilyResult(Family.AI_TELLS, "not_analyzed", "no disponible", findings)
+    reason = llm.reason
+    if llm.status != "ok" and static and static.findings:
+        note = f"{len(static.findings)} hallazgos de reglas automáticas"
+        reason = f"{reason}; {note}" if reason else note
+    return FamilyResult(Family.AI_TELLS, llm.status, reason, findings)
+
+
+def _count_kloc(files: list[Path], cancel: threading.Event) -> float:
     lines = 0
     for path in files:
+        if cancel.is_set():
+            raise Cancelled()
         try:
+            if path.stat().st_size > MAX_FILE_BYTES:
+                continue
             with path.open("rb") as fh:
                 while chunk := fh.read(1 << 20):
                     lines += chunk.count(b"\n")
@@ -138,7 +164,7 @@ def _node_clone(state: State, config) -> dict:
     clone_repo(state["meta"], root, cancel)
     files = list_source_files(root)
     progress.step("clone", "Repositorio clonado", SCAN_START)
-    return {"root": str(root), "files": files, "kloc": _count_kloc(files)}
+    return {"root": str(root), "files": files, "kloc": _count_kloc(files, cancel)}
 
 
 def _make_scanner_node(name: str):
@@ -213,12 +239,14 @@ def _node_report(state: State, config) -> dict:
     _, progress = _ctx(config)
     progress.step("report", "Generando el informe", 94)
     meta = state["meta"]
-    llm = [r for r in state["llm_results"] if r.family == Family.AI_TELLS]
+    static = next((r for r in state["merged"] if r.family == Family.AI_TELLS), None)
+    llm = next((r for r in state["llm_results"] if r.family == Family.AI_TELLS), None)
+    rest = [r for r in state["merged"] if r.family != Family.AI_TELLS]
     report = build_report(
         meta.owner,
         meta.repo,
         meta.head_sha,
-        state["merged"] + llm,
+        rest + [combine_ai_tells(static, llm)],
         state["kloc"],
         state.get("summary"),
         len(state["files"]),
@@ -266,6 +294,8 @@ def run_analysis(
     emit: Callable[[ProgressEvent], None],
     llm_client=None,
 ) -> tuple[dict, float]:
+    # El borrado es seguro porque el ejecutor de LangGraph espera a los nodos hermanos antes de
+    # propagar la excepción (verificado con 0.2.28 fijado, en Docker); _cleanup cubre el resto.
     workdir = tempfile.mkdtemp(prefix="tech_debt_")
     try:
         configurable = {
