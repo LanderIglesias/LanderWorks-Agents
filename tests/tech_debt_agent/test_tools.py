@@ -55,3 +55,21 @@ def test_env_se_mezcla_con_el_entorno(tmp_path):
     code = "import os; print(os.environ['TD_X'])"
     out = run_tool([sys.executable, "-c", code], tmp_path, 5, threading.Event(), env={"TD_X": "v"})
     assert out.strip() == "v"
+
+
+def test_cancel_previo_no_arranca_el_proceso(tmp_path):
+    marca = tmp_path / "marca"
+    ev = threading.Event()
+    ev.set()
+    code = f"open({str(marca)!r}, 'w').close()"
+    with pytest.raises(Cancelled):
+        run_tool([sys.executable, "-c", code], tmp_path, 5, ev)
+    assert not marca.exists()
+
+
+def test_salida_demasiado_grande(tmp_path, monkeypatch):
+    from backend.agents.tech_debt_agent import tools
+
+    monkeypatch.setattr(tools, "MAX_OUTPUT_BYTES", 10)
+    with pytest.raises(RuntimeError, match="demasiado grande"):
+        run_tool([sys.executable, "-c", "print('x' * 100)"], tmp_path, 5, threading.Event())

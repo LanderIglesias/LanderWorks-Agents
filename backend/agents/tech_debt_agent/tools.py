@@ -11,6 +11,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 _POLL_SECONDS = 0.25
+MAX_OUTPUT_BYTES = 50 * 1024 * 1024
 
 
 class ToolUnavailable(Exception):
@@ -47,6 +48,8 @@ def run_tool(
 ) -> str:
     if shutil.which(args[0]) is None:
         raise ToolUnavailable(args[0])
+    if cancel.is_set():
+        raise Cancelled(args[0])
 
     popen_kwargs: dict = {}
     if os.name == "posix":
@@ -82,6 +85,9 @@ def run_tool(
             if proc.poll() is None:
                 _kill(proc)
             raise
+        finally:
+            if os.name == "posix":
+                _kill(proc)
 
         if proc.returncode not in ok_codes:
             err.seek(0)
@@ -93,4 +99,7 @@ def run_tool(
             )
             raise RuntimeError(f"{args[0]} salió con código {proc.returncode}")
         out.seek(0)
-        return out.read().decode("utf-8", "replace")
+        data = out.read(MAX_OUTPUT_BYTES + 1)
+        if len(data) > MAX_OUTPUT_BYTES:
+            raise RuntimeError(f"salida de {args[0]} demasiado grande")
+        return data.decode("utf-8", "replace")
