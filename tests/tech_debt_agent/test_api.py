@@ -20,6 +20,7 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setenv("TECH_DEBT_DB_PATH", str(tmp_path / "td.sqlite3"))
     monkeypatch.setattr(api, "get_repo_meta", lambda o, r, client=None: META)
     api.limiter.reset()
+    api._meta_cache.clear()
     calls = []
 
     def fake_run(meta, cancel, emit, llm_client=None):
@@ -204,3 +205,41 @@ def test_convive_con_el_limiter_del_expense_tracker():
     r = TestClient(app).post("/tech-debt/analyze", json={"github_url": "https://evil.com/a/b"})
     assert r.status_code in (400, 429)
     assert hasattr(app.state, "limiter")
+
+
+def _spend(db):
+    import contextlib
+
+    with contextlib.closing(CostGuard(db)._connect()) as c:
+        return c.execute("SELECT settled_usd FROM reservations").fetchall()
+
+
+def test_exito_liquida_el_coste_real(env):
+    client, _, db = env
+    assert post(client).status_code == 200
+    assert _spend(db) == [(0.01,)]
+
+
+def test_stream_done_liquida_y_cachea(env):
+    client, calls, db = env
+    post(client, path="/tech-debt/analyze/stream")
+    assert _spend(db) == [(0.01,)]
+    assert post(client).json()["cached"] is True
+    assert len(calls) == 1
+
+
+def test_meta_cache_ttl_evita_llamadas_a_github(env, monkeypatch):
+    client, _, _ = env
+    n = []
+
+    def meta(o, r, client=None):
+        n.append((o, r))
+        return META
+
+    monkeypatch.setattr(api, "get_repo_meta", meta)
+    post(client)
+    post(client, "https://github.com/OCTO/Demo")
+    assert len(n) == 1
+    api._meta_cache.clear()
+    post(client)
+    assert len(n) == 2

@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import threading
+import time
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
@@ -17,7 +18,7 @@ from .cost_guard import CostGuard, LimitExceeded, cache_key, default_db_path
 from .demo_template import demo_html
 from .engine import run_analysis
 from .llm_reviewer import max_cost_usd
-from .repo_fetcher import FetchError, get_repo_meta, normalize_github_url
+from .repo_fetcher import FetchError, RepoMeta, get_repo_meta, normalize_github_url
 from .tools import Cancelled
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,8 @@ _guards_lock = threading.Lock()
 
 def _client_ip(request: Request) -> str:
     # Detrás de Cloudflare la IP de conexión es la del proxy; CF-Connecting-IP trae la real.
+    # Fiarse de esa cabecera exige que el origen solo acepte tráfico de Cloudflare (requisito
+    # de despliegue, igual que en el expense tracker); si no, cualquiera puede falsearla.
     return request.headers.get("CF-Connecting-IP") or (
         request.client.host if request.client else "unknown"
     )
@@ -54,6 +57,28 @@ def setup_rate_limiting(app) -> None:
     if not hasattr(app.state, "limiter"):
         app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+_META_TTL_S = 300
+_META_MAX = 256
+_meta_cache: dict[tuple[str, str], tuple[float, RepoMeta]] = {}
+_meta_lock = threading.Lock()
+
+
+def _cached_meta(owner: str, repo: str) -> RepoMeta:
+    # el pool anónimo de la API de GitHub (60/h) es compartido por todos los visitantes
+    key = (owner.lower(), repo.lower())
+    now = time.monotonic()
+    with _meta_lock:
+        hit = _meta_cache.get(key)
+        if hit and now - hit[0] < _META_TTL_S:
+            return hit[1]
+    meta = get_repo_meta(owner, repo)
+    with _meta_lock:
+        if len(_meta_cache) >= _META_MAX:
+            _meta_cache.pop(min(_meta_cache, key=lambda k: _meta_cache[k][0]))
+        _meta_cache[key] = (now, meta)
+    return meta
 
 
 def _get_guard() -> CostGuard:
@@ -113,7 +138,7 @@ def _analyze(url: str, cancel: threading.Event, emit) -> tuple[dict, bool]:
     """Flujo completo y bloqueante; lanza ApiError con mensajes aptos para el cliente."""
     try:
         owner, repo = normalize_github_url(url)
-        meta = get_repo_meta(owner, repo)
+        meta = _cached_meta(owner, repo)
         guard = _get_guard()
         key = cache_key(owner, repo, meta.head_sha)
         cached = guard.get_cached(key)
