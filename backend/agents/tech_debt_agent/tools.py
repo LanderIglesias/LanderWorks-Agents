@@ -3,6 +3,7 @@ import os
 import shutil
 import signal
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -103,3 +104,29 @@ def run_tool(
         if len(data) > MAX_OUTPUT_BYTES:
             raise RuntimeError(f"salida de {args[0]} demasiado grande")
         return data.decode("utf-8", "replace")
+
+
+def find_executable(name: str) -> str | None:
+    # run_tool exige un ejecutable resoluble; los paquetes pip (ruff, lizard) viven junto al
+    # intérprete (Scripts/ o bin/) y ese directorio puede no estar en PATH.
+    found = shutil.which(name)
+    if found:
+        return found
+    for candidate in (name, f"{name}.exe"):
+        path = Path(sys.executable).parent / candidate
+        if path.is_file():
+            return str(path)
+    return None
+
+
+def chunk_args(items: list[str], budget: int = 20000) -> list[list[str]]:
+    # Windows limita la línea de comandos a ~32k caracteres.
+    chunks: list[list[str]] = []
+    size = 0
+    for item in items:
+        if not chunks or size + len(item) + 1 > budget:
+            chunks.append([])
+            size = 0
+        chunks[-1].append(item)
+        size += len(item) + 1
+    return chunks
