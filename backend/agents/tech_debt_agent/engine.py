@@ -328,8 +328,3 @@ def run_analysis(
         return final["final_report"], final.get("cost", 0.0)
     finally:
         _cleanup(Path(workdir))
-
-
-def analyze_repository(github_url: str) -> dict:
-    """Atajo del API antiguo; la Task 13 lo elimina junto con el api.py heredado."""
-    raise NotImplementedError("sustituido por run_analysis")

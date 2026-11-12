@@ -36,6 +36,9 @@ except Exception as e:
 
 try:
     from .agents.tech_debt_agent.api import router as tech_debt_router
+    from .agents.tech_debt_agent.api import (
+        setup_rate_limiting as _setup_tech_debt_rate_limiting,
+    )
 
     TECH_DEBT_AGENT_AVAILABLE = True
 except Exception as e:
@@ -116,6 +119,7 @@ if JOB_MATCHER_AVAILABLE:
     app.include_router(job_matcher_router)
 if TECH_DEBT_AGENT_AVAILABLE:
     app.include_router(tech_debt_router)
+    _setup_tech_debt_rate_limiting(app)
 if MEETING_INTEL_AVAILABLE:
     app.include_router(meeting_intel_router)
 if DOC_INTEL_AVAILABLE:

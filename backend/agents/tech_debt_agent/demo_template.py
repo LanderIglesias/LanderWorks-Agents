@@ -136,7 +136,7 @@ def demo_html() -> str:
   <div class="logo">TD</div>
   <div class="header-brand">
     <div class="header-title">Technical Debt Analyzer</div>
-    <div class="header-sub">AST · radon · Claude · LangGraph</div>
+    <div class="header-sub">Semgrep · Gitleaks · OSV · Claude · LangGraph</div>
   </div>
   <div class="header-pills">
     <span class="hpill">Python</span>
@@ -197,7 +197,7 @@ def demo_html() -> str:
 
     <div class="tab-panel active" id="panel-issues">
       <table class="issues-table">
-        <thead><tr><th>SEVERITY</th><th>TYPE</th><th>FILE</th><th>MESSAGE</th></tr></thead>
+        <thead><tr><th>SEVERITY</th><th>FAMILY</th><th>FILE</th><th>WHY / FIX</th></tr></thead>
         <tbody id="issuesBody"></tbody>
       </table>
     </div>
@@ -252,6 +252,12 @@ def demo_html() -> str:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ github_url: url })
       });
+      if (!response.ok) {
+        let msg = 'Error ' + response.status;
+        try { const d = await response.json(); msg = d.detail || d.error || msg; } catch(e) {}
+        showError(typeof msg === 'string' ? msg : 'Error ' + response.status);
+        return;
+      }
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -274,7 +280,7 @@ def demo_html() -> str:
   }
 
   function handleEvent(data) {
-    if (data.error) { showError(data.message); return; }
+    if (data.step === 'error') { showError(data.message); return; }
     setProgress(data.progress);
     if (data.step !== 'done') addStep(data.message, 'active');
     if (data.step === 'done' && data.report) {
@@ -285,43 +291,54 @@ def demo_html() -> str:
     }
   }
 
+  const gradeColor = (s) => s >= 80 ? 'green' : s >= 60 ? 'yellow' : s >= 40 ? 'orange' : 'red';
+
   function renderReport(report) {
     document.getElementById('progressSection').classList.remove('visible');
     document.getElementById('reportSection').classList.add('visible');
-    const summary = report.summary || {};
-    const score = report.health_score;
+    const score = Number(report.score) || 0;
+    const families = report.families || [];
+    const top = report.top || [];
+    const notAnalyzed = report.not_analyzed || [];
 
     const fill = document.getElementById('scoreRingFill');
     fill.style.strokeDashoffset = 314 - (score / 100 * 314);
     fill.style.stroke = score >= 80 ? '#00FF88' : score >= 60 ? '#FFD700' : score >= 40 ? '#FF8844' : '#FF4444';
     animateNumber('scoreNumber', 0, score, 1200);
 
-    document.getElementById('scoreRepo').textContent = summary.repo_name || '—';
-    document.getElementById('scoreLabel').textContent = report.score_label || '—';
+    document.getElementById('scoreRepo').textContent = report.repo || '—';
+    document.getElementById('scoreLabel').textContent = 'Grade ' + (report.grade || '—');
     document.getElementById('scoreMeta').innerHTML = [
-      `<span class="meta-item">Files: <strong>${summary.files_analyzed||0}</strong></span>`,
-      `<span class="meta-item">Issues: <strong>${summary.total_issues||0}</strong></span>`,
-      `<span class="meta-item">Tests: <strong>${summary.has_tests ? 'Yes ('+summary.test_ratio+'%)' : 'No'}</strong></span>`,
-      `<span class="meta-item">CI/CD: <strong>${summary.has_ci_cd ? 'Yes' : 'No'}</strong></span>`,
+      `<span class="meta-item">Findings: <strong>${families.reduce((n, f) => n + (f.findings || []).length, 0)}</strong></span>`,
+      `<span class="meta-item">Not analyzed: <strong>${notAnalyzed.length}</strong></span>`,
+      report.cached ? '<span class="meta-item"><strong>CACHED</strong></span>' : '',
     ].join('');
 
-    const risk = summary.risk_level || 'unknown';
-    const riskColor = risk === 'low' ? 'green' : risk === 'medium' ? 'yellow' : 'red';
-    document.getElementById('summaryGrid').innerHTML = [
-      card('HEALTH SCORE', score+'/100', score>=60?'green':score>=40?'yellow':'red'),
-      card('RISK LEVEL', risk.toUpperCase(), riskColor),
-      card('OUTDATED DEPS', summary.outdated_deps||0, (summary.outdated_deps||0)>5?'orange':'green'),
-      card('TEST COVERAGE', (summary.test_ratio||0)+'%', (summary.test_ratio||0)>=60?'green':(summary.test_ratio||0)>=30?'yellow':'red'),
-    ].join('');
+    const gate = report.security_gate_applied
+      ? card('SECURITY GATE', 'SCORE CAPPED AT 40', 'red') : '';
+    document.getElementById('summaryGrid').innerHTML = gate + families.map(f =>
+      f.score == null
+        ? card(esc(f.name), 'N/A', 'orange')
+        : card(esc(f.name), esc(f.score) + ' · ' + esc(f.grade), gradeColor(f.score))
+    ).join('');
 
-    document.getElementById('issuesBody').innerHTML =
-      '<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:20px;">See Full Report tab for detailed issues breakdown</td></tr>';
+    const rows = top.slice(0, 10).map(f =>
+      `<tr><td><span class="severity-badge ${esc(f.severity)}">${esc(f.severity)}</span></td>` +
+      `<td>${esc(f.family)}</td><td>${esc(f.file)}:${esc(f.line_start)}</td>` +
+      `<td>${esc(f.why)}<br><span style="color:var(--text3)">${esc(f.fix)}</span></td></tr>`
+    ).join('');
+    const skipped = notAnalyzed.map(n =>
+      `<tr><td colspan="4" style="color:var(--text3)">Not analyzed: ${esc(n.name)} — ${esc(n.reason)}</td></tr>`
+    ).join('');
+    document.getElementById('issuesBody').innerHTML = rows || skipped
+      ? rows + skipped
+      : '<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:20px;">No findings</td></tr>';
 
     document.getElementById('markdownReport').innerHTML = DOMPurify.sanitize(marked.parse(report.markdown || ''));
     const blob = new Blob([report.markdown||''], { type: 'text/markdown' });
     const dlBtn = document.getElementById('downloadBtn');
     dlBtn.href = URL.createObjectURL(blob);
-    dlBtn.download = (summary.repo_name||'report') + '-tech-debt.md';
+    dlBtn.download = String(report.repo || 'report').replace(/[^\w.-]+/g, '-') + '-tech-debt.md';
   }
 
   function card(label, value, colorClass) {

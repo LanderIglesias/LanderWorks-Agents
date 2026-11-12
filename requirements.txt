@@ -64,7 +64,6 @@ langfuse==4.5.1
 
 # Technical Debt Analyzer
 gitpython==3.1.44
-radon==6.0.1
 pygments==2.18.0
 PyGithub==2.5.0
 packaging==24.2
