@@ -31,8 +31,10 @@ def family_score(result: FamilyResult, kloc: float) -> int | None:
     if result.status != "ok":
         return None
     total = sum(SEVERITY_WEIGHT[f.severity] for f in result.findings)
-    divisor = 1 if result.family in UNNORMALIZED else max(kloc, 1)
-    return max(0, round(100 - 10 * total / divisor))
+    if result.family in UNNORMALIZED:
+        return max(0, round(100 - 10 * total))
+    # round() redondea a par en los .5 (half-to-even)
+    return max(0, round(100 - 3 * total / max(kloc, 1)))
 
 
 def grade(score: int) -> str:

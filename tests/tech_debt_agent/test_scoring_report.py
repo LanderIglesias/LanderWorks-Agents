@@ -6,7 +6,7 @@ from backend.agents.tech_debt_agent.findings import (
     Finding,
     Severity,
 )
-from backend.agents.tech_debt_agent.report_generator import build_report
+from backend.agents.tech_debt_agent.report_generator import _esc, build_report
 from backend.agents.tech_debt_agent.scoring import (
     family_score,
     global_score,
@@ -59,14 +59,15 @@ def test_critical_family6_no_gate():
 
 def test_kloc_normalization():
     r = ok(6, *[f(6) for _ in range(10)])
-    assert family_score(r, 5.0) > family_score(r, 1.0)
+    assert family_score(r, 1.0) == 40
+    assert family_score(r, 5.0) == 88
     assert family_score(r, 0) == family_score(r, 1) == family_score(r, 0.2)
 
 
 def test_unnormalized_families():
     r = ok(1, f(1, Severity.HIGH))
     assert family_score(r, 100) == 50
-    assert family_score(ok(5, f(5, Severity.HIGH)), 100) == 100 - round(0.5)
+    assert family_score(ok(5, f(5, Severity.HIGH)), 1) == 85
 
 
 def test_family_score_none_and_floor():
@@ -131,3 +132,29 @@ def test_malicious_text_is_neutralized():
     assert "<img" not in md
     assert not re.search(r"^# head", md, re.M)
     assert "`ab.py:12`" in md
+
+
+def test_esc_exact_output():
+    assert _esc("a_b") == r"a\_b"
+    assert _esc("f(x) *y*") == r"f\(x\) \*y\*"
+    assert _esc("plain text, 1.5") == "plain text, 1.5"
+
+
+def test_esc_breaks_autolinks():
+    out = _esc("see https://evil.com and www.evil.com")
+    assert "://" not in out and "www." not in out
+
+
+def test_summary_line_start_injection():
+    for summary in ("- item", "---", "# h", "1. x"):
+        md = build(clean(), summary=summary)["markdown"]
+        line = next(x for x in md.splitlines() if "Resumen:" in x)
+        assert line.startswith("**Resumen:** ")
+
+
+def test_length_caps():
+    assert len(_esc("x" * 5000)) == 500 and _esc("x" * 5000).endswith("…")
+    res = clean()
+    res[1] = ok(2, f(2, file="p" * 1000, title="t" * 1000))
+    md = build(res, summary="s" * 5000)["markdown"]
+    assert "p" * 301 not in md and "t" * 501 not in md and "s" * 2001 not in md

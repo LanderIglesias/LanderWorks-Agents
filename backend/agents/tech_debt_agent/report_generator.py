@@ -314,17 +314,22 @@ def _score_label(score: int) -> str:
 _MD_SPECIAL = re.compile(r"([\\[\]()`*_#|~!])")
 
 
-def _esc(text: object) -> str:
+def _truncate(s: str, limit: int) -> str:
+    return s if len(s) <= limit else s[: limit - 1] + "…"
+
+
+def _esc(text: object, limit: int = 500) -> str:
     """Neutraliza texto no confiable: sin enlaces, imágenes, HTML ni saltos de línea."""
-    s = " ".join(str(text if text is not None else "").split())
+    s = _truncate(" ".join(str(text if text is not None else "").split()), limit)
     s = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    return _MD_SPECIAL.sub(r"\\1", s)
+    s = s.replace("://", ":/​/").replace("www.", "www​.")
+    return _MD_SPECIAL.sub(lambda m: "\\" + m.group(1), s)
 
 
 def _location(f: Finding) -> str:
     if f.file == ".":
         return "`proyecto`"
-    where = " ".join(f.file.replace("`", "").split())
+    where = _truncate(" ".join(f.file.replace("`", "").split()), 300)
     if f.line_start is not None:
         where += f":{f.line_start}"
     return f"`{where}`"
@@ -376,7 +381,7 @@ def _report_markdown(
         lines += [f"> - {FAMILY_NAMES[r.family]}: {_esc(r.reason)}" for r in skipped]
         lines.append("")
     if summary:
-        lines += ["## Resumen ejecutivo", "", _esc(summary), ""]
+        lines += ["## Resumen ejecutivo", "", "**Resumen:** " + _esc(summary, 2000), ""]
     lines += ["## Qué tocar primero", ""]
     lines += [_finding_md(f, True) for f in top] if top else ["Sin hallazgos."]
     lines.append("")
