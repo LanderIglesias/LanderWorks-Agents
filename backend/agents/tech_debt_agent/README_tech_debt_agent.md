@@ -1,176 +1,133 @@
 # Technical Debt Analyzer
 
-Production-grade repository health scanner that combines static code analysis with LLM interpretation. Give it a GitHub URL and it returns a 0-100 health score, prioritized issues, and a Claude-generated report with business impact and concrete recommendations — not just technical metrics.
+Static analyzer for public GitHub repositories (Python and JS/TS). It runs mature
+scanners in parallel, has Claude read the highest-risk files for design and
+"AI-written code" smells, and returns a 0-100 score with findings grouped in eight
+families. Every finding cites `file:line`.
+
+The report itself is written in Spanish.
 
 **Portfolio:** [notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d](https://www.notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d)
 
 ---
 
-## The problem
+## What it detects
 
-Every codebase accumulates technical debt. Developers know it exists but can't quantify it for non-technical stakeholders. Linters give you thousands of warnings with no prioritization. CTOs can't read code. There's no open-source tool that analyzes a Python repo, scores its health, and explains the business impact of each issue in plain language.
+| # | Family | How |
+|---|---|---|
+| 1 | Secrets, including git history | gitleaks |
+| 2 | Code vulnerabilities (SAST): SQL built from strings, `eval`/`exec`, `shell=True`, insecure deserialization, CORS `*` | semgrep with vendored rules, ruff `S` rules |
+| 3 | Dependencies with known CVEs | osv-scanner |
+| 4 | Error handling: swallowed errors and errors exposed to the client | semgrep rules, ruff `BLE` |
+| 5 | Monoliths and duplication | lizard (complexity, duplicated blocks), plus Claude for design issues such as files mixing routes, business logic and data access |
+| 6 | Debug leftovers: stray `print` / `console.log`, commented-out code | semgrep rules, ruff `T20` |
+| 7 | Ghost tests: no tests, tests without assertions, `assert True`, tests that only check mocks | own static analysis (`ast` for Python, bounded block parsing for JS/TS) |
+| 8 | AI-written code tells: narrating comments, generic names, giant try/except, reimplemented stdlib, tutorial boilerplate | Claude |
+
+Nothing from the analyzed repository is executed: no tests, no dependency install.
 
 ---
 
-## Solution
-
-A 6-node LangGraph pipeline that clones any GitHub repository, runs four independent analyzers in sequence, and feeds the structured results to Claude — which interprets them in business terms and generates a prioritized action plan.
-
-**What makes it different from a linter:**
-- Linters give you warnings. This gives you business impact.
-- Linters treat all issues equally. This weights them by severity and category.
-- Linters don't explain why something matters. Claude does.
-- Linters don't estimate remediation effort. This does.
-
----
-
-## Architecture
+## Pipeline
 
 ```
-GitHub URL
-     │
-     ▼
-┌─────────────┐
-│ Repo Fetcher │  gitpython clones repo with depth=1
-│  (Nodo 1)   │  into a temp folder (auto-deleted after)
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────┐
-│  Code Analyzer  │  AST: long functions, too many params,
-│   (Nodo 2)      │  large classes, long files
-│                 │  radon: cyclomatic complexity per function
-│                 │  radon: maintainability index per file
-└──────┬──────────┘
-       │
-       ▼
-┌──────────────────────┐
-│  Dependency Scanner  │  requirements.txt parsing
-│     (Nodo 3)         │  PyPI API: detects outdated packages
-│                      │  AST: detects unused dependencies
-│                      │  Detects unpinned versions (no ==)
-└──────┬───────────────┘
-       │
-       ▼
-┌─────────────────┐
-│  Test Analyzer  │  Counts test files vs source files
-│   (Nodo 4)      │  Detects pytest config
-│                 │  Detects CI/CD configuration
-│                 │  Estimates untested public functions
-└──────┬──────────┘
-       │
-       ▼
-┌──────────────────┐
-│ Health Score     │  Weighted formula:
-│ (calculated      │  Code quality: 40pts
-│  before Claude)  │  Tests: 30pts
-│                  │  Dependencies: 20pts
-└──────┬───────────┘  CI/CD: 10pts
-       │
-       ▼
-┌──────────────────┐
-│ LLM Interpreter  │  Claude receives structured summary
-│   (Nodo 5)       │  (not raw code) and generates:
-│                  │  - Executive summary for CTOs
-│                  │  - Critical findings with business impact
-│                  │  - Prioritized recommendations
-│                  │  - Risk level + estimated remediation hours
-└──────┬───────────┘
-       │
-       ▼
-┌──────────────────┐
-│ Report Generator │  Combines technical data + Claude output
-│   (Nodo 6)       │  into structured report + markdown
-│                  │  Health score label + summary cards
-└──────────────────┘
+           clone (shallow, size-capped, temp dir)
+                         |
+   +--------+--------+---+----+-------------+------------+
+   |        |        |        |             |            |
+secrets   deps     sast   python_lint   complexity   ghost_tests     (in parallel)
+gitleaks  osv     semgrep    ruff         lizard      ast / regex
+   |        |        |        |             |            |
+   +--------+--------+---+----+-------------+------------+
+                         |
+                      dedupe            same family + file + line counts once,
+                         |              keeping the highest severity
+                    llm_review          Claude reads the riskiest files (families 8 and 5)
+                         |
+                       report           per-family score, security gate, markdown
 ```
 
----
-
-## Key features
-
-**AST-based code analysis**
-Uses Python's built-in `ast` module to parse code into a syntax tree — not as text. This means no false positives from comments or strings that happen to look like code patterns.
-
-**Cyclomatic complexity with radon**
-Measures how many independent paths exist through each function. A function with complexity 26 needs 26 test cases to be fully covered — practically untestable. This is the most actionable metric for refactoring priorities.
-
-**PyPI dependency checking**
-Queries the PyPI public API for each pinned dependency and compares versions. Detects outdated packages, unpinned dependencies (no `==`), and dependencies declared in requirements.txt but never imported in the code.
-
-**Weighted health score (0-100)**
-Not a simple issue count — a weighted formula where a repo with no tests can never score above 70, regardless of code quality. A repo with critical syntax errors scores near 0. The weights reflect real engineering priorities.
-
-**Claude as business interpreter**
-Claude doesn't see the raw code — it receives a structured summary of findings and translates them into business language. "Function X has cyclomatic complexity 26" becomes "this module blocks all future feature development on the anomaly detection system because no engineer can safely modify it."
-
-**Streaming progress (SSE)**
-The analysis takes 30-90 seconds. Instead of a loading spinner, the UI shows real-time progress: cloning → analyzing → scanning dependencies → checking tests → Claude interpreting → generating report.
-
-**Downloadable markdown report**
-The full report is downloadable as a `.md` file for sharing with the team or attaching to engineering planning documents.
+LangGraph orchestrates the graph. Cancellation (client disconnect on the SSE
+endpoint) propagates to every running scanner, and the temp clone is always removed.
 
 ---
 
-## Tech stack
+## Scoring
 
-| Layer | Technology |
+- Each finding weighs by severity: critical 10, high 5, medium 2, low 0.5.
+- Families 1, 3 and 7 score `100 - 10 * weight`. The rest are normalized per KLOC
+  (`100 - 3 * weight / KLOC`), so a medium-sized repo does not score 0 by default.
+- The global score is the weighted average of the families that were analyzed. A
+  family that could not be analyzed (tool missing, no lockfile, LLM error) is listed
+  as such and does not count.
+- **Security gate:** any critical finding in secrets, SAST or CVEs caps the global
+  score at 40.
+- Grades: A >= 90, B >= 75, C >= 60, D >= 40, F below.
+
+---
+
+## Hardening
+
+The endpoint is public and processes untrusted repositories.
+
+- URL validation: exact `github.com` host and an `owner/repo` path with an allowlisted
+  character set. Public repositories only.
+- Repository size checked through the GitHub API before cloning (200 MB), shallow
+  clone with a timeout, and a 400 MB cap on the clone directory while it is written.
+- Files over 300 KB, symlinks and vendored directories are skipped.
+- Every external tool runs with a timeout, a bounded output size and cancellation.
+- Config files from the analyzed repo (`.gitleaks.toml`, `.gitleaksignore`,
+  `osv-scanner.toml`, inline `gitleaks:allow`) cannot silence findings.
+- Repository content sent to Claude is wrapped as data, the prompt treats it as
+  untrusted, and every cited line is checked against the real file; findings citing
+  non-existent lines are dropped. Model text is escaped when rendering the report.
+- The container runs as an unprivileged user.
+
+---
+
+## Cost limits
+
+| Limit | Value |
 |---|---|
-| Pipeline orchestration | LangGraph (6-node stateful graph) |
-| LLM | Anthropic Claude Haiku |
-| Code parsing | Python `ast` (built-in) |
-| Complexity analysis | radon |
-| Repository cloning | gitpython |
-| Dependency version checking | httpx + PyPI public API |
-| Version comparison | packaging |
-| Streaming | Server-Sent Events (SSE) |
-| Backend | FastAPI, Python 3.12 |
+| Analyses per day | 20 (global) |
+| Monthly budget | 20 EUR |
+| Rate limit per IP | 5/minute, 30/day |
+| Concurrent analyses | 2 |
+| Result cache | 24 h, keyed by repo and HEAD commit |
+
+Before each analysis the maximum possible LLM cost is reserved; the reservation is
+settled with the real cost afterwards. Counters live in SQLite (WAL mode) so they
+survive restarts. A cache hit costs nothing and does not use quota.
+
+Measured on three real repositories (2026-11-13): **0.10 to 0.12 USD per analysis**,
+26 to 110 seconds.
 
 ---
 
-## Key technical decisions
+## Configuration
 
-**Why AST instead of reading code as text?**
-Text-based analysis with regex is fragile — "def " can appear in comments, strings, or docstrings. AST parses the actual structure of the code: every `FunctionDef`, `ClassDef`, `Import` is a node in the tree with exact line numbers and metadata. No false positives.
+| Variable | Required | Purpose |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | yes | Claude review. Without it, family 8 is reported as not analyzed. |
+| `GITHUB_TOKEN` | no | Raises the GitHub API rate limit for repository metadata. |
+| `TECH_DEBT_DB_PATH` | no | SQLite file for quota, budget and cache. Defaults to `backend/data/`. Point it at a mounted volume in production. |
+| `TECH_DEBT_EUR_PER_USD` | no | Exchange rate for the monthly budget. Default `0.92`. |
 
-**Why `depth=1` when cloning?**
-`git clone` downloads the full commit history by default. For a 2-year-old repo with thousands of commits, that's hundreds of MB. We only need the current state of the code — `depth=1` downloads only the latest commit, making the clone 10-100x faster.
+The scanners are pinned in the `Dockerfile` (gitleaks 8.18.4, osv-scanner 2.7.1,
+semgrep 1.163.0 in an isolated venv) with SHA-256 verified downloads. The versions
+must match the constants in `scanners/`.
 
-**Why not give Claude the raw code?**
-A medium-sized repo has 50,000+ lines of code. That's way beyond Claude's practical context window for analysis. More importantly, Claude doesn't need to read the code — it needs the structured findings. We run the analysis first, summarize the top issues, and give Claude exactly what it needs to interpret them in business terms.
+### Docker image size
 
-**Why separate `calculate_health_score()` from `generate_report()`?**
-The health score is calculated before calling Claude so Claude can use it in its interpretation ("a health score of 20/100 indicates..."). If it were calculated after, Claude wouldn't know the score while generating the executive summary.
+Measured with `docker image ls` against the image without the scanners:
 
-**Why use a tempfile instead of a fixed directory?**
-If we cloned repos to a fixed directory, analyzing 10 different repos would fill the disk with 10 copies of large codebases. `tempfile.mkdtemp()` creates a uniquely-named temp folder that's automatically cleaned up after analysis, regardless of success or failure (`finally` block).
+| | Before | After | Increase |
+|---|---|---|---|
+| On disk | 2.66 GB | 3.27 GB | +610 MB |
+| Compressed | 589 MB | 716 MB | +127 MB |
 
-**Why is the health score weighted instead of counting total issues?**
-A repo with 50 style warnings is healthier than a repo with 5 critical issues. Simple issue counts are misleading. The weighted formula means: no tests → max 70/100, no CI/CD → max 90/100, critical syntax errors → near 0/100.
-
----
-
-## Limitations
-
-- **Python only.** The AST parser and radon only work with Python files. JavaScript, TypeScript, Go repos would need different parsers per language.
-- **Estimated test coverage.** We detect which source files have a corresponding test file, not actual line coverage. Real coverage requires running the tests with `pytest --cov`.
-- **PyPI API rate limits.** Checking 30+ dependencies against PyPI takes time and may hit rate limits on very large repos. We handle failures gracefully and skip packages that can't be checked.
-- **Private repos require authentication.** The current implementation only supports public GitHub repos. Private repos would need a GitHub token passed as an environment variable.
-- **Claude interprets findings, not code.** The LLM receives a structured summary, not the actual code. Its recommendations are general and based on the metrics — it can't suggest specific refactoring of individual functions.
-
----
-
-## Running locally
-
-```bash
-git clone https://github.com/LanderIglesias/LanderWorks-Agents
-cd LanderWorks-Agents
-pip install -r requirements.txt
-cp .env.example .env  # Add ANTHROPIC_API_KEY
-
-uvicorn backend.main:app --reload --port 8000
-open http://localhost:8000/tech-debt/demo
-```
+semgrep accounts for 436 MB on disk, gitleaks and osv-scanner for 65 MB. semgrep is
+kept because it is the only SAST coverage for JS/TS.
 
 ---
 
@@ -178,19 +135,60 @@ open http://localhost:8000/tech-debt/demo
 
 ```
 POST /tech-debt/analyze
-     Body: { github_url: str }
-     Response: { health_score, score_label, markdown, summary }
-     Note: synchronous, may take 30-90 seconds
+     Body: {"github_url": "https://github.com/owner/repo"}
+     200:  report + {"cached": bool}
+     400:  invalid URL, private or missing repository, repository too large
+     429:  daily quota, monthly budget or rate limit reached
+     503:  too many analyses in progress
 
 POST /tech-debt/analyze/stream
-     Body: { github_url: str }
-     Response: SSE stream
-     Events: { step, message, progress }
-     Final event: { step: "done", report: { ... } }
+     Same body. Server-Sent Events: {step, message, progress}
+     Final event: {"step": "done", "report": {...}, "cached": bool}
+              or  {"step": "error", "status": int, "message": str}
+     Closing the connection cancels the analysis.
 
 GET  /tech-debt/demo
-     Demo UI with real-time progress and downloadable report
+     Demo page with live progress and markdown download.
 ```
+
+The report contains `repo`, `head_sha`, `generated_at`, `score`, `grade`,
+`security_gate_applied`, `families`, `top` (the 10 findings to fix first),
+`not_analyzed` and `markdown`.
+
+---
+
+## Limitations
+
+- Python and JS/TS only. Other languages are counted but not analyzed.
+- Tests are never run, so coverage is not measured; family 7 is static.
+- CVEs need pinned versions: a repo with only `pyproject.toml` or `package.json` and
+  no lockfile or `requirements*.txt` gets family 3 as not analyzed.
+- SAST rules match patterns. An f-string SQL query that only interpolates internal
+  constants is still reported, and it triggers the security gate.
+- Claude reviews a selection of files within a fixed byte budget, not the whole repo,
+  and returns at most 20 findings.
+- Public repositories only.
+
+Out of scope for this phase: fixing code or opening PRs, private repositories, a
+visual redesign of the demo.
+
+---
+
+## Running locally
+
+The binary scanners are easiest to get through Docker:
+
+```bash
+docker build -t ai-portfolio .
+docker run --rm -p 8000:8000 -e ANTHROPIC_API_KEY ai-portfolio
+# http://localhost:8000/tech-debt/demo
+```
+
+Without Docker, `pip install -r requirements.txt` plus gitleaks, osv-scanner and
+semgrep on the `PATH`. Missing scanners are reported as "not analyzed".
+
+Tests: `pytest tests/tech_debt_agent`. Tests that need a binary are skipped when it
+is not installed; CI installs all three.
 
 ---
 
@@ -198,13 +196,17 @@ GET  /tech-debt/demo
 
 ```
 backend/agents/tech_debt_agent/
-├── api.py                  # FastAPI endpoints + SSE streaming
-├── engine.py               # LangGraph orchestrator (6 nodes)
-├── repo_fetcher.py         # Clone GitHub repo into temp folder
-├── code_analyzer.py        # AST + radon: quality issues per file
-├── dependency_scanner.py   # requirements.txt + PyPI version check
-├── test_analyzer.py        # Test coverage + CI/CD detection
-├── llm_interpreter.py      # Claude: findings → business impact
-├── report_generator.py     # Health score formula + markdown report
-└── demo_template.py        # Dark industrial UI with SSE progress
+├── api.py               # endpoints, limits, cache, cancellable SSE
+├── cost_guard.py        # SQLite: daily quota, monthly budget, result cache
+├── engine.py            # LangGraph graph
+├── repo_fetcher.py      # URL validation, size checks, clone, file listing
+├── tools.py             # subprocess runner with timeout and cancellation
+├── findings.py          # finding model and line-reference validation
+├── llm_reviewer.py      # Claude review via tool use
+├── scoring.py           # family scores, security gate, global score
+├── report_generator.py  # report dict and markdown
+├── demo_template.py     # demo page
+├── scanners/            # secrets, deps, sast, python_lint, complexity, ghost_tests
+├── rules/               # vendored semgrep rules
+└── rule_tests/          # semgrep rule test cases
 ```

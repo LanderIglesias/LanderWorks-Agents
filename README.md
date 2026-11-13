@@ -67,10 +67,10 @@ Hybrid ML + LLM system that scores the fit between a CV and a job offer. Claude 
 ---
 
 ### 8. Technical Debt Analyzer
-Analyzes any GitHub Python repository and returns a 0-100 health score with a Claude-generated business impact report. Combines AST-based static analysis, cyclomatic complexity (radon), PyPI dependency checking, and test coverage estimation into prioritized, actionable recommendations with effort estimates.
+Analyzes public GitHub repositories (Python and JS/TS) and returns a 0-100 score with findings in eight families, each citing `file:line`: secrets (including git history), SAST, dependency CVEs, error handling, monoliths and duplication, debug leftovers, ghost tests, and AI-written code tells. Mature scanners run in parallel; Claude reads the riskiest files for design issues. Hardened as a public endpoint: never executes the analyzed code, with size caps, daily quota, monthly budget and a 24 h result cache.
 
 **Demo:** [youtu.be/O_nH_DIkxyU](https://youtu.be/O_nH_DIkxyU)  
-**Tech:** Python · LangGraph · Python AST · radon · gitpython · httpx · PyPI API · Streaming SSE · Claude Haiku · FastAPI  
+**Tech:** Python · LangGraph · gitleaks · semgrep · osv-scanner · ruff · lizard · Claude Sonnet (tool use) · SQLite · Streaming SSE · FastAPI  
 **[View project →](backend/agents/tech_debt_agent/)**
 
 ---
@@ -139,8 +139,8 @@ Simulates a mechanic shop's diagnosis-to-invoice workflow with a supervisor/rout
 | boto3 | S3-compatible storage client (Cloudflare R2) |
 | Twilio | WhatsApp messaging |
 | Resend | Transactional email delivery |
-| gitpython | Repository cloning — Tech Debt Analyzer |
-| radon | Cyclomatic complexity + maintainability index — Tech Debt Analyzer |
+| gitleaks, semgrep, osv-scanner | Secrets, SAST and CVE scanning — Tech Debt Analyzer |
+| ruff, lizard | Python lint, complexity and duplication — Tech Debt Analyzer |
 | pydub | Audio preprocessing — Meeting Intelligence Agent |
 
 ### Data & Storage
@@ -189,7 +189,7 @@ backend/
     ├── bi_agent/                # Multi-agent BI analytics (LangGraph)
     ├── doc_intel_agent/         # Document intelligence (Docker + PostgreSQL)
     ├── job_matcher_agent/       # ML + LLM CV/job fit scorer
-    ├── tech_debt_agent/         # GitHub repo health analyzer (AST + radon + Claude)
+    ├── tech_debt_agent/         # GitHub repo debt analyzer (scanners + Claude)
     ├── meeting_intel_agent/     # Meeting analyzer (Whisper + Claude + pgvector)
     ├── mcp_agent/               # MCP server — Claude Desktop integration
     ├── mcp_demo/                # MCP demo server (development)

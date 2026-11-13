@@ -28,4 +28,21 @@ jobs:
           python-version-file: .python-version
           cache: pip
       - run: pip install -r requirements.txt -r requirements-dev.txt
+      # Escaneres del tech debt agent: sin ellos sus tests de binario se saltan.
+      # Mismas versiones y checksums que el Dockerfile.
+      - name: Instalar gitleaks y osv-scanner
+        run: |
+          curl -fsSL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
+          echo "ba6dbb656933921c775ee5a2d1c13a91046e7952e9d919f9bac4cec61d628e7d  gitleaks.tgz" | sha256sum -c -
+          sudo tar -xzf gitleaks.tgz -C /usr/local/bin gitleaks
+          curl -fsSL -o osv-scanner https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_linux_amd64
+          echo "fb7dab19a8bd9bbe5c3189f09d4b7ee1820c9553a23bac202648a56efd2f6ee8  osv-scanner" | sha256sum -c -
+          sudo install -m 0755 osv-scanner /usr/local/bin/osv-scanner
+          rm gitleaks.tgz osv-scanner
+      # venv aislado: los pins de semgrep chocan con los del monolito.
+      - name: Instalar semgrep
+        run: |
+          python -m venv "$RUNNER_TEMP/semgrep"
+          "$RUNNER_TEMP/semgrep/bin/pip" install semgrep==1.163.0
+          sudo ln -s "$RUNNER_TEMP/semgrep/bin/semgrep" /usr/local/bin/semgrep
       - run: pytest

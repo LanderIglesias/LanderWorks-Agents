@@ -63,9 +63,7 @@ twilio==9.3.7
 langfuse==4.5.1
 
 # Technical Debt Analyzer
-gitpython==3.1.44
 pygments==2.18.0
-PyGithub==2.5.0
 packaging==24.2
 python-docx==1.1.2
 beautifulsoup4==4.12.3
