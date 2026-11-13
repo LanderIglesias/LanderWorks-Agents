@@ -37,7 +37,7 @@ def test_ruff_detecta_plantados(vibe_repo):
     evals = [f for f in sast if f.file == "app/utils.py" and f.line_start == 8]
     assert evals and all(f.severity == "critical" for f in evals)
     assert any(
-        f.file == "app/main.py" and f.line_start == 17 and f.severity == "critical" for f in sast
+        f.file == "app/main.py" and f.line_start == 17 and f.severity == "high" for f in sast
     )
     errors = r[Family.ERRORS].findings
     assert any(f.file == "app/utils.py" and f.line_start in (24, 25) for f in errors)

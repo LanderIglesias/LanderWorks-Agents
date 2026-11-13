@@ -30,6 +30,11 @@ def test_semgrep_detecta_plantados(vibe_repo):
         f for f in results[Family.SAST].findings if f.file == "app/utils.py" and f.line_start == 8
     ]
     assert any(f.severity == "critical" for f in evals)
+    # La inyección plantada interpola un parámetro: sql-param-por-string la marca crítica.
+    sql = [
+        f for f in results[Family.SAST].findings if f.file == "app/main.py" and f.line_start == 17
+    ]
+    assert any(f.severity == "critical" for f in sql)
 
 
 @pytest.mark.skipif(shutil.which("semgrep") is None, reason="semgrep no instalado")

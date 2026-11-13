@@ -163,8 +163,10 @@ The report contains `repo`, `head_sha`, `generated_at`, `score`, `grade`,
 - Tests are never run, so coverage is not measured; family 7 is static.
 - CVEs need pinned versions: a repo with only `pyproject.toml` or `package.json` and
   no lockfile or `requirements*.txt` gets family 3 as not analyzed.
-- SAST rules match patterns. An f-string SQL query that only interpolates internal
-  constants is still reported, and it triggers the security gate.
+- SAST rules match patterns, with no data-flow analysis. SQL built from strings is
+  reported as high; it is critical (and triggers the security gate) only when a
+  function parameter is interpolated directly. A value that reaches the query through
+  an intermediate variable is therefore high, not critical.
 - Claude reviews a selection of files within a fixed byte budget, not the whole repo,
   and returns at most 20 findings.
 - Public repositories only.

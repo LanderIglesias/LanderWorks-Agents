@@ -19,9 +19,11 @@ RUFF_VERSION = "0.17.4"
 TIMEOUT_SECONDS = 120
 FAMILIES = (Family.SAST, Family.ERRORS, Family.DEBUG)
 SELECT = "S,BLE,T20,E722,ERA001"
-CRITICAL = {"S307", "S602", "S608"}
+# S608 (SQL por string) es solo patrón: high. Lo crítico lo decide semgrep
+# (sql-param-por-string), que exige que se interpole un parámetro de la función.
+CRITICAL = {"S307", "S602"}
 HIGH = {
-    "S102", "S105", "S106", "S107", "S301", "S302", "S306", "S324", "S501", "S506", "S507",
+    "S608", "S102", "S105", "S106", "S107", "S301", "S302", "S306", "S324", "S501", "S506", "S507",
     "S604", "S605", "S701",
 }  # fmt: skip
 # S101 (assert) es ruido: los tests lo usan por diseño.

@@ -27,19 +27,19 @@ def evals(user_input, x):
 
 
 def sql(conn, cur, name, ids):
-    # ruleid: sql-por-string
+    # ruleid: sql-por-string, sql-param-por-string
     conn.execute(f"SELECT * FROM users WHERE name = '{name}'")
-    # ruleid: sql-por-string
+    # ruleid: sql-por-string, sql-param-por-string
     cur.execute("SELECT * FROM users WHERE name = '" + name + "'")
-    # ruleid: sql-por-string
+    # ruleid: sql-por-string, sql-param-por-string
     cur.execute("SELECT * FROM users WHERE name = '%s'" % name)
-    # ruleid: sql-por-string
+    # ruleid: sql-por-string, sql-param-por-string
     cur.execute(f"SELECT * FROM users WHERE name = '{name}'")
-    # ruleid: sql-por-string
+    # ruleid: sql-por-string, sql-param-por-string
     cur.executemany(f"INSERT INTO t VALUES ({name})", [])
-    # ruleid: sql-por-string
+    # ruleid: sql-por-string, sql-param-por-string
     cur.executescript(f"DROP TABLE {name}")
-    # ruleid: sql-por-string
+    # ruleid: sql-por-string, sql-param-por-string
     conn.execute(f"SELECT * FROM {TABLE} WHERE name = '{name}'")
     # ok: sql-por-string
     conn.execute(f"SELECT * FROM {TABLE}")
@@ -51,8 +51,23 @@ def sql(conn, cur, name, ids):
     conn.execute("SELECT * FROM users WHERE name = ?", (name,))
 
 
+def sql_tipado(conn, name: str = ""):
+    # ruleid: sql-por-string, sql-param-por-string
+    conn.execute(f"SELECT * FROM users WHERE name = '{name}'")
+
+
+def sql_local(conn, rows):
+    # Fragmento construido dentro: patrón sospechoso (high), sin evidencia de input (no critical).
+    where = "WHERE id = ?"
+    # ruleid: sql-por-string
+    conn.execute(f"SELECT * FROM t {where}", rows)
+    for table in ("a", "b"):
+        # ruleid: sql-por-string
+        conn.execute(f"DELETE FROM {table} WHERE id = ?", rows)
+
+
 def sql_text(name):
-    # ruleid: sql-text-por-string
+    # ruleid: sql-text-por-string, sql-param-por-string
     text(f"SELECT * FROM users WHERE name = '{name}'")
     # ok: sql-text-por-string
     text("SELECT * FROM users WHERE name = :name")

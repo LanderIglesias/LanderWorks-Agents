@@ -32,6 +32,9 @@ rules:
       why: "eval ejecuta como código lo que recibe; si el dato llega de fuera, permite ejecutar código arbitrario."
       fix: "Elimina eval; usa JSON.parse para datos o un mapa de funciones permitidas."
 
+  # Sin `critical`: un patrón no sabe si lo interpolado viene de fuera (falsos positivos
+  # reales: placeholders, constantes, nombres de tabla internos). Lo crítico, que activa la
+  # puerta de seguridad, es sql-param-por-string: se interpola un parámetro de la función.
   - id: sql-por-string
     languages: [python]
     severity: ERROR
@@ -51,7 +54,6 @@ rules:
           regex: '^(?![A-Z][A-Z0-9_]*$)(?!\w*placeholders?\w*$)(?!.*join\(\s*\[?\s*["''](\?|%s)["'']).*'
     metadata:
       family: 2
-      critical: true
       why: "Interpolar datos en la consulta permite inyección SQL: quien controle el valor controla la base de datos."
       fix: "Usa parámetros: conn.execute('SELECT ... WHERE name = ?', (name,))."
 
@@ -71,9 +73,38 @@ rules:
           regex: '^(?![A-Z][A-Z0-9_]*$)(?!\w*placeholders?\w*$)(?!.*join\(\s*\[?\s*["''](\?|%s)["'']).*'
     metadata:
       family: 2
-      critical: true
       why: "Interpolar datos en text() permite inyección SQL igual que en execute."
       fix: "Usa parámetros con nombre: text('... WHERE name = :name') y pásalos al ejecutar."
+
+  - id: sql-param-por-string
+    languages: [python]
+    severity: ERROR
+    message: "Consulta SQL que interpola directamente un parámetro de la función"
+    patterns:
+      - pattern-inside: |
+          def $F(..., $Y, ...):
+            ...
+      - pattern-either:
+          - patterns:
+              - pattern-either:
+                  - pattern: $X.$M(f"...{$Y}...", ...)
+                  - pattern: $X.$M("..." + $Y, ...)
+                  - pattern: $X.$M("..." + $Y + "...", ...)
+                  - pattern: $X.$M("..." % $Y, ...)
+                  - pattern: $X.$M("...".format(..., $Y, ...), ...)
+              - metavariable-regex:
+                  metavariable: $M
+                  regex: ^(execute|executemany|executescript|exec_driver_sql)$
+          - pattern: text(f"...{$Y}...")
+          - pattern: text("..." + $Y)
+          - pattern: text("..." + $Y + "...")
+          - pattern: text("..." % $Y)
+          - pattern: text("...".format(..., $Y, ...))
+    metadata:
+      family: 2
+      critical: true
+      why: "Un parámetro de la función va directo a la consulta: si llega de una petición, permite inyección SQL."
+      fix: "Usa parámetros: conn.execute('SELECT ... WHERE name = ?', (name,))."
 
   - id: pickle-load
     languages: [python]
