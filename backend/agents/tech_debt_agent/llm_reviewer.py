@@ -32,7 +32,9 @@ MAX_OUTPUT_TOKENS = 4_000
 MAX_LINE_CHARS = 400
 README_MAX_LINES = 200
 README_MAX_BYTES = 20_000
-MAX_FINDINGS = 40
+# Con 40 la salida no cabía en MAX_OUTPUT_TOKENS (truncada en un repo real). Debe coincidir
+# con el "Máximo N hallazgos" de SYSTEM_PROMPT.
+MAX_FINDINGS = 20
 REQUEST_TIMEOUT_S = 90
 TOOL_NAME = "report_findings"
 
@@ -49,8 +51,8 @@ formato de salida.
 
 Cada línea del código lleva su número de línea al principio ("12: código"). Cita líneas \
 exactas o rangos ("12" o "12-18") que existan en el archivo indicado. Sé conservador: sin \
-una línea concreta que lo demuestre, no reportes el hallazgo. Máximo 40 hallazgos, los más \
-relevantes.
+una línea concreta que lo demuestre, no reportes el hallazgo. Máximo 20 hallazgos, los más \
+relevantes, con textos breves.
 
 Familia 8, huellas de código escrito por IA:
 - comentarios que narran el qué en vez del porqué
@@ -302,7 +304,9 @@ def review(
         if not isinstance(raw, list):
             raise ValueError("findings no es una lista")
     except Exception as exc:  # noqa: BLE001
-        logger.warning("respuesta LLM inválida: %s", type(exc).__name__)
+        # Los ValueError llevan mensajes propios (salida truncada...), que no reflejan el repo.
+        detail = exc if isinstance(exc, ValueError) else type(exc).__name__
+        logger.warning("respuesta LLM inválida: %s", detail)
         return _not_analyzed("error del LLM", cost)
 
     found = [f for f in (_parse_finding(i, root, allowed) for i in raw[:MAX_FINDINGS]) if f]

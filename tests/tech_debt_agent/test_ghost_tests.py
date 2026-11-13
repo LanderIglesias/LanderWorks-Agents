@@ -107,6 +107,21 @@ def test_js_variantes(tmp_path):
     assert lines == [1]
 
 
+def test_js_helper_con_assert_cuenta_como_comprobacion(tmp_path):
+    # Falso positivo real (Traza): tests que solo llaman a near(), que envuelve assert.ok.
+    _write(
+        tmp_path,
+        "flame.test.mjs",
+        "const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-9);\n"
+        "function check(x) {\n  expect(x).toBeTruthy();\n}\n"
+        "const make = (n) => ({ n });\n"
+        "test('a', () => {\n  near(1, 1);\n});\n"
+        "test('b', () => {\n  check(1);\n});\n"
+        "test('c', () => {\n  make(1);\n});\n",
+    )
+    assert [f.line_start for f in _scan(tmp_path).findings] == [12]
+
+
 def test_cancelado(tmp_path):
     _write(tmp_path, "test_a.py", "def test_a():\n    pass\n")
     ev = threading.Event()

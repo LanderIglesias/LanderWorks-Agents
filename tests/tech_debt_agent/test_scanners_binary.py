@@ -53,6 +53,28 @@ def test_gitleaks_secreto_vigente_en_codigo_actual(tmp_path):
 
 
 @pytest.mark.skipif(shutil.which("gitleaks") is None, reason="gitleaks no instalado")
+def test_gitleaks_no_marca_claves_de_cache_pero_si_api_keys(tmp_path):
+    # Falso positivo real (CrossCheck): 789 "secretos" que eran hashes en "cache_key".
+    repo = tmp_path / "r"
+    repo.mkdir()
+    # Valores partidos para que el gitleaks del pre-commit de este repo no los marque.
+    hexval = "c46a8f1e9b2d7a3c" + "5e8f0b1d4a6c9e2f7b3d5a8c"
+    fake = "Zq8Rk2Lm5Np7Vx3T" + "y6Bw9Cd4Fg1Hj0Kp"
+    rows = [
+        f'{{"cache_key": "{hexval}"}}',
+        f'{{"primary_key": "{fake}"}}',
+        f'{{"api_key": "{fake}"}}',
+    ]
+    (repo / "data.jsonl").write_text("\n".join(rows) + "\n", encoding="utf-8")
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@e.x"]
+    subprocess.run([*git, "init", "-q"], cwd=repo, check=True)
+    subprocess.run([*git, "add", "-A"], cwd=repo, check=True)
+    subprocess.run([*git, "commit", "-qm", "i"], cwd=repo, check=True, capture_output=True)
+    [res] = secrets.scan_secrets(repo, [], threading.Event())
+    assert [f.line_start for f in res.findings] == [3]
+
+
+@pytest.mark.skipif(shutil.which("gitleaks") is None, reason="gitleaks no instalado")
 def test_gitleaks_ignora_config_del_repo(vibe_repo):
     cfg = "[allowlist]\npaths = ['''app/config.py''']\n"
     (vibe_repo / ".gitleaks.toml").write_text(cfg, encoding="utf-8")
@@ -128,6 +150,15 @@ def test_osv_formas_incompletas_son_not_analyzed(monkeypatch, tmp_path, out):
     monkeypatch.setattr(deps, "run_tool", lambda *a, **k: out)
     [res] = deps.scan_deps(tmp_path, [], threading.Event())
     assert res.status == "not_analyzed"
+
+
+@pytest.mark.parametrize("manifest", ["pyproject.toml", "package.json"])
+def test_osv_sin_lockfile_es_not_analyzed_con_motivo_claro(monkeypatch, tmp_path, manifest):
+    # Caso real (Traza, CrossCheck): solo pyproject.toml; osv-scanner sale con 128 sin salida.
+    (tmp_path / manifest).write_text("", encoding="utf-8")
+    monkeypatch.setattr(deps, "run_tool", lambda *a, **k: "")
+    [res] = deps.scan_deps(tmp_path, [], threading.Event())
+    assert res.status == "not_analyzed" and "lockfile" in res.reason
 
 
 def test_osv_salida_vacia_con_manifiesto_es_not_analyzed(monkeypatch, tmp_path):

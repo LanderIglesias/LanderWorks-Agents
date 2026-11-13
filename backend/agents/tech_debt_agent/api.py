@@ -1,7 +1,7 @@
 """api.py — endpoints FastAPI del Technical Debt Analyzer (público: límites, caché y SSE cancelable)."""
 
-from __future__ import annotations
-
+# Sin `from __future__ import annotations`: con el wrapper de slowapi, FastAPI
+# 0.115 no resuelve las anotaciones en string y trata el body como query (422).
 import asyncio
 import json
 import logging

@@ -13,6 +13,20 @@ logger = logging.getLogger(__name__)
 GITLEAKS_VERSION = "8.18.4"
 TIMEOUT_SECONDS = 120
 
+# generic-api-key marca cualquier valor con entropía asignado a un nombre con "key".
+# Estos nombres son, por convención, identificadores o hashes, no credenciales
+# (falso positivo real: 789 hashes en "cache_key" de un .jsonl). El match de gitleaks
+# empieza en "key" y no incluye el prefijo, así que se filtra sobre la línea.
+# ponytail: una línea minificada con "cache_key" y además un secreto real se pierde;
+# si molesta, pasar a una allowlist por regla cuando se suba gitleaks a >=8.21.
+GITLEAKS_CONFIG = """[extend]
+useDefault = true
+
+[allowlist]
+regexTarget = "line"
+regexes = ['''(?i)\\b(cache|primary|foreign|sort|partition|idempotency|dedup|lookup|row|composite)[_-]?key\\b''']
+"""
+
 
 def _not_analyzed(reason: str) -> list[FamilyResult]:
     return [FamilyResult(Family.SECRETS, "not_analyzed", reason)]
@@ -67,7 +81,7 @@ def _key(leak: dict, root: Path) -> tuple[str, str]:
 def scan_secrets(repo_root: Path, files: list[Path], cancel: threading.Event) -> list[FamilyResult]:
     with tempfile.TemporaryDirectory() as tmp_name:
         tmp = Path(tmp_name)
-        (tmp / "gitleaks.toml").write_text("[extend]\nuseDefault = true\n", encoding="utf-8")
+        (tmp / "gitleaks.toml").write_text(GITLEAKS_CONFIG, encoding="utf-8")
         (tmp / "sin-ignore").mkdir()
         try:
             leaks = _leaks(repo_root, tmp, "history", [], cancel)

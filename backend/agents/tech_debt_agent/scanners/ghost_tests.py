@@ -25,6 +25,9 @@ _NON_SOURCE_NAME = re.compile(
 _BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 _JS_START = re.compile(r"^\s*(?:it|test)(?:\.(?:only|concurrent|each|failing))*\s*[(`]")
 _JS_ASSERT = re.compile(r"\bexpect\s*[(.]|\bassert\w*\b|\.should\b")
+_JS_HELPER = re.compile(
+    r"^(?:export\s+)?(?:(?:async\s+)?function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=)"
+)
 _STRING = re.compile(r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`")
 _MOCK_FACTORIES = {"Mock", "MagicMock", "AsyncMock", "NonCallableMock", "create_autospec", "patch"}
 _PYTEST_CHECKS = {"raises", "warns", "fail", "deprecated_call"}
@@ -178,29 +181,38 @@ def _strip_js(line: str) -> str:
     return _STRING.sub('""', line).split("//", 1)[0]
 
 
+def _block(lines: list[str], i: int) -> str:
+    depth = 0
+    started = False
+    end = i
+    for j in range(i, min(i + MAX_JS_BLOCK_LINES, len(lines))):
+        end = j
+        for ch in lines[j]:
+            if ch in "({[":
+                depth += 1
+                started = True
+            elif ch in ")}]":
+                depth -= 1
+        if started and depth <= 0:
+            break
+    return "\n".join(lines[i : end + 1])
+
+
 def _scan_js(rel: str, text: str) -> list[Finding]:
     # ponytail: strings y comentarios de una línea se ignoran al contar delimitadores; un template
     # literal o un /* */ multilínea con llaves puede desajustar el bloque (tope de 200 líneas).
     text = _BLOCK_COMMENT.sub(lambda m: "\n" * m.group().count("\n"), text)
     lines = [_strip_js(x) for x in text.splitlines()]
+    # Helpers de nivel superior que envuelven un assert/expect (p. ej. near()) cuentan como comprobación.
+    helpers = [
+        m.group(1) or m.group(2)
+        for i, line in enumerate(lines)
+        if (m := _JS_HELPER.match(line)) and _JS_ASSERT.search(_block(lines, i))
+    ]
+    checks = re.compile(_JS_ASSERT.pattern + "".join(rf"|\b{re.escape(h)}\s*\(" for h in helpers))
     out: list[Finding] = []
     for i, line in enumerate(lines):
-        if not _JS_START.match(line):
-            continue
-        depth = 0
-        started = False
-        end = i
-        for j in range(i, min(i + MAX_JS_BLOCK_LINES, len(lines))):
-            end = j
-            for ch in lines[j]:
-                if ch in "({[":
-                    depth += 1
-                    started = True
-                elif ch in ")}]":
-                    depth -= 1
-            if started and depth <= 0:
-                break
-        if not _JS_ASSERT.search("\n".join(lines[i : end + 1])):
+        if _JS_START.match(line) and not checks.search(_block(lines, i)):
             out.append(_finding("js", Severity.HIGH, rel, i + 1, "test sin expect ni assert"))
     return out
 
