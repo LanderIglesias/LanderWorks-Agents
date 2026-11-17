@@ -6,6 +6,7 @@ import threading
 from pathlib import Path
 
 from backend.agents.tech_debt_agent.findings import Family, FamilyResult, Finding, Severity
+from backend.agents.tech_debt_agent.repo_fetcher import EXCLUDED_DIRS, MAX_FILE_BYTES
 from backend.agents.tech_debt_agent.tools import ToolTimeout, ToolUnavailable, run_tool
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,6 @@ TIMEOUT_SECONDS = 300
 RULE_TIMEOUT_SECONDS = 20
 RULES_DIR = Path(__file__).resolve().parent.parent / "rules"
 FAMILIES = (Family.SAST, Family.ERRORS, Family.DEBUG, Family.AI_TELLS)
-EXCLUDED = ("node_modules", "dist", "build", ".venv", "venv", "vendor", ".git")
 SEVERITY = {"ERROR": Severity.HIGH, "WARNING": Severity.MEDIUM, "INFO": Severity.LOW}
 
 
@@ -86,7 +86,8 @@ def _failed_files(data: dict) -> int:
 
 
 def scan_sast(repo_root: Path, files: list[Path], cancel: threading.Event) -> list[FamilyResult]:
-    # `files` se ignora: semgrep recorre repo_root entero salvo los directorios de EXCLUDED.
+    # `files` se ignora: semgrep recorre repo_root con las mismas carpetas excluidas y el mismo
+    # tope de tamaño que list_source_files; a propósito sí analiza .min.js.
     with tempfile.TemporaryDirectory() as tmp_name:
         report = Path(tmp_name) / "semgrep.json"
         args = [
@@ -104,8 +105,10 @@ def scan_sast(repo_root: Path, files: list[Path], cancel: threading.Event) -> li
             "--x-ignore-semgrepignore-files",
             "--timeout",
             str(RULE_TIMEOUT_SECONDS),
+            "--max-target-bytes",
+            str(MAX_FILE_BYTES),
         ]
-        for name in EXCLUDED:
+        for name in sorted(EXCLUDED_DIRS):
             args += ["--exclude", name]
         try:
             run_tool(

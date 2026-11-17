@@ -16,6 +16,15 @@ def test_devuelve_stdout(tmp_path):
     )
 
 
+def test_no_hereda_secretos_del_entorno(tmp_path, monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-secreto")
+    code = "import os; print(os.environ.get('ANTHROPIC_API_KEY'), os.environ.get('X_EXTRA'))"
+    out = run_tool(
+        [sys.executable, "-c", code], tmp_path, 5, threading.Event(), env={"X_EXTRA": "1"}
+    )
+    assert out.split() == ["None", "1"]
+
+
 def test_timeout_mata_el_proceso(tmp_path):
     t0 = time.monotonic()
     with pytest.raises(ToolTimeout):

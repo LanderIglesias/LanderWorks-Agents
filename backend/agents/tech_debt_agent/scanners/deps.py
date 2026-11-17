@@ -51,13 +51,16 @@ def _score(group: dict) -> float:
         return DEFAULT_SCORE
 
 
-def _line_of(manifest: Path, name: str) -> int | None:
+def _read_lower_lines(manifest: Path) -> list[str]:
+    try:
+        return manifest.read_text(encoding="utf-8", errors="replace").lower().splitlines()
+    except OSError:
+        return []
+
+
+def _line_of(lines: list[str], name: str) -> int | None:
     # Grep barato; en package-lock.json la entrada "node_modules/<name>" va antes que las menciones sueltas.
     needles = (f'node_modules/{name.lower()}"', name.lower())
-    try:
-        lines = manifest.read_text(encoding="utf-8", errors="replace").lower().splitlines()
-    except OSError:
-        return None
     for needle in needles:
         for n, line in enumerate(lines, 1):
             if needle in line:
@@ -68,13 +71,21 @@ def _line_of(manifest: Path, name: str) -> int | None:
 def _manifest_kind(repo_root: Path) -> str | None:
     """'locked' si hay algo que osv-scanner sabe leer, 'unlocked' si solo hay manifiestos sin versiones."""
     kind = None
-    for _dir, dirs, names in os.walk(repo_root):
+    for dirpath, dirs, names in os.walk(repo_root):
         dirs[:] = [d for d in dirs if d not in (".git", "node_modules")]
-        if any(n in MANIFESTS or n.startswith("requirements") for n in names):
+        if any(n in MANIFESTS for n in names):
             return "locked"
-        if any(n in UNLOCKED for n in names):
+        reqs = [n for n in names if n.startswith("requirements") and n.endswith(".txt")]
+        if any(_has_pins(Path(dirpath) / n) for n in reqs):
+            return "locked"
+        if reqs or any(n in UNLOCKED for n in names):
             kind = "unlocked"
     return kind
+
+
+def _has_pins(requirements: Path) -> bool:
+    # osv-scanner solo extrae las líneas con versión exacta (==); sin ninguna, sale con 128.
+    return any("==" in line.split("#", 1)[0] for line in _read_lower_lines(requirements))
 
 
 def scan_deps(repo_root: Path, files: list[Path], cancel: threading.Event) -> list[FamilyResult]:
@@ -130,6 +141,7 @@ def _parse(repo_root: Path, data: object) -> list[Finding]:
         raise ValueError("forma inesperada")
     root = repo_root.resolve()
     findings: list[Finding] = []
+    manifest_lines: dict[Path, list[str]] = {}
     for result in data.get("results") or []:
         src = result["source"]["path"]
         if not src:
@@ -147,7 +159,9 @@ def _parse(repo_root: Path, data: object) -> list[Finding]:
             score = max(_score(g) for g in groups)
             ids = sorted({a for g in groups for a in g.get("aliases", []) if a.startswith("CVE-")})
             shown = ", ".join(ids[:3]) or groups[0].get("ids", ["?"])[0]
-            line = _line_of(manifest, name)
+            if manifest not in manifest_lines:
+                manifest_lines[manifest] = _read_lower_lines(manifest)
+            line = _line_of(manifest_lines[manifest], name)
             findings.append(
                 Finding(
                     family=Family.CVE,

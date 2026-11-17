@@ -121,7 +121,25 @@ class CostGuard:
         self._settle(reservation_id, actual_cost_usd)
 
     def release(self, reservation_id: str) -> None:
-        self._settle(reservation_id, 0.0)
+        """Sin gasto (falló o se canceló antes del LLM): coste 0 y se devuelve la plaza del día."""
+        with _LOCK, closing(self._connect()) as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            try:
+                row = conn.execute(
+                    "SELECT created FROM reservations WHERE id=? AND settled_usd IS NULL",
+                    (reservation_id,),
+                ).fetchone()
+                if row:
+                    conn.execute(
+                        "UPDATE reservations SET settled_usd=0 WHERE id=?", (reservation_id,)
+                    )
+                    conn.execute(
+                        "UPDATE usage SET count = MAX(count - 1, 0) WHERE day=?", (row[0][:10],)
+                    )
+                conn.execute("COMMIT")
+            except BaseException:
+                conn.execute("ROLLBACK")
+                raise
 
     def get_cached(self, key: str, now: datetime | None = None) -> dict | None:
         moment = _utc(now)

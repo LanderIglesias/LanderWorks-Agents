@@ -56,11 +56,47 @@ def test_exito_y_cache_hit_no_llama_al_engine_ni_consume_cupo(env):
     assert CostGuard(db).reserve(0.01)
 
 
+def test_informe_degradado_no_se_cachea(env, monkeypatch):
+    client, calls, _ = env
+    degraded = {
+        **REPORT,
+        "families": [{"status": "not_analyzed", "reason": "El escáner SAST falló"}],
+    }
+    monkeypatch.setattr(
+        api,
+        "run_analysis",
+        lambda m, c, e, llm_client=None: (calls.append(m) or dict(degraded), 0.01),
+    )
+    assert post(client).json()["cached"] is False
+    assert post(client).json()["cached"] is False
+    assert len(calls) == 2
+    permanent = {**REPORT, "families": [{"status": "not_analyzed", "reason": "sin código fuente"}]}
+    monkeypatch.setattr(
+        api, "run_analysis", lambda m, c, e, llm_client=None: (dict(permanent), 0.01)
+    )
+    post(client)
+    assert post(client).json()["cached"] is True
+
+
+def test_cf_connecting_ip_solo_con_proxy_de_confianza(monkeypatch):
+    from starlette.requests import Request
+
+    scope = {
+        "type": "http",
+        "headers": [(b"cf-connecting-ip", b"9.9.9.9")],
+        "client": ("1.2.3.4", 1),
+    }
+    monkeypatch.delenv("TECH_DEBT_TRUST_CF_HEADER", raising=False)
+    assert api._client_ip(Request(scope)) == "1.2.3.4"
+    monkeypatch.setenv("TECH_DEBT_TRUST_CF_HEADER", "1")
+    assert api._client_ip(Request(scope)) == "9.9.9.9"
+
+
 def test_cupo_diario_429_mensaje_exacto(env):
     client, calls, db = env
     guard = CostGuard(db)
     for _ in range(20):
-        guard.release(guard.reserve(0.01))
+        guard.settle(guard.reserve(0.01), 0.01)
     r = post(client)
     assert r.status_code == 429 and r.json()["detail"] == DAILY_MSG
     assert calls == []

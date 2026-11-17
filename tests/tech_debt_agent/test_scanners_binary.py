@@ -166,3 +166,13 @@ def test_osv_salida_vacia_con_manifiesto_es_not_analyzed(monkeypatch, tmp_path):
     monkeypatch.setattr(deps, "run_tool", lambda *a, **k: "")
     [res] = deps.scan_deps(tmp_path, [], threading.Event())
     assert res.status == "not_analyzed"
+
+
+def test_requirements_sin_versiones_es_unlocked(tmp_path):
+    # osv-scanner sale con 128 sin versiones fijadas: es "sin lockfile", no un fallo del escáner
+    (tmp_path / "requirements.txt").write_text(
+        "flask\nrequests>=2  # ==no cuenta\n", encoding="utf-8"
+    )
+    assert deps._manifest_kind(tmp_path) == "unlocked"
+    (tmp_path / "requirements-dev.txt").write_text("pytest==8.0\n", encoding="utf-8")
+    assert deps._manifest_kind(tmp_path) == "locked"

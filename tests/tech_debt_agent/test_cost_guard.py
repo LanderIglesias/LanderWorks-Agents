@@ -63,14 +63,16 @@ def test_settle_ajusta_al_coste_real(tmp_path):
     g.reserve(18, T0)
 
 
-def test_release_libera_presupuesto_pero_mantiene_cupo(tmp_path):
+def test_release_libera_presupuesto_y_cupo(tmp_path):
+    # un análisis que falla antes del LLM no gasta: no debe agotar el cupo diario de todos
     g = make(tmp_path, eur_per_usd=1.0, daily_limit=1)
-    g.release(g.reserve(20, T0))
+    rid = g.reserve(20, T0)
+    g.release(rid)
+    g.release(rid)  # repetido: no devuelve la plaza dos veces
+    g.settle(g.reserve(20, T0), 0)
     with pytest.raises(LimitExceeded) as e:
         g.reserve(1, T0)
     assert e.value.message == DAILY_MSG
-    g2 = make(tmp_path, eur_per_usd=1.0)
-    g2.reserve(20, T0 + timedelta(days=1))
 
 
 def test_settle_y_release_desconocidos_o_repetidos_son_noop(tmp_path):

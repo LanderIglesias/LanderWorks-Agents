@@ -243,3 +243,16 @@ def test_diseno_no_convierte_familia_5_en_ok():
     out = engine.attach_design([FamilyResult(Family.MONOLITH, "not_analyzed", "sin lizard")], llm)
     assert out[0].status == "not_analyzed" and len(out[0].findings) == 1
     assert "1 hallazgos de la revisión con IA" in out[0].reason
+
+
+def test_revisor_que_lanza_factura_el_maximo(tmp_path, monkeypatch, tmp_dirs):
+    # review() puede fallar tras la llamada pagada: el coste nunca puede quedar en 0
+    monkeypatch.setattr(engine, "clone_repo", _clone_from(_py_repo(tmp_path)))
+    _fast_scanners(monkeypatch)
+
+    def boom(*_a, **_kw):
+        raise ValueError("salida rara del modelo")
+
+    monkeypatch.setattr(engine, "review", boom)
+    _, cost = engine.run_analysis(META, threading.Event(), lambda _e: None, FakeClient())
+    assert cost == pytest.approx(engine.max_cost_usd())

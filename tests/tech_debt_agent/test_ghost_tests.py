@@ -179,3 +179,14 @@ def test_unittest_testfoo(tmp_path):
 def test_comentario_de_bloque_no_cuenta(tmp_path):
     _write(tmp_path, "a.test.js", "it('a', () => {\n  /* expect(1) */\n  run();\n});\n")
     assert [f.line_start for f in _scan(tmp_path).findings] == [1]
+
+
+def test_comentarios_sin_cerrar_no_son_cuadraticos():
+    # la regex /\*.*?\*/ tardaba ~40 s con esta entrada y bloqueaba el GIL
+    import time
+
+    from backend.agents.tech_debt_agent.scanners.ghost_tests import _scan_js
+
+    t0 = time.monotonic()
+    _scan_js("a.test.js", "/* " * 100_000)
+    assert time.monotonic() - t0 < 2

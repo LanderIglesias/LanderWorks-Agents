@@ -39,6 +39,20 @@ def _kill(proc: subprocess.Popen) -> None:
     proc.wait()
 
 
+# Los escáneres procesan código no confiable: solo heredan lo imprescindible, nunca las API keys.
+_ENV_ALLOWLIST = {
+    "PATH", "PATHEXT", "HOME", "USERPROFILE", "TMP", "TEMP", "TMPDIR",
+    "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "COMSPEC", "APPDATA", "LOCALAPPDATA", "PROGRAMDATA",
+    "LANG", "LC_ALL", "LC_CTYPE", "XDG_CACHE_HOME", "XDG_CONFIG_HOME",
+    "SSL_CERT_FILE", "SSL_CERT_DIR", "REQUESTS_CA_BUNDLE",
+    "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
+}  # fmt: skip
+
+
+def _base_env() -> dict[str, str]:
+    return {k: v for k, v in os.environ.items() if k.upper() in _ENV_ALLOWLIST}
+
+
 def run_tool(
     args: list[str],
     cwd: Path,
@@ -65,7 +79,7 @@ def run_tool(
             stdin=subprocess.DEVNULL,
             stdout=out,
             stderr=err,
-            env={**os.environ, **env} if env else None,
+            env={**_base_env(), **(env or {})},
             **popen_kwargs,
         )
         deadline = time.monotonic() + timeout

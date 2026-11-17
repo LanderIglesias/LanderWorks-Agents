@@ -11,7 +11,7 @@ from typing import Annotated, TypedDict
 from langgraph.graph import END, START, StateGraph
 
 from .findings import Family, FamilyResult, Finding
-from .llm_reviewer import review
+from .llm_reviewer import max_cost_usd, review
 from .repo_fetcher import MAX_FILE_BYTES, RepoMeta, _rmtree, clone_repo, list_source_files
 from .report_generator import build_report
 from .scanners.complexity import scan_complexity
@@ -250,7 +250,8 @@ def _node_llm(state: State, config) -> dict:
             raise
         except Exception as exc:  # noqa: BLE001 - solo el tipo
             logger.warning("revisor LLM fallido: %s", type(exc).__name__)
-            out = unavailable
+            # la llamada pagada pudo hacerse antes del fallo: se factura el máximo, nunca 0
+            out = {**unavailable, "cost": max_cost_usd()}
     progress.step("llm_review", "Revisión con IA terminada", 92)
     return out
 

@@ -54,9 +54,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # (así si cambias código pero no requirements, Docker reutiliza la capa anterior)
 # Usuario sin privilegios: el agente clona y analiza código ajeno.
 # backend/data guarda la SQLite del agente (TECH_DEBT_DB_PATH la puede mover).
+# /data es el punto de montaje del volumen de docker-compose: el bind mount de
+# desarrollo (.:/app) tapa el chown de backend/data.
 RUN useradd -m app
 COPY --chown=app:app . .
-RUN mkdir -p backend/data && chown app:app backend/data
+RUN mkdir -p backend/data /data && chown app:app backend/data /data
 USER app
 
 # ── Puerto ───────────────────────────────────────────────────────────────────

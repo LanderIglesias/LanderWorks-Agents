@@ -5,6 +5,8 @@
 import asyncio
 import json
 import logging
+import os
+import re
 import threading
 import time
 
@@ -38,11 +40,12 @@ _guards_lock = threading.Lock()
 
 def _client_ip(request: Request) -> str:
     # Detrás de Cloudflare la IP de conexión es la del proxy; CF-Connecting-IP trae la real.
-    # Fiarse de esa cabecera exige que el origen solo acepte tráfico de Cloudflare (requisito
-    # de despliegue, igual que en el expense tracker); si no, cualquiera puede falsearla.
-    return request.headers.get("CF-Connecting-IP") or (
-        request.client.host if request.client else "unknown"
-    )
+    # Solo se lee con TECH_DEBT_TRUST_CF_HEADER=1, que exige que el origen acepte únicamente
+    # tráfico de Cloudflare; sin eso, cualquiera falsearía la cabecera para saltarse el límite.
+    peer = request.client.host if request.client else "unknown"
+    if os.getenv("TECH_DEBT_TRUST_CF_HEADER") == "1":
+        return request.headers.get("CF-Connecting-IP") or peer
+    return peer
 
 
 limiter = Limiter(key_func=_client_ip)
@@ -134,6 +137,15 @@ def _run_billed(meta, cancel: threading.Event, emit) -> tuple[dict, float]:
         _SEM.release()
 
 
+# Motivos de fallo transitorio (red, timeout, error del LLM o del escáner): ese informe no se
+# cachea para que el siguiente visitante reintente. "sin lockfile", "sin código"... sí se cachean.
+_TRANSIENT = re.compile(r"falló|agotó el tiempo|error|no disponible")
+
+
+def _degraded(report: dict) -> bool:
+    return any(_TRANSIENT.search(f.get("reason") or "") for f in report.get("families", []))
+
+
 def _analyze(url: str, cancel: threading.Event, emit) -> tuple[dict, bool]:
     """Flujo completo y bloqueante; lanza ApiError con mensajes aptos para el cliente."""
     try:
@@ -145,7 +157,8 @@ def _analyze(url: str, cancel: threading.Event, emit) -> tuple[dict, bool]:
         if cached is not None:
             return cached, True
         report, _ = _run_billed(meta, cancel, emit)
-        guard.put_cached(key, report)
+        if not _degraded(report):
+            guard.put_cached(key, report)
         return report, False
     except ApiError:
         raise

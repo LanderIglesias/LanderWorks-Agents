@@ -76,6 +76,8 @@ The endpoint is public and processes untrusted repositories.
   clone with a timeout, and a 400 MB cap on the clone directory while it is written.
 - Files over 300 KB, symlinks and vendored directories are skipped.
 - Every external tool runs with a timeout, a bounded output size and cancellation.
+  Tools get a minimal environment (PATH, HOME, temp dirs, locale, proxy and CA
+  settings), never the API keys of the server.
 - Config files from the analyzed repo (`.gitleaks.toml`, `.gitleaksignore`,
   `osv-scanner.toml`, inline `gitleaks:allow`) cannot silence findings.
 - Repository content sent to Claude is wrapped as data, the prompt treats it as
@@ -96,8 +98,12 @@ The endpoint is public and processes untrusted repositories.
 | Result cache | 24 h, keyed by repo and HEAD commit |
 
 Before each analysis the maximum possible LLM cost is reserved; the reservation is
-settled with the real cost afterwards. Counters live in SQLite (WAL mode) so they
-survive restarts. A cache hit costs nothing and does not use quota.
+settled with the real cost afterwards; if the review fails after the call, it is
+settled at the maximum. An analysis that fails or is cancelled before the LLM step
+gives its daily slot back. Counters live in SQLite (WAL mode) so they survive
+restarts. A cache hit costs nothing and does not use quota. Reports where a scanner
+or the LLM failed for a transient reason (error, timeout, tool unavailable) are not
+cached, so the next request retries.
 
 Measured on three real repositories (2026-11-13): **0.10 to 0.12 USD per analysis**,
 26 to 110 seconds.
@@ -112,6 +118,7 @@ Measured on three real repositories (2026-11-13): **0.10 to 0.12 USD per analysi
 | `GITHUB_TOKEN` | no | Raises the GitHub API rate limit for repository metadata. |
 | `TECH_DEBT_DB_PATH` | no | SQLite file for quota, budget and cache. Defaults to `backend/data/`. Point it at a mounted volume in production. |
 | `TECH_DEBT_EUR_PER_USD` | no | Exchange rate for the monthly budget. Default `0.92`. |
+| `TECH_DEBT_TRUST_CF_HEADER` | no | Set to `1` behind Cloudflare to rate-limit by `CF-Connecting-IP`. Only safe if the origin accepts traffic from Cloudflare alone; otherwise the header can be forged. Unset, the TCP peer address is used. |
 
 The scanners are pinned in the `Dockerfile` (gitleaks 8.18.4, osv-scanner 2.7.1,
 semgrep 1.163.0 in an isolated venv) with SHA-256 verified downloads. The versions

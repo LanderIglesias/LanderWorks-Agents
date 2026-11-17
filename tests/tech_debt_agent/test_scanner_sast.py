@@ -161,3 +161,17 @@ def test_reglas_pasan_sus_tests_anotados():
         timeout=300,
     )
     assert proc.returncode == 0, proc.stdout[-2000:] + proc.stderr[-2000:]
+
+
+def test_mismas_exclusiones_y_tope_que_el_listado(monkeypatch, tmp_path):
+    from backend.agents.tech_debt_agent.repo_fetcher import EXCLUDED_DIRS, MAX_FILE_BYTES
+
+    seen = {}
+    monkeypatch.setattr(
+        sast, "run_tool", lambda args, **k: seen.update(args=args) or _write((args,), "{}")
+    )
+    sast.scan_sast(tmp_path, [], threading.Event())
+    args = seen["args"]
+    excluded = {args[i + 1] for i, a in enumerate(args) if a == "--exclude"}
+    assert excluded == EXCLUDED_DIRS
+    assert args[args.index("--max-target-bytes") + 1] == str(MAX_FILE_BYTES)

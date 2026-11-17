@@ -23,11 +23,13 @@ services:
       EXPENSE_TRACKER_DATABASE_URL: postgresql://${EXPENSE_TRACKER_POSTGRES_USER}:${EXPENSE_TRACKER_POSTGRES_PASSWORD}@db_expense_tracker:5432/${EXPENSE_TRACKER_POSTGRES_DB}
       EXPENSE_TRACKER_WEBHOOK_SECRET: ${EXPENSE_TRACKER_WEBHOOK_SECRET}
       EXPENSE_TRACKER_APP_TOKEN: ${EXPENSE_TRACKER_APP_TOKEN}
+      TECH_DEBT_DB_PATH: /data/tech_debt.sqlite3
     depends_on:
       - db
       - db_expense_tracker
     volumes:
       - .:/app
+      - tech_debt_data:/data
 
   db_expense_tracker:
     image: postgres:16
@@ -44,3 +46,4 @@ services:
 volumes:
   postgres_data:
   expense_tracker_postgres_data:
+  tech_debt_data:

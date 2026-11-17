@@ -22,7 +22,6 @@ _NON_SOURCE_DIRS = {"scripts", "config", "docs", "migrations"}
 _NON_SOURCE_NAME = re.compile(
     r"(?:^|/)(?:setup\.py|conftest\.py|__init__\.py|manage\.py)$|\.config\.[cm]?[jt]s$|\.d\.[cm]?ts$"
 )
-_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 _JS_START = re.compile(r"^\s*(?:it|test)(?:\.(?:only|concurrent|each|failing))*\s*[(`]")
 _JS_ASSERT = re.compile(r"\bexpect\s*[(.]|\bassert\w*\b|\.should\b")
 _JS_HELPER = re.compile(
@@ -198,10 +197,22 @@ def _block(lines: list[str], i: int) -> str:
     return "\n".join(lines[i : end + 1])
 
 
+def _strip_block_comments(text: str) -> str:
+    # Lineal: la regex /\*.*?\*/ con DOTALL es cuadrática con muchos /* sin cerrar.
+    parts, pos = [], 0
+    while (start := text.find("/*", pos)) != -1:
+        end = text.find("*/", start + 2)
+        stop = len(text) if end == -1 else end + 2
+        parts += [text[pos:start], "\n" * text.count("\n", start, stop)]
+        pos = stop
+    parts.append(text[pos:])
+    return "".join(parts)
+
+
 def _scan_js(rel: str, text: str) -> list[Finding]:
     # ponytail: strings y comentarios de una línea se ignoran al contar delimitadores; un template
     # literal o un /* */ multilínea con llaves puede desajustar el bloque (tope de 200 líneas).
-    text = _BLOCK_COMMENT.sub(lambda m: "\n" * m.group().count("\n"), text)
+    text = _strip_block_comments(text)
     lines = [_strip_js(x) for x in text.splitlines()]
     # Helpers de nivel superior que envuelven un assert/expect (p. ej. near()) cuentan como comprobación.
     helpers = [

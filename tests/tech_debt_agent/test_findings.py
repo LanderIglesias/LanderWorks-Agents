@@ -24,6 +24,8 @@ from backend.agents.tech_debt_agent.findings import (
         ("15-10", None),
         ("0", None),
         ("abc", None),
+        ("9" * 5000, None),
+        ("1-" + "9" * 5000, None),
     ],
 )
 def test_parse_line_ref(ref, expected):

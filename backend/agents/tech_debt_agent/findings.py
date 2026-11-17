@@ -58,6 +58,9 @@ def parse_line_ref(ref: str | int) -> tuple[int, int] | None:
     if not matches:
         return None
     first, second = matches[-1]
+    # int() falla con >4300 cifras; ningún archivo tiene tantas líneas
+    if len(first) > 9 or len(second) > 9:
+        return None
     start = int(first)
     end = int(second) if second else start
     if start < 1 or end < start:
