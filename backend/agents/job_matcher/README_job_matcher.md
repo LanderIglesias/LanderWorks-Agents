@@ -68,9 +68,9 @@ Generates 500 synthetic CV/job pairs with Python and scores each one with Claude
 
 - **Cost:** ~$0.13 for 500 Claude calls
 - **Output:** CSV with 14 features per pair + Claude score (0-100)
-- **Features generated:** experience_years, level, techs_match_pct, missing_critical_techs, extra_techs, domain_match, language_match, diff_nivel, etc.
+- **Features generated (14):** cobertura_tech, n_techs_match, diff_nivel, diff_anos, tiene_cloud_si_pide, falta_cloud, tiene_docker_si_pide, falta_docker, tiene_sql_si_pide, falta_sql, ingles_ok, llm_match, n_proyectos, anos_experiencia
 
-### Phase 2 — train_model.py
+### Phase 2 — training_model.py
 Trains a GradientBoostingRegressor to imitate Claude's scoring pattern.
 
 | Metric | Value |
@@ -78,7 +78,7 @@ Trains a GradientBoostingRegressor to imitate Claude's scoring pattern.
 | MAE (cross-validation) | 8.04 points out of 100 |
 | R² (test set) | 0.629 |
 | Most important feature | diff_nivel (0.361) |
-| Second most important | techs_match_pct (0.198) |
+| Second most important | diff_anos (0.188) |
 
 **Key finding:** the gap between candidate level and required level (`diff_nivel`) dominates the score. A junior applying to a senior role will score low regardless of tech stack match.
 
