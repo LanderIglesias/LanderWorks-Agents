@@ -196,6 +196,12 @@ docker run --rm -p 8000:8000 -e ANTHROPIC_API_KEY ai-portfolio
 Without Docker, `pip install -r requirements.txt` plus gitleaks, osv-scanner and
 semgrep on the `PATH`. Missing scanners are reported as "not analyzed".
 
+On Windows, the same pinned versions work natively: the `windows_x64` / `windows_amd64.exe`
+release assets of gitleaks 8.18.4 and osv-scanner 2.7.1 (check them against the release
+checksum files), and `uv tool install semgrep==1.163.0` for semgrep in its own environment.
+Putting the three executables in `.venv/Scripts` is enough for the scanners and the tests to
+find them. Git checks files out with CRLF there, so the regex rules accept both line endings.
+
 Tests: `pytest tests/tech_debt_agent`. Tests that need a binary are skipped when it
 is not installed; CI installs all three.
 
