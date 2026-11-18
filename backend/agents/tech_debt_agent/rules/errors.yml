@@ -3,7 +3,7 @@ rules:
     languages: [python]
     severity: WARNING
     message: "Excepción tragada con pass"
-    pattern-regex: 'except(\s+(Base)?Exception)?(\s+as\s+\w+)?\s*:[ \t]*(#[^\n]*)?\n\s*pass\b'
+    pattern-regex: 'except(\s+(Base)?Exception)?(\s+as\s+\w+)?\s*:[ \t]*(#[^\r\n]*)?\r?\n\s*pass\b'
     metadata:
       family: 4
       why: "El error desaparece sin rastro: el fallo se esconde y luego aparece como un bug imposible de reproducir."
@@ -13,7 +13,7 @@ rules:
     languages: [python]
     severity: WARNING
     message: "Excepción tragada con print"
-    pattern-regex: 'except\s+(Base)?Exception\s+as\s+(\w+)\s*:[ \t]*\n\s*print\(\s*\2\s*\)'
+    pattern-regex: 'except\s+(Base)?Exception\s+as\s+(\w+)\s*:[ \t]*\r?\n\s*print\(\s*\2\s*\)'
     metadata:
       family: 4
       why: "Imprimir el error y seguir lo deja fuera de los logs y el programa continúa en un estado dudoso."

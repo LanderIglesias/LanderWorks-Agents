@@ -191,3 +191,26 @@ def test_rule_es_el_id_corto_de_semgrep():
         },
     }
     assert sast._finding(item).rule == "debug-true"
+
+
+@pytest.mark.skipif(shutil.which("semgrep") is None, reason="semgrep no instalado")
+def test_except_tragado_con_finales_crlf(tmp_path):
+    # Un repo commiteado desde Windows llega con CRLF; las reglas regex no pueden depender de LF.
+    lines = [
+        "def a(fn):",
+        "    try:",
+        "        fn()",
+        "    except:",
+        "        pass",
+        "def b(fn):",
+        "    try:",
+        "        fn()",
+        "    except Exception as e:",
+        "        print(e)",
+        "",
+    ]
+    (tmp_path / "c.py").write_bytes("\r\n".join(lines).encode())
+    results = sast.scan_sast(tmp_path, [tmp_path / "c.py"], threading.Event())
+    errors = next(r for r in results if r.family == Family.ERRORS)
+    rules = {f.rule for f in errors.findings}
+    assert {"except-pass-tragado", "except-print-tragado"} <= rules
