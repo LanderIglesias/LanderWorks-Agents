@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import tempfile
 import threading
 from pathlib import Path
@@ -136,6 +137,38 @@ def scan_deps(repo_root: Path, files: list[Path], cancel: threading.Event) -> li
     return [FamilyResult(Family.CVE, "ok", None, findings)]
 
 
+def _vkey(v: str) -> tuple[int, ...]:
+    # ponytail: solo compara los números; ordena mal prereleases (1.0.0rc1 vs 1.0.0).
+    # Mejora: packaging.version para PyPI y un comparador semver para npm.
+    return tuple(int(n) for n in re.findall(r"\d+", v))
+
+
+def _norm(name: str) -> str:
+    return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def min_fixed_version(pkg: dict) -> str | None:
+    """Menor versión que corrige todas las vulnerabilidades del paquete, o None si alguna no tiene arreglo."""
+    name = _norm(pkg["package"]["name"])
+    current = _vkey(pkg["package"].get("version", "0"))
+    needed: list[str] = []
+    for vuln in pkg.get("vulnerabilities") or []:
+        fixes = [
+            event["fixed"]
+            for aff in vuln.get("affected") or []
+            if _norm(aff.get("package", {}).get("name", "")) == name
+            # Los rangos GIT traen hashes de commit, no versiones publicadas.
+            for rng in aff.get("ranges") or []
+            if rng.get("type") in ("ECOSYSTEM", "SEMVER")
+            for event in rng.get("events") or []
+            if "fixed" in event and _vkey(event["fixed"]) > current
+        ]
+        if not fixes:
+            return None
+        needed.append(min(fixes, key=_vkey))
+    return max(needed, key=_vkey) if needed else None
+
+
 def _parse(repo_root: Path, data: object) -> list[Finding]:
     if not isinstance(data, dict):
         raise ValueError("forma inesperada")
@@ -162,6 +195,11 @@ def _parse(repo_root: Path, data: object) -> list[Finding]:
             if manifest not in manifest_lines:
                 manifest_lines[manifest] = _read_lower_lines(manifest)
             line = _line_of(manifest_lines[manifest], name)
+            fixed = min_fixed_version(pkg)
+            if fixed:
+                fix = f"Actualiza {name} a >= {fixed}."
+            else:
+                fix = f"Actualiza {name}; no hay versión corregida publicada para todos sus avisos."
             findings.append(
                 Finding(
                     family=Family.CVE,
@@ -171,8 +209,9 @@ def _parse(repo_root: Path, data: object) -> list[Finding]:
                     line_end=line,
                     title=f"{name} {version}: {len(groups)} vulnerabilidades conocidas",
                     why=f"{name} {version} tiene {len(groups)} avisos (CVSS máx. {score}): {shown}.",
-                    fix=f"Actualiza {name} a una versión corregida.",
+                    fix=fix,
                     source="osv-scanner",
+                    rule=",".join(sorted(i for g in groups for i in g.get("ids", []))),
                 )
             )
     return findings
