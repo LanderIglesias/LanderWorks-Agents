@@ -204,6 +204,7 @@ def demo_html() -> str:
 
     <div class="tab-panel" id="panel-report">
       <a class="download-btn" id="downloadBtn" href="#" download>↓ DOWNLOAD REPORT (.md)</a>
+      <a class="download-btn" id="downloadJsonBtn" href="#" download>↓ DOWNLOAD REPORT (.json)</a>
       <div class="markdown-report" id="markdownReport"></div>
     </div>
   </div>
@@ -338,7 +339,13 @@ def demo_html() -> str:
     const blob = new Blob([report.markdown||''], { type: 'text/markdown' });
     const dlBtn = document.getElementById('downloadBtn');
     dlBtn.href = URL.createObjectURL(blob);
-    dlBtn.download = String(report.repo || 'report').replace(/[^\w.-]+/g, '-') + '-tech-debt.md';
+    const baseName = String(report.repo || 'report').replace(/[^\w.-]+/g, '-');
+    dlBtn.download = baseName + '-tech-debt.md';
+    // Entrada de la skill senior-cleanup: el informe completo sin el markdown.
+    const jsonBlob = new Blob([JSON.stringify({ ...report, markdown: undefined }, null, 2)], { type: 'application/json' });
+    const jsonBtn = document.getElementById('downloadJsonBtn');
+    jsonBtn.href = URL.createObjectURL(jsonBlob);
+    jsonBtn.download = baseName + '-tech-debt.json';
   }
 
   function card(label, value, colorClass) {

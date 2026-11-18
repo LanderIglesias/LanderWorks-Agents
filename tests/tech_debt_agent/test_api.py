@@ -279,3 +279,10 @@ def test_meta_cache_ttl_evita_llamadas_a_github(env, monkeypatch):
     api._meta_cache.clear()
     post(client)
     assert len(n) == 2
+
+
+def test_demo_tiene_descarga_json(env):
+    client, _, _ = env
+    html = client.get("/tech-debt/demo").text
+    assert 'id="downloadJsonBtn"' in html
+    assert "application/json" in html and "-tech-debt.json" in html
