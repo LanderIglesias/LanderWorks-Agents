@@ -62,6 +62,7 @@ def _complexity(root: Path, out: str) -> list[Finding]:
                 why="Demasiadas ramas en una sola función: difícil de entender, probar y modificar.",
                 fix="Divide la función en piezas más pequeñas con una responsabilidad cada una.",
                 source="lizard",
+                rule="complexity-ccn",
             )
         )
     return findings
@@ -90,6 +91,7 @@ def _big_files(root: Path, rels: list[str]) -> list[Finding]:
                     why="Archivo enorme que mezcla responsabilidades.",
                     fix="Reparte el contenido en módulos cohesivos por responsabilidad.",
                     source="lizard",
+                    rule="complexity-file-length",
                 )
             )
     return findings
@@ -126,6 +128,7 @@ def _duplicates(root: Path, out: str) -> list[Finding]:
                     why="Código copiado y pegado: cada corrección hay que repetirla en todas las copias.",
                     fix="Extrae el bloque común a una función compartida.",
                     source="lizard",
+                    rule="complexity-duplicate",
                 )
             )
     return findings

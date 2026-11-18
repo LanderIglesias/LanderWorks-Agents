@@ -9,6 +9,8 @@ from contextlib import closing
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+from .findings import SCHEMA_VERSION
+
 DAILY_MSG = "Límite diario de análisis alcanzado, vuelve mañana"
 BUDGET_MSG = "Demo temporalmente fuera de servicio por límite de presupuesto"
 CACHE_TTL = timedelta(hours=24)
@@ -31,7 +33,7 @@ class LimitExceeded(Exception):
 
 
 def cache_key(owner: str, repo: str, head_sha: str) -> str:
-    raw = f"github.com/{owner.lower()}/{repo.lower()}@{head_sha}"
+    raw = f"v{SCHEMA_VERSION}:github.com/{owner.lower()}/{repo.lower()}@{head_sha}"
     return hashlib.sha256(raw.encode()).hexdigest()
 
 

@@ -158,3 +158,7 @@ def test_length_caps():
     res[1] = ok(2, f(2, file="p" * 1000, title="t" * 1000))
     md = build(res, summary="s" * 5000)["markdown"]
     assert "p" * 301 not in md and "t" * 501 not in md and "s" * 2001 not in md
+
+
+def test_informe_lleva_schema_version():
+    assert build_report("o", "r", "a" * 40, [], 1.0, None, 0)["schema_version"] == 1

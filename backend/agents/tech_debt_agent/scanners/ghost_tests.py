@@ -73,6 +73,7 @@ def _finding(kind: str, severity: Severity, file: str, line: int | None, title: 
         why=_WHY[kind],
         fix=_FIX[kind],
         source="ghost_tests",
+        rule=f"ghost-{kind}",
     )
 
 

@@ -33,6 +33,11 @@ def test_detecta_plantados(vibe_repo):
     assert sev[("tests/test_ghost.py", 10)] == Severity.HIGH
     assert sev[("tests/test_ghost.py", 14)] == Severity.MEDIUM
     assert sev[("web/src/App.test.tsx", 4)] == Severity.HIGH
+    rule = {(f.file, f.line_start): f.rule for f in r.findings}
+    assert rule[("tests/test_ghost.py", 6)] == "ghost-none"
+    assert rule[("tests/test_ghost.py", 10)] == "ghost-trivial"
+    assert rule[("tests/test_ghost.py", 14)] == "ghost-mock"
+    assert rule[("web/src/App.test.tsx", 4)] == "ghost-js"
 
 
 def test_test_real_no_se_marca(tmp_path):
@@ -75,6 +80,7 @@ def test_sin_tests_es_critical(tmp_path):
     f = r.findings[0]
     assert f.severity == Severity.CRITICAL and f.line_start is None and f.file == "."
     assert "no tiene tests" in f.title
+    assert f.rule == "ghost-missing"
 
 
 def test_sin_codigo_fuente(tmp_path):

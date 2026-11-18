@@ -43,6 +43,7 @@ def _finding(item: dict) -> Finding | None:
         why=str(meta["why"]),
         fix=str(meta["fix"]),
         source="semgrep",
+        rule=str(item["check_id"]).rsplit(".", 1)[-1],
     )
 
 

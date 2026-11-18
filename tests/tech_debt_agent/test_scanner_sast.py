@@ -87,6 +87,7 @@ def _fake_report(monkeypatch, payload: dict):
 
 def _item(**extra):
     base = {
+        "check_id": "rules.regla-falsa",
         "path": "app/a.py",
         "start": {"line": 1},
         "end": {"line": 1},
@@ -175,3 +176,18 @@ def test_mismas_exclusiones_y_tope_que_el_listado(monkeypatch, tmp_path):
     excluded = {args[i + 1] for i, a in enumerate(args) if a == "--exclude"}
     assert excluded == EXCLUDED_DIRS
     assert args[args.index("--max-target-bytes") + 1] == str(MAX_FILE_BYTES)
+
+
+def test_rule_es_el_id_corto_de_semgrep():
+    item = {
+        "check_id": "backend.agents.tech_debt_agent.rules.debug-true",
+        "path": "a.py",
+        "start": {"line": 3},
+        "end": {"line": 3},
+        "extra": {
+            "message": "m",
+            "severity": "WARNING",
+            "metadata": {"family": 6, "why": "w", "fix": "f"},
+        },
+    }
+    assert sast._finding(item).rule == "debug-true"

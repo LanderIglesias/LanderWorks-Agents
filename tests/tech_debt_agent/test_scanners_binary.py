@@ -19,6 +19,7 @@ def test_gitleaks_encuentra_secreto_en_historial(vibe_repo):
     hits = [f for f in res.findings if f.file == "app/config.py"]
     assert hits and all(f.severity == "critical" for f in hits)
     assert "solo en el historial" in hits[0].why
+    assert hits[0].rule.startswith("history:")
     assert SECRET not in json.dumps([f.to_dict() for f in res.findings])
 
 
@@ -50,6 +51,7 @@ def test_gitleaks_secreto_vigente_en_codigo_actual(tmp_path):
     subprocess.run([*git, "commit", "-qm", "i"], cwd=repo, check=True, capture_output=True)
     [res] = secrets.scan_secrets(repo, [], threading.Event())
     assert res.findings and "código actual del repo" in res.findings[0].why
+    assert res.findings[0].rule and not res.findings[0].rule.startswith("history:")
 
 
 @pytest.mark.skipif(shutil.which("gitleaks") is None, reason="gitleaks no instalado")

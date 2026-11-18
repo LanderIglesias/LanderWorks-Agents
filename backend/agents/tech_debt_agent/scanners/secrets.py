@@ -105,7 +105,8 @@ def scan_secrets(repo_root: Path, files: list[Path], cancel: threading.Event) ->
         if rel in ("", ".") or (rel, line, rule) in seen:
             continue
         seen.add((rel, line, rule))
-        if (rel, rule) in current:
+        in_code = (rel, rule) in current
+        if in_code:
             why = "Hay una credencial en el código actual del repo. Cualquiera con acceso puede leerla: rótala."
         else:
             why = "La credencial ya no está en el código actual, solo en el historial de git; sigue expuesta, rótala."
@@ -120,6 +121,7 @@ def scan_secrets(repo_root: Path, files: list[Path], cancel: threading.Event) ->
                 why=why,
                 fix="Rota la clave en el proveedor, muévela a una variable de entorno y purga el historial si el repo es público.",
                 source="gitleaks",
+                rule=rule if in_code else f"history:{rule}",
             )
         )
     return [FamilyResult(Family.SECRETS, "ok", None, findings)]

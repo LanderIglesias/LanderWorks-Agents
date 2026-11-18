@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from datetime import UTC, datetime
 
-from .findings import Family, FamilyResult, Finding
+from .findings import SCHEMA_VERSION, Family, FamilyResult, Finding
 from .scoring import (
     FAMILY_NAMES,
     family_score,
@@ -134,6 +134,7 @@ def build_report(
             }
         )
     return {
+        "schema_version": SCHEMA_VERSION,
         "repo": f"{owner}/{repo}",
         "head_sha": head_sha,
         "generated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),

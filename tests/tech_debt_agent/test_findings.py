@@ -46,3 +46,11 @@ def test_finding_to_dict():
     d = f.to_dict()
     assert d["family"] == 1 and d["severity"] == "high" and d["file"] == "a.py"
     assert FamilyResult(Family.CVE, "ok", None, [f]).findings == [f]
+
+
+def test_rule_es_opcional_y_se_serializa():
+    # Construcción posicional, como en llm_reviewer.py.
+    f = Finding(Family.DEBUG, Severity.LOW, "a.py", 1, 1, "t", "w", "f", "llm")
+    assert f.rule is None and f.to_dict()["rule"] is None
+    g = Finding(Family.DEBUG, Severity.LOW, "a.py", 1, 1, "t", "w", "f", "ruff", "T201")
+    assert g.to_dict()["rule"] == "T201"

@@ -109,6 +109,9 @@ def test_lizard_detecta_plantados(vibe_repo):
     assert all(f.severity == "medium" for f in dup)
     assert not [f for f in found if f.file == "app/clean.py"]
     assert all(f.source == "lizard" for f in found)
+    assert {"complexity-ccn", "complexity-file-length", "complexity-duplicate"} <= {
+        f.rule for f in found
+    }
 
 
 def test_lizard_sin_fuentes_es_not_analyzed(tmp_path):
@@ -139,3 +142,17 @@ def test_lizard_duplicacion_ilegible_conserva_complejidad(monkeypatch, tmp_path)
     assert res.status == "ok"
     assert "uplicación no disponible" in res.reason
     assert [(f.line_start, f.severity) for f in res.findings] == [(1, "high")]
+
+
+def test_rule_es_el_codigo_de_ruff(tmp_path):
+    (tmp_path / "a.py").write_text("x = 1\n", encoding="utf-8")
+    data = [
+        {
+            "code": "S110",
+            "filename": "a.py",
+            "message": "m",
+            "location": {"row": 1},
+            "end_location": {"row": 1},
+        }
+    ]
+    assert python_lint._parse(tmp_path, data)[0].rule == "S110"

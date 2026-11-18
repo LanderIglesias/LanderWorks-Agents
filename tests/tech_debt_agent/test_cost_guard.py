@@ -199,3 +199,10 @@ def test_cache_expira_exactamente_a_24h(tmp_path):
     g.put_cached("k", {"a": 1}, T0)
     assert g.get_cached("k", T0 + timedelta(hours=24)) is None
     assert g.get_cached("k", T0 + timedelta(hours=24) - timedelta(seconds=1)) == {"a": 1}
+
+
+def test_cache_key_incluye_version_de_esquema():
+    import hashlib
+
+    old = hashlib.sha256(f"github.com/o/r@{'a' * 40}".encode()).hexdigest()
+    assert cache_key("o", "r", "a" * 40) != old

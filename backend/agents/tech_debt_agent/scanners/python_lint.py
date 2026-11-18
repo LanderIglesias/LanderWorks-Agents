@@ -92,6 +92,7 @@ def _parse(root: Path, data: object) -> list[Finding]:
                 why=_WHY[family],
                 fix=_FIX[family],
                 source="ruff",
+                rule=code,
             )
         )
     return findings

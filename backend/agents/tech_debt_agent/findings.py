@@ -4,6 +4,8 @@ from enum import IntEnum, StrEnum
 from pathlib import Path
 from typing import Literal
 
+SCHEMA_VERSION = 1
+
 
 class Family(IntEnum):
     SECRETS = 1
@@ -34,6 +36,7 @@ class Finding:
     why: str
     fix: str
     source: str
+    rule: str | None = None
 
     def to_dict(self) -> dict:
         d = asdict(self)
