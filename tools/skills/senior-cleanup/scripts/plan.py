@@ -1,7 +1,12 @@
 """Plan determinista de la skill senior-cleanup. Solo stdlib; Python 3.10+.
 
 Subcomandos (todos imprimen JSON en stdout; salida 2 con PlanError):
-  check REPORT   valida informe, repo, SHA, árbol limpio y rama de trabajo.
+  check REPORT              valida informe, repo, SHA, árbol limpio y rama de trabajo.
+  plan REPORT               clasifica hallazgos y forma lotes; guarda plan.json y progress.json.
+  mark ID STATUS [--note]   actualiza el estado de un lote.
+  revert                    deshace los cambios sin commitear del lote en curso.
+
+El estado vive en <git-dir>/senior-cleanup/, nunca en el árbol de trabajo.
 """
 
 from __future__ import annotations
@@ -247,14 +252,199 @@ def mode_for(f: dict, kind: str) -> str:
     return "confirm"
 
 
+MAX_AUTO_BATCH = 15
+_AUTO_FAMILY_ORDER = (6, 4, 7)
+_SEVERITY_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+STATUSES = frozenset({"applied", "reverted", "skipped", "kept_red", "not_located", "pending"})
+
+
+def _sorted_findings(findings: list[dict]) -> list[dict]:
+    """Por archivo y, dentro de cada archivo, de la última línea a la primera (sin línea al final)."""
+    return sorted(
+        findings,
+        key=lambda f: (f["file"], f.get("line_start") is None, -(f.get("line_start") or 0)),
+    )
+
+
+def make_batches(items: list[dict]) -> list[dict]:
+    items = [i for i in items if i["kind"] != "history_only"]
+    groups: list[tuple[str, int, list[dict]]] = []
+
+    for family in _AUTO_FAMILY_ORDER:
+        by_file: dict[str, list[dict]] = {}
+        for i in items:
+            if i["mode"] == "auto" and i["family"] == family:
+                by_file.setdefault(i["file"], []).append(i)
+        current: list[dict] = []
+        for file in sorted(by_file):
+            findings = _sorted_findings(by_file[file])
+            if current and len(current) + len(findings) > MAX_AUTO_BATCH:
+                groups.append(("auto", family, current))
+                current = []
+            while len(findings) > MAX_AUTO_BATCH:  # solo un archivo que pasa del tope se parte
+                groups.append(("auto", family, findings[:MAX_AUTO_BATCH]))
+                findings = findings[MAX_AUTO_BATCH:]
+            current += findings
+        if current:
+            groups.append(("auto", family, current))
+
+    confirm: dict[tuple, list[dict]] = {}
+    for n, i in enumerate(items):
+        if i["mode"] == "confirm":
+            key = (5, i["file"]) if i["family"] == 5 else ("solo", n)
+            confirm.setdefault(key, []).append(i)
+    ordered = sorted(
+        confirm.values(),
+        key=lambda fs: (min(_SEVERITY_RANK.get(f.get("severity"), 4) for f in fs), fs[0]["family"]),
+    )
+    groups += [("confirm", fs[0]["family"], fs) for fs in ordered]
+
+    return [
+        {"id": n, "mode": mode, "family": family, "findings": _sorted_findings(fs)}
+        for n, (mode, family, fs) in enumerate(groups, start=1)
+    ]
+
+
+def detect_test_commands(root: Path) -> list[list[str]]:
+    commands = []
+    pyproject = root / "pyproject.toml"
+    if (
+        (root / "pytest.ini").is_file()
+        or (root / "conftest.py").is_file()
+        or (
+            pyproject.is_file()
+            and "[tool.pytest" in pyproject.read_text(encoding="utf-8", errors="replace")
+        )
+        or any((root / "tests").glob("**/test_*.py"))
+    ):
+        commands.append(["python", "-m", "pytest"])
+    scripts = (_load_json(root / "package.json") or {}).get("scripts")
+    test = scripts.get("test") if isinstance(scripts, dict) else None
+    if isinstance(test, str) and test.strip() and "no test specified" not in test:
+        commands.append(["npm", "test"])
+    return commands
+
+
+def _write_json(path: Path, data: dict) -> None:
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def build_plan(report_path: Path, cwd: Path) -> dict:
+    info = check(report_path, cwd)
+    root = Path(info["repo_root"])
+    state = state_dir(root)
+    if info["resume_available"]:
+        existing = _load_json(state / "plan.json")
+        if existing is not None:
+            return existing  # retomar: el plan y el progreso guardados mandan
+
+    report = load_report(report_path)
+    files = head_files(root)
+    items, history_only, rejected = [], [], []
+    for family in report["families"]:
+        for f in family["findings"]:
+            kind, reason = classify_location(root, f, files)
+            if kind == "rejected":
+                rejected.append({"file": f.get("file"), "title": f.get("title"), "reason": reason})
+            elif kind == "history_only":
+                history_only.append(f)
+            else:
+                items.append(
+                    {
+                        **f,
+                        "kind": kind,
+                        "mode": mode_for(f, kind),
+                        "snippet": capture_snippet(root, f),
+                    }
+                )
+
+    batches = make_batches(items)
+    plan = {
+        "report_sha": info["head_sha"],
+        "repo": report["repo"],
+        "branch": info["branch"],
+        "batches": batches,
+        "history_only": history_only,
+        "rejected": rejected,
+        "not_analyzed": report.get("not_analyzed", []),
+        "test_commands": detect_test_commands(root),
+    }
+    state.mkdir(exist_ok=True)
+    _write_json(state / "plan.json", plan)
+    _write_json(
+        state / "progress.json",
+        {"batches": {str(b["id"]): {"status": "pending", "note": ""} for b in batches}},
+    )
+    return plan
+
+
+def mark(cwd: Path, batch_id: int, status: str, note: str = "") -> dict:
+    if status not in STATUSES:
+        raise PlanError(
+            "bad_status", f"Estado desconocido: {status}. Válidos: {', '.join(sorted(STATUSES))}."
+        )
+    path = state_dir(cwd) / "progress.json"
+    progress = _load_json(path)
+    if progress is None or not isinstance(progress.get("batches"), dict):
+        raise PlanError("no_plan", "No hay progreso guardado. Ejecuta antes plan.py plan.")
+    if str(batch_id) not in progress["batches"]:
+        raise PlanError("bad_batch", f"El lote {batch_id} no está en el plan.")
+    progress["batches"][str(batch_id)] = {"status": status, "note": note}
+    _write_json(path, progress)
+    return progress
+
+
+def revert(cwd: Path) -> list[str]:
+    """Deshace el lote en curso: restaura lo seguido y borra lo nuevo sin seguimiento (no lo ignorado)."""
+    root = Path(git(cwd, "rev-parse", "--show-toplevel"))
+    # git restore borra él mismo los archivos nuevos que estaban en el índice; se anotan antes.
+    staged_new = [
+        p
+        for p in git(root, "diff", "--cached", "--name-only", "--diff-filter=A", "-z").split("\0")
+        if p
+    ]
+    git(root, "restore", "--staged", "--worktree", "--", ".")
+    removed = [p for p in staged_new if not (root / p).exists()]
+    status = git(root, "status", "--porcelain=v1", "-z", "--untracked-files=all")
+    for entry in status.split("\0"):
+        if not entry.startswith("?? "):
+            continue
+        rel = entry[3:]
+        path = root / rel
+        if path.is_dir() and not path.is_symlink():
+            continue  # repo anidado: no se toca
+        path.unlink()
+        removed.append(rel)
+        for parent in path.parents:
+            if parent == root or any(parent.iterdir()):
+                break
+            parent.rmdir()
+    return sorted(removed)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="plan.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
     p_check = sub.add_parser("check", help="valida informe, repo y árbol de trabajo")
     p_check.add_argument("report", type=Path)
+    p_plan = sub.add_parser("plan", help="valida, clasifica y forma los lotes; guarda plan.json")
+    p_plan.add_argument("report", type=Path)
+    p_mark = sub.add_parser("mark", help="actualiza el estado de un lote en progress.json")
+    p_mark.add_argument("batch_id", type=int)
+    p_mark.add_argument("status", choices=sorted(STATUSES))
+    p_mark.add_argument("--note", default="")
+    sub.add_parser("revert", help="deshace los cambios sin commitear del lote en curso")
     args = parser.parse_args(argv)
+    cwd = Path.cwd()
     try:
-        out = check(args.report, Path.cwd())
+        if args.command == "check":
+            out = check(args.report, cwd)
+        elif args.command == "plan":
+            out = build_plan(args.report, cwd)
+        elif args.command == "mark":
+            out = mark(cwd, args.batch_id, args.status, args.note)
+        else:
+            out = {"ok": True, "removed": revert(cwd)}
     except PlanError as e:
         print(json.dumps(e.to_dict(), ensure_ascii=False))
         return 2
