@@ -7,6 +7,7 @@ Subcomandos (todos imprimen JSON en stdout; salida 2 con PlanError):
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 import subprocess
@@ -157,6 +158,93 @@ def check(report_path: Path, cwd: Path) -> dict:
         "branch": branch,
         "resume_available": resume,
     }
+
+
+AUTO_RULES_FAMILY4 = frozenset(
+    {
+        "except-pass-tragado",
+        "except-print-tragado",
+        "catch-vacio",
+        "promise-catch-vacio",
+        "error-expuesto-en-respuesta",
+        "traceback-en-respuesta",
+        "E722",
+        "S110",
+        "S112",
+    }
+)
+_GHOST_FUNCTION_RULES = frozenset({"ghost-none", "ghost-trivial", "ghost-mock"})
+_MAX_SNIPPET_LINES = 20
+
+
+def head_files(root: Path) -> set[str]:
+    return {p for p in git(root, "ls-files", "-z").split("\0") if p}
+
+
+def _is_history(f: dict) -> bool:
+    return str(f.get("rule") or "").startswith("history:")
+
+
+def classify_location(root: Path, f: dict, files: set[str]) -> tuple[str, str | None]:
+    path = f.get("file")
+    if _is_history(f) or (f.get("family") == 1 and path not in files):
+        return "history_only", None
+    if path == ".":
+        return "repo", None
+    if not isinstance(path, str) or not path:
+        return "rejected", "ruta vacía"
+    if path.startswith("/") or re.match(r"^[A-Za-z]:", path):
+        return "rejected", "ruta absoluta"
+    if "\\" in path:
+        return "rejected", "ruta no normalizada (barra invertida)"
+    if ".." in path.split("/"):
+        return "rejected", "ruta con '..'"
+    if path not in files:
+        return "rejected", "el archivo no está en el commit analizado"
+    if (root / path).is_symlink():
+        return "rejected", "el archivo es un enlace simbólico"
+    return ("line" if f.get("line_start") else "file"), None
+
+
+def _function_lines(source: str, line: int) -> tuple[int, int] | None:
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and node.lineno == line:
+            return node.lineno, node.end_lineno
+    return None
+
+
+def capture_snippet(root: Path, f: dict) -> str | None:
+    """Fragmento del código señalado; None para hallazgos sin línea, de repo o de historial."""
+    start = f.get("line_start")
+    path = f.get("file")
+    if not start or path == "." or _is_history(f) or not (root / path).is_file():
+        return None
+    source = (root / path).read_text(encoding="utf-8", errors="replace")
+    lines = source.splitlines(keepends=True)
+    if f.get("family") == 7 and path.endswith(".py") and f.get("rule") in _GHOST_FUNCTION_RULES:
+        span = _function_lines(source, start)
+        if span:
+            return "".join(lines[span[0] - 1 : span[1]])
+    end = min(f.get("line_end") or start, start + _MAX_SNIPPET_LINES - 1)
+    return "".join(lines[start - 1 : end])
+
+
+def mode_for(f: dict, kind: str) -> str:
+    rule = f.get("rule")
+    family = f.get("family")
+    if rule is None:
+        return "confirm"
+    if family == 6:
+        return "confirm" if rule == "debug-true" else "auto"
+    if family == 7:
+        return "confirm" if rule == "ghost-missing" or kind == "repo" else "auto"
+    if family == 4 and (rule in AUTO_RULES_FAMILY4 or rule.startswith(("BLE", "express-"))):
+        return "auto"
+    return "confirm"
 
 
 def main(argv: list[str] | None = None) -> int:
