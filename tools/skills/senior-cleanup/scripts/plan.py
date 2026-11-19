@@ -423,6 +423,9 @@ def revert(cwd: Path) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    sys.stdout.reconfigure(
+        encoding="utf-8"
+    )  # en Windows la tubería usa cp1252 y no cabe el código del repo
     parser = argparse.ArgumentParser(prog="plan.py", description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
     p_check = sub.add_parser("check", help="valida informe, repo y árbol de trabajo")

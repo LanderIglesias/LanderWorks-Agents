@@ -168,6 +168,27 @@ def test_cli_devuelve_json_y_codigo_2(plan, make_repo, write_report):
     assert out["ok"] is False and out["code"] == "sha_mismatch"
 
 
+def test_cli_emite_utf8_con_caracteres_fuera_de_cp1252(plan, make_repo, write_report):
+    repo = make_repo()
+    finding = {
+        "family": 6,
+        "file": "../x.py",
+        "line_start": 1,
+        "line_end": 1,
+        "title": "✋ 日本",
+        "rule": "T201",
+    }
+    report = write_report(repo, [finding])
+    res = subprocess.run(
+        [sys.executable, plan.__file__, "plan", str(report)],
+        cwd=repo,
+        capture_output=True,
+        timeout=60,
+    )
+    assert res.returncode == 0, res.stderr
+    assert json.loads(res.stdout.decode("utf-8"))["rejected"][0]["title"] == "✋ 日本"
+
+
 def test_cli_ok_devuelve_0(plan, make_repo, write_report):
     repo = make_repo()
     res = _cli(plan, write_report(repo, []), repo)
