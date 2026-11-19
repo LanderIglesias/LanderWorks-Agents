@@ -155,12 +155,29 @@ POST /tech-debt/analyze/stream
      Closing the connection cancels the analysis.
 
 GET  /tech-debt/demo
-     Demo page with live progress and markdown download.
+     Demo page with live progress, markdown download and JSON download.
 ```
 
-The report contains `repo`, `head_sha`, `generated_at`, `score`, `grade`,
-`security_gate_applied`, `families`, `top` (the 10 findings to fix first),
+The report contains `schema_version`, `repo`, `head_sha`, `generated_at`, `score`,
+`grade`, `security_gate_applied`, `families`, `top` (the 10 findings to fix first),
 `not_analyzed` and `markdown`.
+
+### JSON report and the `senior-cleanup` skill
+
+The demo's **↓ DOWNLOAD REPORT (.json)** button saves the report without the
+`markdown` key. Two fields make it usable by tools:
+
+- `schema_version` (currently `1`) changes whenever the report format changes. It is
+  also part of the cache key, so a cached report never comes back in an old format.
+- Each finding has a `rule`: the scanner's own id (`debug-true`, `BLE001`, `GHSA-…`,
+  `ghost-none`, `complexity-ccn`…), or `null` for findings from the Claude review.
+  Secrets that only exist in git history use `history:<RuleID>`. CVE findings name
+  the minimum version that fixes all of a package's advisories.
+
+The local Claude Code skill in
+[`tools/skills/senior-cleanup`](../../../tools/skills/senior-cleanup/README.md) reads
+that JSON, fixes the findings in batches on a new branch and checks each batch with the
+repository's own tests.
 
 ---
 
@@ -178,8 +195,8 @@ The report contains `repo`, `head_sha`, `generated_at`, `score`, `grade`,
   and returns at most 20 findings.
 - Public repositories only.
 
-Out of scope for this phase: fixing code or opening PRs, private repositories, a
-visual redesign of the demo.
+Out of scope for the web service: fixing code or opening PRs (fixing is done locally by
+the `senior-cleanup` skill), private repositories, a visual redesign of the demo.
 
 ---
 
