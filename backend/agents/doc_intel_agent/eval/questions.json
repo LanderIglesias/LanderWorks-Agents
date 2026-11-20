@@ -1,0 +1,206 @@
+{
+  "documents": [
+    {"key": "HS", "file": "hubspot_tos.pdf", "title": "HubSpot Customer Terms of Service",
+     "version": "last modified 2026-04-14",
+     "source_url": "https://legal.hubspot.com/hubfs/ToS%20April%2014%2C%202026.pdf",
+     "sha256": "c7e7145f4a364cae9453559d893a75daaf10e927bbc08a69f9935f5599508d71", "pages": 47},
+    {"key": "SF", "file": "salesforce_msa.pdf", "title": "Salesforce Main Services Agreement",
+     "version": "2026-10-15",
+     "source_url": "https://www.salesforce.com/content/dam/web/en_us/www/documents/legal/salesforce_MSA.pdf",
+     "sha256": "ad7d78a2495c7c9106de4f3dfa062992d24204e8a51f5bc262fa9f403abe5381", "pages": 17},
+    {"key": "FW", "file": "freshworks_tos.pdf", "title": "Freshworks Terms of Service",
+     "version": "effective 2026-04-01 (printed to PDF 2026-11-20)",
+     "source_url": "https://www.freshworks.com/terms/",
+     "sha256": "841dae24746b369bdd212341b6904d0697844fb320bbdb9bad8bb0e30e842748", "pages": 28}
+  ],
+  "grading": {
+    "unit": "Una pregunta 'ask' es un elemento; una 'compare' son tres (HS, SF, FW). 40 elementos por pasada.",
+    "facts": "Cada elemento se divide en hechos. Varias páginas en un hecho son alternativas (basta una); cada hecho necesita una de las suyas.",
+    "terms": "Cada elemento de 'terms' es una lista de alternativas; basta una por elemento. Minúsculas y sin tildes.",
+    "evidence": "Cita literal corta (máx. 15 palabras) del texto de pypdf de esa página; sirve para el test de cordura y para medir la recuperación.",
+    "expect_refusal": "La respuesta correcta es decir que los documentos no contienen la información.",
+    "forbidden": "Si aparece cualquiera de estos términos la respuesta es incorrecta (cifra inventada o de otro documento).",
+    "note": "La corrección automática es provisional; la decisión final es la revisión manual."
+  },
+  "questions": [
+    {"id": "E1", "type": "extraction", "route": "ask",
+     "question": "How much notice does HubSpot give before raising fees at renewal?",
+     "items": [{"doc": "HS", "expected": "At least 30 days; increase up to the then-current list price.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "at least 30 days' notice", "pages": [9], "evidence": "we will notify you at least thirty (30) days in advance of your renewal", "terms": [["30", "thirty"]]},
+         {"text": "up to the then-current list price", "pages": [9], "evidence": "increase your Subscription Fees up to our then-current list price", "terms": [["list price"]]}]}]},
+
+    {"id": "E2", "type": "extraction", "route": "ask",
+     "question": "What interest does Salesforce charge on overdue invoices?",
+     "items": [{"doc": "SF", "expected": "1.5% per month or the maximum legal rate, whichever is lower.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "1.5% per month", "pages": [5], "evidence": "late interest at the rate of 1.5% of the outstanding balance per month", "terms": [["1.5"], ["month"]]},
+         {"text": "or the maximum legal rate, whichever is lower", "pages": [5], "evidence": "or the maximum rate permitted by law, whichever is lower", "terms": [["maximum", "permitted by law"]]}]}]},
+
+    {"id": "E3", "type": "extraction", "route": "ask",
+     "question": "How long can I export my data after closing a Freshworks account?",
+     "items": [{"doc": "FW", "expected": "14 days; after that Freshworks may retain it up to 3 months before deletion.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "14 days to export", "pages": [12], "evidence": "Freshworks will make Customer Data available for export for fourteen (14) days", "terms": [["14", "fourteen"]]},
+         {"text": "may retain up to 3 months before deletion", "pages": [13], "evidence": "retain Customer data for up to three (3) months before deleting", "terms": [["3 months", "three months", "three (3) months", "3) months"]]}]}]},
+
+    {"id": "E4", "type": "extraction", "route": "ask",
+     "question": "When can HubSpot suspend my account for non-payment?",
+     "items": [{"doc": "HS", "expected": "10 days after notice of non-payment; not while the charge is disputed in good faith.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "10 days after notice of non-payment", "pages": [12], "evidence": "Subscription Services ten (10) days after such notice", "terms": [["10", "ten"]]},
+         {"text": "not while disputed in good faith", "pages": [12], "evidence": "We will not suspend the Subscription Service while you are disputing", "terms": [["disput"]]}]}]},
+
+    {"id": "E5", "type": "extraction", "route": "ask",
+     "question": "If I do nothing, how long does a Salesforce subscription renew for?",
+     "items": [{"doc": "SF", "expected": "Additional one-year terms, unless written notice (email OK) at least 30 days before the end.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "renews for additional one-year terms", "pages": [8], "evidence": "subscriptions will automatically renew for additional one year terms", "terms": [["one year", "one-year", "1 year", "1-year", "12 months", "12-month"]]},
+         {"text": "unless notice at least 30 days before the end", "pages": [8], "evidence": "written notice (email acceptable) at least 30 days before the end", "terms": [["30", "thirty"]]}]}]},
+
+    {"id": "E6", "type": "extraction", "route": "ask",
+     "question": "How do I stop a HubSpot subscription from auto-renewing?",
+     "items": [{"doc": "HS", "expected": "Turn off the auto-renewal setting in Account & Billing before the end of the current term.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "turn off auto-renewal in Account & Billing before term end", "pages": [11], "evidence": "you must turn off the auto-renewal setting in the Account & Billing section", "terms": [["turn off", "turn it off", "switch off", "disable"], ["billing"]]}]}]},
+
+    {"id": "E7", "type": "extraction", "route": "ask",
+     "question": "What happens to my data when a Freshworks free trial ends?",
+     "items": [{"doc": "FW", "expected": "It must be exported before the trial ends or it is permanently deleted.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "export before trial ends or permanently deleted", "pages": [12], "evidence": "must export Customer Data before the end of the free trial", "terms": [["export"], ["delet"]]}]}]},
+
+    {"id": "E8", "type": "extraction", "route": "ask",
+     "question": "What uptime does HubSpot commit to, and how do I claim a credit?",
+     "items": [{"doc": "HS", "expected": "99.95% per month (commercially reasonable efforts); credit if below for 2+ consecutive months, requested within 20 days of month end.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "99.95% monthly uptime", "pages": [46], "evidence": "meet a Service Uptime of 99.95% for our Subscription Service", "terms": [["99.95"]]},
+         {"text": "credit after 2+ consecutive months below", "pages": [46], "evidence": "two (2) or more consecutive calendar months during which the Service Uptime", "terms": [["consecutive"]]},
+         {"text": "request within 20 days of month end", "pages": [46], "evidence": "requests such credit within twenty (20) days of the end", "terms": [["20", "twenty"]]}]}]},
+
+    {"id": "E9", "type": "extraction", "route": "ask",
+     "question": "What is Salesforce's maximum liability during a free trial?",
+     "items": [{"doc": "SF", "expected": "US$1,000.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "US$1,000", "pages": [3], "evidence": "PROVIDED DURING THE FREE TRIAL SHALL NOT EXCEED $1,000.00", "terms": [["1,000", "1000", "one thousand"]]}]}]},
+
+    {"id": "E10", "type": "extraction", "route": "ask",
+     "question": "What is HubSpot's liability cap for Free Services?",
+     "items": [{"doc": "HS", "expected": "US$100.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "US$100", "pages": [19], "evidence": "OUR AGGREGATE LIABILITY WILL BE LIMITED TO ONE HUNDRED U.S. DOLLARS", "terms": [["100", "one hundred"]]}]}]},
+
+    {"id": "C1", "type": "comparison", "route": "compare",
+     "question": "How do I avoid auto-renewal with each provider?",
+     "items": [
+       {"doc": "HS", "expected": "Switch off auto-renewal before the end of the term (no fixed notice period).", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "turn off auto-renewal before term end", "pages": [11], "evidence": "you must turn off the auto-renewal setting in the Account & Billing section", "terms": [["turn off", "turn it off", "switch off", "disable"]]}]},
+       {"doc": "SF", "expected": "Written notice at least 30 days before the end of the term.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "written notice at least 30 days before term end", "pages": [8], "evidence": "written notice (email acceptable) at least 30 days before the end", "terms": [["30", "thirty"]]}]},
+       {"doc": "FW", "expected": "Written notice at least 30 days before the end of the term.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "written notice at least 30 days before term end", "pages": [11], "evidence": "at least thirty (30) days prior to expiration of the relevant Subscription Term", "terms": [["30", "thirty"]]}]}]},
+
+    {"id": "C2", "type": "comparison", "route": "compare",
+     "question": "Can each provider raise prices at renewal, and with how much notice?",
+     "items": [
+       {"doc": "HS", "expected": "Yes, up to list price, with at least 30 days' notice.", "expect_refusal": false, "forbidden": [],
+        "facts": [
+          {"text": "up to list price", "pages": [9], "evidence": "increase your Subscription Fees up to our then-current list price", "terms": [["list price"]]},
+          {"text": "at least 30 days' notice", "pages": [9], "evidence": "we will notify you at least thirty (30) days in advance of your renewal", "terms": [["30", "thirty"]]}]},
+       {"doc": "SF", "expected": "Promotional pricing renews at list price and reduced volume is re-priced; no notice period stated.", "expect_refusal": false, "forbidden": [],
+        "facts": [
+          {"text": "promotional pricing renews at list price", "pages": [8], "evidence": "renewal of promotional or one-time priced subscriptions will be at SFDC's applicable list price", "terms": [["list price"]]},
+          {"text": "reduced volume is re-priced", "pages": [8], "evidence": "result in re-pricing at renewal without regard to the prior term's per-unit pricing", "terms": [["re-pric", "repric", "per-unit", "per unit"]]}]},
+       {"doc": "FW", "expected": "Adjusts fees with at least 30 days' notice; discounts lost if the plan is reduced.", "expect_refusal": false, "forbidden": [],
+        "facts": [
+          {"text": "adjusts fees with at least 30 days' notice", "pages": [11], "evidence": "notify Customer of any fee adjustments at least thirty (30) days before its renewal date", "terms": [["30", "thirty"]]},
+          {"text": "discounts lost if plan reduced", "pages": [11], "evidence": "any discounts or price protections previously provided by Freshworks will not apply to renewal", "terms": [["discount", "price protection"]]}]}]},
+
+    {"id": "C3", "type": "comparison", "route": "compare",
+     "question": "How long do I have to get my data back after termination?",
+     "items": [
+       {"doc": "HS", "expected": "Main terms defer to the DPA and Product Specific Terms; 30 days stated there for certain Marketing Hub plans.", "expect_refusal": false, "forbidden": [],
+        "facts": [
+          {"text": "defers to DPA / Product Specific Terms", "pages": [15], "evidence": "please see the 'HubSpot Obligations' section of our DPA", "terms": [["dpa", "data processing", "product specific terms"]]},
+          {"text": "30 days for certain Marketing Hub plans", "pages": [34], "evidence": "if you make a written request within thirty (30) days after termination", "terms": [["30", "thirty"]]}]},
+       {"doc": "SF", "expected": "30 days, on request.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "30 days on request", "pages": [2], "evidence": "Upon request by Customer made within 30 days after the effective date of termination", "terms": [["30", "thirty"]]}]},
+       {"doc": "FW", "expected": "14 days.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "14 days", "pages": [12, 13], "evidence": "Freshworks will make Customer Data available for export for fourteen (14) days", "terms": [["14", "fourteen"]]}]}]},
+
+    {"id": "C4", "type": "comparison", "route": "compare",
+     "question": "If I terminate because the provider breached the contract, do I get prepaid fees back?",
+     "items": [
+       {"doc": "HS", "expected": "Yes, prepaid unused fees are refunded.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "refund of prepaid unused fees", "pages": [13], "evidence": "we will promptly refund any prepaid but unused fees", "terms": [["refund"], ["prepaid", "unused"]]}]},
+       {"doc": "SF", "expected": "Yes, prepaid fees for the rest of the term are refunded.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "refund of prepaid fees for the remainder of the term", "pages": [8], "evidence": "SFDC will refund Customer any prepaid fees covering the remainder of the term", "terms": [["refund"], ["prepaid", "remainder"]]}]},
+       {"doc": "FW", "expected": "Its termination-for-cause clause promises no refund; refunds only in specific cases (warranty non-conformance, IP claims, force majeure).", "expect_refusal": false, "forbidden": [],
+        "facts": [
+          {"text": "termination-for-cause clause promises no refund", "pages": [12], "evidence": "materially breaches this Agreement and does not cure such breach within thirty (30) days", "terms": [["no refund", "not mention", "not specif", "not address", "not provide", "not state", "silent"]]},
+          {"text": "refunds only in specific cases", "pages": [14, 21], "evidence": "entitled to receive a refund of any unused Fees that Customer has pre-paid", "terms": [["warranty", "force majeure", "infring", "intellectual property"]]}]}]},
+
+    {"id": "C5", "type": "comparison", "route": "compare",
+     "question": "What cure period does each give for a material breach?",
+     "items": [
+       {"doc": "HS", "expected": "30 days.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "30 days", "pages": [11], "evidence": "upon thirty (30) days' notice to the other party of a material breach", "terms": [["30", "thirty"]]}]},
+       {"doc": "SF", "expected": "30 days.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "30 days", "pages": [8], "evidence": "upon 30 days written notice to the other party of a material breach", "terms": [["30", "thirty"]]}]},
+       {"doc": "FW", "expected": "30 days.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "30 days", "pages": [12], "evidence": "does not cure such breach within thirty (30) days of such notice", "terms": [["30", "thirty"]]}]}]},
+
+    {"id": "C6", "type": "comparison", "route": "compare",
+     "question": "Can I cancel mid-term and get a refund?",
+     "items": [
+       {"doc": "HS", "expected": "No: you may not cancel before the end of the term and prepaid fees are not refunded.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "no mid-term cancellation or refund", "pages": [11], "evidence": "you may not cancel your subscription prior to the end of your Current Term", "terms": [["no refund", "not provide any refund", "non-refundable", "not refundable", "may not cancel", "cannot", "can't", "no,", "no."]]}]},
+       {"doc": "SF", "expected": "No: payment obligations are non-cancelable and fees paid are non-refundable.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "non-cancelable, non-refundable", "pages": [5], "evidence": "payment obligations are non- cancelable and fees paid are non-refundable", "terms": [["non-refundable", "non-cancelable", "non- cancelable", "no refund", "not refundable", "cannot", "can't", "no,", "no."]]}]},
+       {"doc": "FW", "expected": "No: payment obligations are non-cancelable and non-refundable.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "non-cancelable, non-refundable", "pages": [8], "evidence": "Payment obligations are non-cancelable, and non-refundable", "terms": [["non-refundable", "non-cancelable", "no refund", "not refundable", "cannot", "can't", "no,", "no."]]}]}]},
+
+    {"id": "C7", "type": "comparison", "route": "compare",
+     "question": "What happens if I pay late?",
+     "items": [
+       {"doc": "HS", "expected": "Suspension 10 days after notice of non-payment.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "suspension 10 days after notice", "pages": [12], "evidence": "Subscription Services ten (10) days after such notice", "terms": [["suspen"], ["10", "ten"]]}]},
+       {"doc": "SF", "expected": "Late interest of 1.5% per month.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "1.5% per month interest", "pages": [5], "evidence": "late interest at the rate of 1.5% of the outstanding balance per month", "terms": [["1.5"]]}]},
+       {"doc": "FW", "expected": "Suspension if more than 30 days overdue, after written notice.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "suspension if >30 days overdue, after notice", "pages": [9], "evidence": "If undisputed Fees are more than thirty (30) days overdue", "terms": [["suspen"], ["30", "thirty"]]}]}]},
+
+    {"id": "C8", "type": "comparison", "route": "compare",
+     "question": "How is each provider's total liability capped?",
+     "items": [
+       {"doc": "HS", "expected": "Amounts paid or payable in the 12 months before the claim.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "12 months of fees", "pages": [19], "evidence": "PAID OR PAYABLE FOR THE SUBSCRIPTION SERVICE IN THE TWELVE MONTH PERIOD", "terms": [["12", "twelve"]]}]},
+       {"doc": "SF", "expected": "Amounts paid in the 12 months before the incident.", "expect_refusal": false, "forbidden": [],
+        "facts": [{"text": "12 months of fees", "pages": [8], "evidence": "IN THE TWELVE MONTHS PRECEDING THE FIRST INCIDENT OUT OF WHICH THE LIABILITY AROSE", "terms": [["12", "twelve"]]}]},
+       {"doc": "FW", "expected": "Fees received or payable in the 12 months before the claim; excludes gross negligence, wilful misconduct, fraud and indemnities.", "expect_refusal": false, "forbidden": [],
+        "facts": [
+          {"text": "12 months of fees", "pages": [18], "evidence": "PAYABLE TO FRESHWORKS IN THE APPLICABLE SOF IN THE TWELVE MONTHS PRECEDING THE CLAIM", "terms": [["12", "twelve"]]},
+          {"text": "excludes gross negligence, wilful misconduct, fraud, indemnities", "pages": [18], "evidence": "EXCEPT FOR AN ACTION BROUGHT FOR GROSS NEGLIGENCE, WILLFUL MISCONDUCT, FRAUD", "terms": [["gross negligence", "willful misconduct", "wilful misconduct", "fraud", "indemnif"]]}]}]},
+
+    {"id": "T1", "type": "trap", "route": "ask",
+     "question": "What uptime does Salesforce guarantee?",
+     "items": [{"doc": null, "expected": "Not stated (only HubSpot has an uptime commitment; answering 99.95% is cross-document contamination).", "expect_refusal": true, "facts": [], "forbidden": ["99.95"]}]},
+    {"id": "T2", "type": "trap", "route": "ask",
+     "question": "Does Freshworks guarantee 99.9% uptime?",
+     "items": [{"doc": null, "expected": "Not stated.", "expect_refusal": true, "facts": [], "forbidden": ["99.95"]}]},
+    {"id": "T3", "type": "trap", "route": "ask",
+     "question": "How many days is the Salesforce free trial?",
+     "items": [{"doc": null, "expected": "Not stated (trial length is whatever the customer registered for).", "expect_refusal": true, "facts": [], "forbidden": ["14 days", "30 days", "14-day", "30-day"]}]},
+    {"id": "T4", "type": "trap", "route": "ask",
+     "question": "What is the monthly per-seat price of Freshworks' Pro plan?",
+     "items": [{"doc": null, "expected": "Not stated.", "expect_refusal": true, "facts": [], "forbidden": ["$"]}]},
+    {"id": "T5", "type": "trap", "route": "ask",
+     "question": "What fine does HubSpot pay if it leaks my data?",
+     "items": [{"doc": null, "expected": "Not stated.", "expect_refusal": true, "facts": [], "forbidden": ["€", "$"]}]},
+    {"id": "T6", "type": "trap", "route": "ask",
+     "question": "Which provider offers 24/7 phone support?",
+     "items": [{"doc": "HS", "expected": "None offers 24/7 phone support; HubSpot phone support (Professional/Enterprise) runs 8pm Sunday – 8pm Friday EST, email/in-app questions accepted 24/7.", "expect_refusal": false, "forbidden": [],
+       "facts": [
+         {"text": "no 24/7 phone; phone 8pm Sunday – 8pm Friday EST", "pages": [46, 47], "evidence": "available from 8pm Sunday to 8pm Friday EST", "terms": [["sunday"], ["friday"]]}]}]}
+  ]
+}
