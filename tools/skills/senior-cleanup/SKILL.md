@@ -173,8 +173,12 @@ Sin preguntar. Arreglos mínimos, según el `fix` y tu criterio:
 - **Familia 4, tragados:** estrecha la excepción y registra el error con logging. Nunca lo
   silencies de otra forma.
 - **Familia 4, expuestos:** mensaje genérico al cliente y el detalle al log del servidor.
-- **Familia 7:** asserts reales sobre lo que promete el nombre del test. Nunca
-  `assert True`, nunca asserts solo sobre mocks.
+- **Familia 7:** asserts reales sobre lo que promete el nombre del test, llamando a código
+  del proyecto. Nunca `assert True`, nunca tautologías (`expect(1 + 1).toBe(2)`), nunca
+  asserts solo sobre mocks, tampoco sobre el valor que devuelve un mock que tú configuraste.
+  Si el test no llama a código del proyecto o su nombre no dice qué comportamiento
+  comprobar, no lo toques: anótalo en la `note` del lote como "sin arreglo automático:
+  <test>" y llévalo al resumen como pendiente para el usuario.
 
 Después, `run_tests.py verify`:
 
@@ -240,9 +244,13 @@ Nunca copies un secreto completo en el diff ni en el texto: córtalo con `…`. 
 
 Casos con contenido propio:
 
-- **Familia 3 (CVE):** sube a la versión del `fix` en el manifiesto. Si hay lockfile,
-  incluye en la propuesta el comando que lo regenera (`uv lock`,
-  `npm install --package-lock-only`…) y ejecútalo solo tras "Sí, aplicar".
+- **Familia 3 (CVE):** sube a la versión del `fix` respetando el estilo del manifiesto: si
+  fija versiones exactas (`==`, versión sin rango en `package.json`), escribe `==` con esa
+  versión, no `>=`. Si el paquete no está en el manifiesto (dependencia transitiva), dilo
+  en la propuesta y añádelo fijado, con un comentario que explique por qué está ahí.
+  Si hay lockfile, incluye en la propuesta el comando que lo regenera (`uv lock`,
+  `npm install --package-lock-only`…) y ejecútalo solo tras "Sí, aplicar". No edites un
+  lockfile a mano salvo que no haya manifiesto del que regenerarlo, y en ese caso avisa.
 - **Familia 5 (monolito):** propone una división concreta (qué funciones van a qué archivo
   nuevo). Si se salta, la propuesta va completa al resumen.
 - **Familia 1 en el código actual:** pasa el valor a una variable de entorno y añade la
