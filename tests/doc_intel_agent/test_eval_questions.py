@@ -2,25 +2,16 @@
 
 import hashlib
 import json
-import re
-import unicodedata
 from functools import cache
 from pathlib import Path
 
 from pypdf import PdfReader
 
+from backend.agents.doc_intel_agent.eval.grading import normalise
+
 EVAL_DIR = Path(__file__).resolve().parents[2] / "backend" / "agents" / "doc_intel_agent" / "eval"
 QUESTIONS = json.loads((EVAL_DIR / "questions.json").read_text(encoding="utf-8"))
 DOCS = {d["key"]: d for d in QUESTIONS["documents"]}
-
-
-def normalise(text: str) -> str:
-    text = unicodedata.normalize("NFKC", text)
-    for ch in "ʼ’‘":
-        text = text.replace(ch, "'")
-    text = text.replace("“", '"').replace("”", '"').lower()
-    text = "".join(c for c in unicodedata.normalize("NFD", text) if not unicodedata.combining(c))
-    return re.sub(r"\s+", " ", text).strip()
 
 
 @cache
