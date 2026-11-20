@@ -35,7 +35,10 @@ class PlanError(Exception):
 
 
 def _run_git(root: Path, *args: str) -> subprocess.CompletedProcess:
-    return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, timeout=60)
+    try:
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, timeout=60)
+    except OSError as e:  # git no instalado o cwd inexistente: error JSON, no traceback
+        raise PlanError("git_failed", f"No se pudo ejecutar git en {root}: {e}") from e
 
 
 def git(root: Path, *args: str) -> str:

@@ -15,6 +15,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -27,12 +28,6 @@ _TAIL_LINES = 40
 
 def _timeout() -> int:
     return int(os.environ.get("SENIOR_CLEANUP_TEST_TIMEOUT", 900))
-
-
-def _text(out: str | bytes | None) -> str:
-    if isinstance(out, bytes):  # TimeoutExpired puede traer bytes aunque se pida text=True
-        return out.decode("utf-8", errors="replace")
-    return out or ""
 
 
 def _is_pytest(cmd: list[str]) -> bool:
@@ -62,29 +57,31 @@ def run_command(cmd: list[str], root: Path, junit: Path | None, timeout: int) ->
         junit.unlink(missing_ok=True)
     argv[0] = shutil.which(argv[0]) or argv[0]  # en Windows, npm es npm.cmd
     timed_out = False
-    try:
-        res = subprocess.run(
-            argv,
-            cwd=root,
-            env=env,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=timeout,
-        )
-        exit_code, output = res.returncode, res.stdout + res.stderr
-    except subprocess.TimeoutExpired as e:
-        timed_out, exit_code = True, None
-        output = _text(e.stdout) + _text(e.stderr) + f"\n[timeout tras {timeout} s]"
-    except FileNotFoundError:
-        exit_code, output = 127, f"No se encuentra el ejecutable {cmd[0]!r}."
+    # Salida a un archivo y no a una tubería: si un proceso nieto (node bajo npm.cmd) sobrevive
+    # al kill del timeout, una tubería abierta dejaría run() esperando para siempre.
+    # ponytail: los nietos huérfanos siguen vivos; matar el árbol entero pide Job Objects / killpg.
+    with tempfile.TemporaryFile() as log:
+        try:
+            res = subprocess.run(
+                argv, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=timeout
+            )
+            exit_code = res.returncode
+        except subprocess.TimeoutExpired:
+            timed_out, exit_code = True, None
+        except FileNotFoundError:
+            exit_code = 127
+            log.write(f"No se encuentra el ejecutable {cmd[0]!r}.".encode())
+        log.seek(0)
+        output = log.read().decode("utf-8", errors="replace")
+    if timed_out:
+        output += f"\n[timeout tras {timeout} s]"
 
     failed: list[str] = []
     collect_error = False
     if pytest_run and not timed_out:
         ids = _failed_ids(junit)
-        collect_error = ids is None or exit_code in (2, 3, 4)
+        # 0 = verde y 1 = hay fallos; 1 sin ids fallidos, 5 (cero tests) o 2-4 = la ejecución no vale.
+        collect_error = ids is None or exit_code not in (0, 1) or (exit_code == 1 and not ids)
         failed = ids or []
     return {
         "cmd": cmd,
@@ -128,6 +125,7 @@ def baseline(cwd: Path, cmd: str | None = None) -> dict:
         "known_failures": sorted({t for r in results for t in r["failed"]}),
         "opaque_red": any(r["exit"] != 0 for r in results if not _is_pytest(r["cmd"])),
     }
+    state.mkdir(exist_ok=True)  # con --cmd puede no haber plan todavía
     plan._write_json(state / "baseline.json", data)
     return data
 

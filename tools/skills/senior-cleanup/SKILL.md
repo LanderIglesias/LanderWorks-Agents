@@ -137,7 +137,9 @@ Omite las líneas que queden vacías. Si `test_commands` está vacío, escribe
 `Tests: no detectados` y pregunta `Tests` antes de `Empezar`. Con "No hay tests", todos
 los lotes son de confirmación y no se ejecutan ni `baseline` ni `verify`.
 
-Pregunta `Empezar`. Con "No, cancelar", detente sin crear nada. Si no:
+Pregunta `Empezar`. Con "No, cancelar", detente sin crear nada. Si no, avisa en una línea
+de que no edite el repo mientras trabajas (revertir un lote borra los archivos sin
+seguimiento), y después:
 
 1. Guarda la rama actual: el nombre que da `git rev-parse --abbrev-ref HEAD`, escrito en
    `<git-dir>/senior-cleanup/origin`.

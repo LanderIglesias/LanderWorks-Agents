@@ -111,6 +111,27 @@ def test_sin_comando_de_tests_es_error(rt, make_repo, write_report):
     assert exc.value.code == "no_tests"
 
 
+def test_lote_que_deja_cero_tests_no_ok(rt, project):
+    rt.baseline(project)
+    for name in ("test_ok.py", "test_known.py"):
+        (project / name).write_text("# vaciado\n")
+    out = rt.verify(project)
+    assert out["ok"] is False and out["results"][0]["exit"] == 5
+
+
+def test_cmd_sin_plan_crea_el_estado(rt, make_repo):
+    repo = make_repo()
+    base = rt.baseline(repo, cmd='python -c "pass"')
+    assert base["opaque_red"] is False
+    assert (rt.plan.state_dir(repo) / "baseline.json").is_file()
+
+
+def test_schema_version_igual_que_el_backend(rt):
+    from backend.agents.tech_debt_agent.findings import SCHEMA_VERSION
+
+    assert rt.plan.SCHEMA_VERSION == SCHEMA_VERSION
+
+
 def test_ejecutar_tests_no_ensucia_el_arbol(rt, project):
     assert not (project / ".gitignore").exists()
     rt.baseline(project)

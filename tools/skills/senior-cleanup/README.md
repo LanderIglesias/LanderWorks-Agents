@@ -67,6 +67,8 @@ El estado se guarda en `.git/senior-cleanup/`, nunca en el árbol de trabajo.
   instrucciones de `git filter-repo` y te avisa de que rotes la clave, pero no ejecuta nada.
 - No vuelve a escanear. Trabaja con lo que dice el informe; si el código cambió, hay
   que analizarlo de nuevo en la demo.
+- No edites el repo mientras la skill trabaja: si un lote se revierte, se borran los
+  archivos sin seguimiento que haya en ese momento (los ignorados por `.gitignore` no).
 - Solo verifica con tests que existan. Sin comando de tests, todos los lotes piden
   confirmación.
 - Comando de tests manual en Windows: si la ruta lleva barras invertidas, ponla entre
