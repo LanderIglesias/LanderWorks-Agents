@@ -37,7 +37,7 @@ python -m backend.agents.doc_intel_agent.eval.run_eval --repeats 1 --only E1,C1,
 python -m backend.agents.doc_intel_agent.eval.report backend/agents/doc_intel_agent/eval/results/results_<fecha>.json
 ```
 
-`run_eval` vacía la tabla, indexa los tres PDF con `process_pdf` + `save_chunks` (sin subir nada a R2) y responde con `answer_question` / `compare_documents`. Guarda `results/results_<fecha>.json`. `report` imprime el resumen y escribe `results/review_<fecha>.csv` para la revisión manual; si existe `results/grades_<fecha>.json` (`[{id, run, doc, grade}]`), esas notas sustituyen a la corrección automática.
+`run_eval` vacía la tabla, indexa los tres PDF con `process_pdf` + `save_chunks` (sin subir nada a R2) y responde con `answer_question` / `compare_documents`. Guarda `results/results_<fecha>.json`; si se corta a medias (por ejemplo, un error de la API) guarda lo hecho como `results/results_partial_<fecha>.json`, con `meta.complete: false`. `report` imprime el resumen y escribe `results/review_<fecha>.csv` para la revisión manual; si existe `results/grades_<fecha>.json` (`[{id, run, doc, grade}]`), esas notas sustituyen a la corrección automática.
 
 ## Métricas
 
