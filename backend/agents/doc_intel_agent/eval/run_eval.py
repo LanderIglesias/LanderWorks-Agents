@@ -45,6 +45,12 @@ def check_eval_db_url(url: str) -> str:
     return url
 
 
+def results_name(n_records: int, n_expected: int, stamp: str) -> str:
+    """Una ejecución incompleta (p. ej. error de la API a medias) lleva 'partial' en el nombre."""
+    prefix = "results" if n_records == n_expected else "results_partial"
+    return f"{prefix}_{stamp}.json"
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -145,7 +151,11 @@ def main() -> None:
         finally:
             # Guardamos aunque falle a medias: no perder respuestas ya pagadas.
             RESULTS_DIR.mkdir(exist_ok=True)
-            out = RESULTS_DIR / f"results_{datetime.now():%Y%m%d_%H%M%S}.json"
+            expected = args.repeats * len(questions)
+            meta["complete"] = len(records) == expected
+            meta["records_expected"] = expected
+            stamp = f"{datetime.now():%Y%m%d_%H%M%S}"
+            out = RESULTS_DIR / results_name(len(records), expected, stamp)
             out.write_text(
                 json.dumps({"meta": meta, "records": records}, ensure_ascii=False, indent=1),
                 encoding="utf-8",

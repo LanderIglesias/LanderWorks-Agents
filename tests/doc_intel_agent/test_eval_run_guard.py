@@ -31,6 +31,12 @@ def test_accepts_localhost():
         assert _check(url) == url
 
 
+def test_partial_run_is_named_partial():
+    name = importlib.import_module(RUN_EVAL).results_name
+    assert name(72, 72, "20261121_100000") == "results_20261121_100000.json"
+    assert name(14, 72, "20261121_100000") == "results_partial_20261121_100000.json"
+
+
 def test_import_does_not_touch_database_module(monkeypatch):
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.delitem(sys.modules, DATABASE, raising=False)
