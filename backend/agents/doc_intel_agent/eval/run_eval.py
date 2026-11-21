@@ -42,6 +42,16 @@ def check_eval_db_url(url: str) -> str:
     host = urlsplit(url).hostname
     if host not in LOCAL_HOSTS:
         raise SystemExit(f"EVAL_DATABASE_URL debe apuntar a localhost, no a '{host}'.")
+    parts = urlsplit(url)
+    # libpq acepta ?host=... en la query: se saltaría la comprobación del host.
+    if parts.query:
+        raise SystemExit("EVAL_DATABASE_URL no puede llevar parámetros (?...).")
+    # Una copia local de la base de la app o un túnel a producción en localhost no vale:
+    # la tabla se vacía antes de indexar.
+    if "eval" not in parts.path.lstrip("/"):
+        raise SystemExit(
+            "La base de EVAL_DATABASE_URL debe llamarse con 'eval' (p. ej. doc_intel_eval)."
+        )
     return url
 
 

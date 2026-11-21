@@ -23,6 +23,16 @@ def test_rejects_remote_host():
         _check("postgresql://u:p@db.example.com:5432/x")
 
 
+def test_rejects_local_db_not_named_eval():
+    with pytest.raises(SystemExit):
+        _check("postgresql://u:p@localhost:5432/doc_intel")
+
+
+def test_rejects_query_string_host_override():
+    with pytest.raises(SystemExit):
+        _check("postgresql://u:p@localhost:5436/doc_intel_eval?host=db.example.com")
+
+
 def test_accepts_localhost():
     for url in (
         "postgresql://u:p@localhost:5433/doc_intel_eval",

@@ -104,11 +104,42 @@ def test_summary_counts():
     assert s["citation"] == {"exact": 7, "adjacent": 1, "wrong": 0, "n/a": 0}
     assert s["failure_split"] == {
         "not_retrieved": 0,
-        "retrieved_adjacent": 1,
+        "retrieved_mislabelled": 1,
         "retrieved_cited_wrong": 0,
     }
     assert s["compare_all_three_right"] == {"1": 1, "2": 1}
     assert s["unstable_items"] == [["Q1", "HS"]]
+
+
+def test_adjacent_citation_with_right_label_is_cited_wrong():
+    # El chunk con la evidencia está bien etiquetado (página 9) y aun así cita la 8:
+    # no es culpa del etiquetado, aunque la cita quede a ±1.
+    results = {
+        "meta": {},
+        "records": [
+            {
+                "id": "Q1",
+                "run": 1,
+                "route": "ask",
+                "answers": [
+                    _answer(
+                        None,
+                        "HubSpot gives thirty days' notice (page 8).",
+                        "hubspot_tos.pdf",
+                        9,
+                        "we will notify you at least thirty (30) days",
+                    )
+                ],
+            }
+        ],
+    }
+    s = summarise(QUESTIONS, results)
+    assert s["citation"]["adjacent"] == 1
+    assert s["failure_split"] == {
+        "not_retrieved": 0,
+        "retrieved_mislabelled": 0,
+        "retrieved_cited_wrong": 1,
+    }
 
 
 def test_human_grade_overrides_auto():

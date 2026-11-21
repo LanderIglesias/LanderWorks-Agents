@@ -17,11 +17,23 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from .grading import auto_grade, citation_status, cited_pages, facts_hit_by_chunks
+from .grading import auto_grade, citation_status, cited_pages, facts_hit_by_chunks, normalise
 
 EVAL_DIR = Path(__file__).resolve().parent
 GRADES = ("correcta", "parcial", "incorrecta")
 STATUSES = ("exact", "adjacent", "wrong", "n/a")
+
+
+def _labelled_right(item: dict, chunks: list[dict]) -> list[bool]:
+    """Por hecho: algún chunk con su evidencia lleva una de sus páginas (si no, falla el etiquetado)."""
+    return [
+        any(
+            c["page"] in f["pages"]
+            for c in chunks
+            if normalise(f["evidence"]) in normalise(c["content"])
+        )
+        for f in item["facts"]
+    ]
 
 
 def rows(questions: dict, results: dict, human: list[dict] | None = None) -> list[dict]:
@@ -55,6 +67,7 @@ def rows(questions: dict, results: dict, human: list[dict] | None = None) -> lis
                     "citation_status": citation_status(item, cited),
                     "cited_pages": {k: sorted(v) for k, v in cited.items()},
                     "facts_retrieved": facts_hit_by_chunks(item, answer["chunks_text"]),
+                    "facts_labelled_right": _labelled_right(item, answer["chunks_text"]),
                 }
             )
     return out
@@ -74,8 +87,8 @@ def summarise(questions: dict, results: dict, human: list[dict] | None = None) -
             continue
         if not all(r["facts_retrieved"]):
             split["not_retrieved"] += 1
-        elif r["citation_status"] == "adjacent":
-            split["retrieved_adjacent"] += 1
+        elif not all(r["facts_labelled_right"]):
+            split["retrieved_mislabelled"] += 1
         else:
             split["retrieved_cited_wrong"] += 1
 
@@ -102,7 +115,7 @@ def summarise(questions: dict, results: dict, human: list[dict] | None = None) -
         },
         "citation": {s: status[s] for s in STATUSES},
         "failure_split": {
-            k: split[k] for k in ("not_retrieved", "retrieved_adjacent", "retrieved_cited_wrong")
+            k: split[k] for k in ("not_retrieved", "retrieved_mislabelled", "retrieved_cited_wrong")
         },
         "compare_all_three_right": dict(sorted(all_three.items())),
         "unstable_items": [[i, d] for (i, d), v in seen.items() if len(v) > 1],

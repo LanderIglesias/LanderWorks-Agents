@@ -22,7 +22,7 @@ HubSpot y Salesforce son los PDF oficiales. Freshworks no publica PDF: `freshwor
 
 ## Cómo se ejecuta
 
-Base de datos propia y local (nunca la de producción del `.env`; `run_eval.py` se niega si el host no es `localhost`/`127.0.0.1`):
+Base de datos propia y local (nunca la de producción del `.env`; `run_eval.py` se niega si el host no es `localhost`/`127.0.0.1`, si la URL lleva parámetros `?...` o si el nombre de la base no contiene `eval`, porque vacía la tabla antes de indexar):
 
 ```
 docker run -d --name doc-intel-eval-db -e POSTGRES_USER=eval -e POSTGRES_PASSWORD=eval -e POSTGRES_DB=doc_intel_eval -p 5436:5432 pgvector/pgvector:pg16
@@ -43,7 +43,8 @@ python -m backend.agents.doc_intel_agent.eval.report backend/agents/doc_intel_ag
 
 - **Nota**: correcta / parcial / incorrecta. Primera pasada automática por términos clave (`grading.auto_grade`); la nota final es la revisión manual. Las trampas solo son correctas si dicen que no está y no dan ninguna cifra prohibida (`forbidden`, por ejemplo el 99.95 % de HubSpot en una pregunta sobre Salesforce).
 - **Cita**: `exact` si cada hecho tiene citada una de sus páginas en el documento correcto; `adjacent` si solo acierta a ±1 página; `wrong` en otro caso; `n/a` si el elemento no tiene páginas (trampas).
-- **Reparto de fallos de cita**: no recuperado (ningún chunk contenía la evidencia) · recuperado pero citado en la página contigua · recuperado y citado mal.
+- **Reparto de fallos de cita** (elementos con página cuya cita no es `exact`): no recuperado (ningún chunk contenía la evidencia) · recuperado pero mal etiquetado (ningún chunk con la evidencia lleva una de sus páginas: el problema conocido de abajo) · recuperado con la etiqueta correcta y aun así citado mal.
+- **Inestables**: pares (pregunta, documento) cuya nota o estado de cita cambia entre pasadas.
 
 ## Problema conocido (medido, no corregido)
 
