@@ -194,6 +194,17 @@ repository's own tests.
 - Claude reviews a selection of files within a fixed byte budget, not the whole repo,
   and returns at most 20 findings.
 - Public repositories only.
+- The minimum fixed version in CVE findings is chosen by comparing only the numbers in
+  each version, so pre-releases (`1.0.0rc1` vs `1.0.0`) can be ordered wrongly and the
+  suggested version may be off for those packages. Fix: `packaging.version` for PyPI
+  and a semver comparator for npm (`_vkey` in `scanners/deps.py`).
+- Running the repo's tests happens only locally, in the `senior-cleanup` skill. The web
+  service never runs them.
+
+## Pending
+
+- **Phase 3: PR mode in the web demo.** Not implemented. Today the web service only
+  reports; fixes are applied locally by the `senior-cleanup` skill.
 
 Out of scope for the web service: fixing code or opening PRs (fixing is done locally by
 the `senior-cleanup` skill), private repositories, a visual redesign of the demo.
