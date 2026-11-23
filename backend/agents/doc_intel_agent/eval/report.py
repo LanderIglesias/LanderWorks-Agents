@@ -152,7 +152,7 @@ def main(path: str) -> None:
                     **r,
                     "cited_pages": json.dumps(r["cited_pages"]),
                     "facts_retrieved": json.dumps(r["facts_retrieved"]),
-                    "human_grade": "",
+                    "human_grade": r["grade"] if human else "",
                 }
             )
 

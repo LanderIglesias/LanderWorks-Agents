@@ -54,6 +54,17 @@ python -m backend.agents.doc_intel_agent.eval.report backend/agents/doc_intel_ag
 
 El test de cordura debe pasar antes de la primera ejecución completa; después `questions.json` queda congelado. Se permite un piloto de 2-3 preguntas para probar la tubería, que se descarta. Tras la ejecución completa, una respuesta esperada solo puede cambiar si es errónea frente al texto del PDF, nunca por lo que haya respondido el agente; cada cambio se apunta abajo con su motivo y la ejecución se vuelve a corregir, no a ejecutar.
 
+## Notas humanas
+
+`results/grades_20261121_115837.json` tiene la nota manual de los 120 elementos de la ejecución completa (`results_20261121_115837.json`); `report` la usa en lugar de la automática y la vuelca en la columna `human_grade` del CSV. Se revisaron las 120 respuestas y cambian 20 notas respecto a la corrección automática:
+
+- Sube a correcta: E1·HS ×3 (la pregunta solo pide el plazo de aviso), C2·SF pasada 1 (dice que no hay plazo de aviso, que es lo esperado) y T1 ×3 (menciona el 99.95 % atribuido bien a HubSpot; la trampa busca atribuirlo a Salesforce).
+- Sube a parcial: C4·FW ×3 (apunta a que no se reembolsa, pero no se compromete).
+- Baja a parcial: C3·SF ×3 (da los 30 días del cambio de proveedor de la Data Act, p. 16, no los de la p. 2) y C7·HS ×3 (no menciona los 10 días tras el aviso).
+- Baja a incorrecta: C4·HS ×3 (dice que no consta, cuando la p. 13 sí lo dice) y C6·SF pasada 2 (confunde cancelar con resolver por incumplimiento, como las pasadas 1 y 3).
+
+Resultado: 102 correctas / 9 parciales / 9 incorrectas (extracción 30/0/0, comparación 54/9/9, trampas 18/0/0). Las citas no cambian: son automáticas.
+
 ## Cambios al set
 
 - 2026-11-20 (antes de congelar): T2 tiene `forbidden: ["99.95"]` en vez de `["99.9"]`, porque la propia pregunta dice "99.9%" y una negativa correcta que la repita no debe contar como incorrecta. Ninguna página de la spec tuvo que corregirse (E9 verificada: SF página 3).

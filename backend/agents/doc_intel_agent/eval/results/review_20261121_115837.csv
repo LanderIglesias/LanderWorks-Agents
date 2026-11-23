@@ -3,32 +3,32 @@ E1,1,HS,At least 30 days; increase up to the then-current list price.,"According
 
 As stated on Page 9: ""If this increase applies to you, we will notify you at least thirty (30) days in advance of your renewal and the increased fees will apply at the start of the next Renewal Term.""
 
-If you don't agree to the fee increase, you have the option to terminate your subscription at the end of your Current Term by providing the required notice of non-renewal.",parcial,exact,"{""HS"": [9]}","[true, true]",
+If you don't agree to the fee increase, you have the option to terminate your subscription at the end of your Current Term by providing the required notice of non-renewal.",parcial,exact,"{""HS"": [9]}","[true, true]",correcta
 E2,1,SF,"1.5% per month or the maximum legal rate, whichever is lower.","According to the Salesforce MSA, Salesforce charges **late interest at the rate of 1.5% of the outstanding balance per month, or the maximum rate permitted by law, whichever is lower** on overdue invoices.
 
-This applies when any invoiced amount is not received by Salesforce by the due date. (Source: Salesforce MSA, Page 5, Section 5.3 ""Overdue Charges"")",correcta,exact,"{""SF"": [5]}","[true, true]",
+This applies when any invoiced amount is not received by Salesforce by the due date. (Source: Salesforce MSA, Page 5, Section 5.3 ""Overdue Charges"")",correcta,exact,"{""SF"": [5]}","[true, true]",correcta
 E3,1,FW,14 days; after that Freshworks may retain it up to 3 months before deletion.,"Based on the Freshworks Terms of Service, you have **14 days** to export your data after closing your account.
 
 Specifically, Freshworks will make your Customer Data available for export for fourteen (14) days from the effective date of the closure of your account, whether due to termination or expiration of the Agreement or the applicable Service Order Form (this period is called the ""Data Export Period"").
 
 After this 14-day period, Freshworks reserves the right to retain your Customer Data for up to three (3) months before deleting it in the normal course of operation. Once your data is deleted, it cannot be recovered.
 
-**Source:** freshworks_tos.pdf, Page 11-12",correcta,adjacent,"{""FW"": [11, 12]}","[true, true]",
+**Source:** freshworks_tos.pdf, Page 11-12",correcta,adjacent,"{""FW"": [11, 12]}","[true, true]",correcta
 E4,1,HS,10 days after notice of non-payment; not while the charge is disputed in good faith.,"According to the HubSpot Terms of Service (Page 12), HubSpot can suspend your access to Subscription Services **ten (10) days after providing you with notice of non-payment**.
 
 However, there is an important exception: HubSpot will not suspend your service while you are disputing the applicable charges reasonably and in good faith and are cooperating diligently to resolve the dispute.
 
-Additionally, if your Subscription Service is suspended for non-payment, HubSpot may charge a re-activation fee to reinstate the service.",correcta,exact,"{""HS"": [12]}","[true, true]",
+Additionally, if your Subscription Service is suspended for non-payment, HubSpot may charge a re-activation fee to reinstate the service.",correcta,exact,"{""HS"": [12]}","[true, true]",correcta
 E5,1,SF,"Additional one-year terms, unless written notice (email OK) at least 30 days before the end.","Based on the Salesforce MSA document, if you do nothing, subscriptions will **automatically renew for additional one year terms**.
 
 According to Section 11.2 (Term of Purchased Subscriptions) on Page 8 of the salesforce_msa.pdf:
 
 > ""Except as otherwise specified in an Order Form, subscriptions will automatically renew for additional one year terms, unless either party gives the other written notice (email acceptable) at least 30 days before the end of the relevant subscription term.""
 
-This means you must actively opt out by providing written notice at least 30 days before the end of your subscription term to prevent automatic renewal.",correcta,exact,"{""SF"": [8]}","[true, true]",
+This means you must actively opt out by providing written notice at least 30 days before the end of your subscription term to prevent automatic renewal.",correcta,exact,"{""SF"": [8]}","[true, true]",correcta
 E6,1,HS,Turn off the auto-renewal setting in Account & Billing before the end of the current term.,"According to the HubSpot Terms of Service (Page 11), to stop your subscription from auto-renewing, you must **turn off the auto-renewal setting in the Account & Billing section of your HubSpot account prior to the end of your Current Term**.
 
-If you do not turn off the auto-renewal setting, your subscription will renew automatically. The document also notes that you can learn more about this process by following the steps in the HubSpot knowledge base article titled ""Cancel your subscription and delete your HubSpot account.""",correcta,exact,"{""HS"": [11]}",[true],
+If you do not turn off the auto-renewal setting, your subscription will renew automatically. The document also notes that you can learn more about this process by following the steps in the HubSpot knowledge base article titled ""Cancel your subscription and delete your HubSpot account.""",correcta,exact,"{""HS"": [11]}",[true],correcta
 E7,1,FW,It must be exported before the trial ends or it is permanently deleted.,"# What Happens to Your Data When a Free Trial Ends
 
 According to the Freshworks Terms of Service (Page 11), when your free trial expires:
@@ -39,7 +39,7 @@ According to the Freshworks Terms of Service (Page 11), when your free trial exp
 
 3. **No Retention Obligation**: Freshworks has no obligation to maintain, store, or otherwise retain your Customer Data beyond the end of the free trial period.
 
-**Key Takeaway**: You should export all your data before your free trial expires to avoid losing it permanently.",correcta,adjacent,"{""FW"": [11]}",[true],
+**Key Takeaway**: You should export all your data before your free trial expires to avoid losing it permanently.",correcta,adjacent,"{""FW"": [11]}",[true],correcta
 E8,1,HS,"99.95% per month (commercially reasonable efforts); credit if below for 2+ consecutive months, requested within 20 days of month end.","# HubSpot Service Uptime Commitment
 
 **Uptime Commitment:** HubSpot commits to 99.95% Service Uptime for its Subscription Service in a given calendar month. (HubSpot TOS, Page 45)
@@ -54,17 +54,17 @@ You are entitled to a credit if Service Uptime falls below 99.95% for **two (2) 
 
 3. **Request Deadline:** You must request the credit **within twenty (20) days of the end of the relevant calendar month** in which HubSpot did not meet the 99.95% Service Uptime commitment
 
-**Important Note:** This Service Uptime Commitment does not apply to HubSpot's Free Services. (HubSpot TOS, Page 46)",correcta,exact,"{""HS"": [45, 46]}","[true, true, true]",
+**Important Note:** This Service Uptime Commitment does not apply to HubSpot's Free Services. (HubSpot TOS, Page 46)",correcta,exact,"{""HS"": [45, 46]}","[true, true, true]",correcta
 E9,1,SF,"US$1,000.","According to the Salesforce MSA, **Salesforce's maximum liability during a free trial is $1,000.00**.
 
 However, this cap only applies if the exclusion of liability is enforceable under applicable law. The document states that ""SFDC SHALL HAVE NO INDEMNIFICATION OBLIGATIONS NOR LIABILITY OF ANY TYPE WITH RESPECT TO THE SERVICES FOR THE FREE TRIAL PERIOD UNLESS SUCH EXCLUSION OF LIABILITY IS NOT ENFORCEABLE UNDER APPLICABLE LAW IN WHICH CASE SFDC'S LIABILITY WITH RESPECT TO THE SERVICES PROVIDED DURING THE FREE TRIAL SHALL NOT EXCEED $1,000.00.""
 
 Additionally, during the free trial period, the services are provided ""AS-IS"" without any warranty, and Salesforce makes no representations or warranties regarding the services' performance, security, or accuracy.
 
-[Source: salesforce_msa.pdf, Pages 2-3]",correcta,exact,"{""SF"": [2, 3]}",[true],
+[Source: salesforce_msa.pdf, Pages 2-3]",correcta,exact,"{""SF"": [2, 3]}",[true],correcta
 E10,1,HS,US$100.,"According to the HubSpot Terms of Service (Page 19), if you only use the Free Services, HubSpot's aggregate liability is limited to **one hundred U.S. dollars ($100)**.
 
-The document specifically states: ""PROVIDED HOWEVER, THIS LIMITATION WILL NOT APPLY TO YOU IF YOU ONLY USE THE FREE SERVICES, AND IN THIS CASE, IF WE ARE DETERMINED TO HAVE ANY LIABILITY TO YOU OR ANY THIRD PARTY ARISING FROM YOUR USE OF THE FREE SERVICES, THEN OUR AGGREGATE LIABILITY WILL BE LIMITED TO ONE HUNDRED U.S. DOLLARS.""",correcta,exact,"{""HS"": [19]}",[true],
+The document specifically states: ""PROVIDED HOWEVER, THIS LIMITATION WILL NOT APPLY TO YOU IF YOU ONLY USE THE FREE SERVICES, AND IN THIS CASE, IF WE ARE DETERMINED TO HAVE ANY LIABILITY TO YOU OR ANY THIRD PARTY ARISING FROM YOUR USE OF THE FREE SERVICES, THEN OUR AGGREGATE LIABILITY WILL BE LIMITED TO ONE HUNDRED U.S. DOLLARS.""",correcta,exact,"{""HS"": [19]}",[true],correcta
 C1,1,HS,Switch off auto-renewal before the end of the term (no fixed notice period).,"Based on the HubSpot Terms of Service document provided, here's how to avoid auto-renewal with **HubSpot**:
 
 **To cancel auto-renewal:**
@@ -76,7 +76,7 @@ The document notes there is a knowledge base article titled ""Cancel your subscr
 
 ---
 
-However, I should note that you asked about ""each provider"" (plural), but the context provided only contains HubSpot's Terms of Service. I couldn't find information about other providers in this document.",correcta,exact,"{""HS"": [11]}",[true],
+However, I should note that you asked about ""each provider"" (plural), but the context provided only contains HubSpot's Terms of Service. I couldn't find information about other providers in this document.",correcta,exact,"{""HS"": [11]}",[true],correcta
 C1,1,SF,Written notice at least 30 days before the end of the term.,"Based on the Salesforce MSA document, to avoid auto-renewal, you need to provide **written notice (email acceptable) at least 30 days before the end of the relevant subscription term**.
 
 According to Section 11.2 (Term of Purchased Subscriptions) on Page 8:
@@ -88,7 +88,7 @@ So the key steps are:
 2. Send written notice to Salesforce at least 30 days before that end date
 3. Email is acceptable for this notice
 
-**Note:** This information is specific to Salesforce. If you need to know how to avoid auto-renewal with other providers, you would need to check their individual terms and conditions.",correcta,exact,"{""SF"": [8]}",[true],
+**Note:** This information is specific to Salesforce. If you need to know how to avoid auto-renewal with other providers, you would need to check their individual terms and conditions.",correcta,exact,"{""SF"": [8]}",[true],correcta
 C1,1,FW,Written notice at least 30 days before the end of the term.,"# Auto-Renewal Opt-Out for Freshworks
 
 Based on the Freshworks Terms of Service, to avoid auto-renewal you must:
@@ -104,7 +104,7 @@ According to the document (Page 9):
 - Failure to provide this notice will result in automatic renewal
 - You can also request a downgrade instead of full non-renewal
 
-**Note:** This information is specific to Freshworks only. If you're asking about other providers, I would need their terms and conditions to provide guidance on their auto-renewal policies.",correcta,wrong,"{""FW"": [9]}",[true],
+**Note:** This information is specific to Freshworks only. If you're asking about other providers, I would need their terms and conditions to provide guidance on their auto-renewal policies.",correcta,wrong,"{""FW"": [9]}",[true],correcta
 C2,1,HS,"Yes, up to list price, with at least 30 days' notice.","Based on the HubSpot Terms of Service, **yes, HubSpot can raise prices at renewal with at least 30 days' notice**.
 
 According to Section 3.2 (Fee Adjustments at Renewal) on Page 8:
@@ -113,7 +113,7 @@ According to Section 3.2 (Fee Adjustments at Renewal) on Page 8:
 
 If you disagree with the price increase, you have the option to terminate your subscription at the end of your Current Term by turning off auto-renewal before the renewal date.
 
-**Note:** The document only provides information about HubSpot's pricing policies. If you're asking about multiple providers, I would need additional documents to answer about their specific renewal and pricing terms.",correcta,adjacent,"{""HS"": [8]}","[true, true]",
+**Note:** The document only provides information about HubSpot's pricing policies. If you're asking about multiple providers, I would need additional documents to answer about their specific renewal and pricing terms.",correcta,adjacent,"{""HS"": [8]}","[true, true]",correcta
 C2,1,SF,Promotional pricing renews at list price and reduced volume is re-priced; no notice period stated.,"Based on the Salesforce MSA document, here's what it says about price increases at renewal:
 
 **Price Increases at Renewal:**
@@ -124,14 +124,14 @@ Either party must give the other **written notice (email acceptable) at least 30
 
 However, the document does not explicitly state whether Salesforce must provide separate advance notice specifically about price increases beyond the general 30-day renewal notice requirement. The language suggests that price changes at renewal are permitted, but the specific notice period for price increases themselves is not detailed in the provided sections.
 
-**Note:** The document only addresses Salesforce's pricing practices. It does not discuss whether customers can raise prices.",parcial,exact,"{""SF"": [8]}","[true, true]",
+**Note:** The document only addresses Salesforce's pricing practices. It does not discuss whether customers can raise prices.",parcial,exact,"{""SF"": [8]}","[true, true]",correcta
 C2,1,FW,Adjusts fees with at least 30 days' notice; discounts lost if the plan is reduced.,"Yes, Freshworks can raise prices at renewal. According to the Terms of Service, **Freshworks will notify Customer of any fee adjustments at least thirty (30) days before its renewal date, and these adjusted fees will take effect at the beginning of the Renewal Term.**
 
 The adjustments are made ""to reflect delivered innovation, general cost inflation, and other relevant factors.""
 
 Additionally, the document notes that ""any discounts or price protections previously provided by Freshworks will not apply to renewal if Customer's overall number of Users, Service Plan (including any add-ons), or contract terms are reduced or lowered from the prior Subscription Term.""
 
-**Source:** Freshworks ToS, Page 11, Section 6(c) - Fee Adjustments",correcta,exact,"{""FW"": [11]}","[true, true]",
+**Source:** Freshworks ToS, Page 11, Section 6(c) - Fee Adjustments",correcta,exact,"{""FW"": [11]}","[true, true]",correcta
 C3,1,HS,Main terms defer to the DPA and Product Specific Terms; 30 days stated there for certain Marketing Hub plans.,"Based on the HubSpot Terms of Service, **you should retrieve your Customer Data prior to the end of your Subscription Term**, as HubSpot will not provide access to Customer Data after termination or expiration of your Subscription Term.
 
 Specifically, the document states:
@@ -142,7 +142,7 @@ However, HubSpot will provide ""reasonable assistance to you, at your cost, if y
 
 So to directly answer your question: You have until the **end of your Current Term** to retrieve your data. Once your subscription terminates or expires, you will no longer have access to your Customer Data.
 
-**Source:** HubSpot Terms of Service, Page 36",incorrecta,wrong,"{""HS"": [36]}","[false, false]",
+**Source:** HubSpot Terms of Service, Page 36",incorrecta,wrong,"{""HS"": [36]}","[false, false]",incorrecta
 C3,1,SF,"30 days, on request.","Based on the Salesforce MSA document, the timeline for getting your data back depends on the type of request:
 
 **For a Switching Request (migrating to another provider):**
@@ -153,14 +153,14 @@ Salesforce will delete your data in accordance with their Security, Privacy and 
 
 It's important to note that **Salesforce continues to provide Services until the Termination Date**, so you're not losing service access during this export period.
 
-[Source: Salesforce MSA, Page 16]",correcta,wrong,"{""SF"": [16]}",[false],
+[Source: Salesforce MSA, Page 16]",correcta,wrong,"{""SF"": [16]}",[false],parcial
 C3,1,FW,14 days.,"According to the Freshworks Terms of Service, you have **14 days** to export your Customer Data after your account is closed.
 
 Specifically, Freshworks will make your Customer Data available for export for fourteen (14) days from the effective date of the closure of your Account due to termination or expiration of the Agreement or applicable Statement of Fees (""Data Export Period""). You can contact Freshworks at support@freshworks.com during this period to request data export.
 
 **Important:** After the 14-day Data Export Period expires, Freshworks reserves the right to retain your data for up to three additional months before deleting it, but you would no longer be able to access or recover it yourself. The document emphasizes that ""Customer Data cannot be recovered once it is deleted.""
 
-[Source: Freshworks TOS, Pages 11-12]",correcta,exact,"{""FW"": [11, 12]}",[true],
+[Source: Freshworks TOS, Pages 11-12]",correcta,exact,"{""FW"": [11, 12]}",[true],correcta
 C4,1,HS,"Yes, prepaid unused fees are refunded.","Based on the HubSpot Terms of Service, **the document does not explicitly state whether you receive prepaid fees back if the provider breaches the contract**.
 
 What the document does say is:
@@ -171,14 +171,14 @@ Additionally: ""All payment obligations are non-cancelable and all amounts paid 
 
 The terms indicate that **termination for cause** is available to either party for material breach (with 30 days' notice to cure), but the refund policy for prepaid fees in this scenario would depend on those unspecified exceptions mentioned (""except as specifically provided for in this Agreement""). 
 
-**I'd recommend reviewing your specific Order Form or contacting HubSpot directly**, as the refund entitlement in a breach scenario may be detailed elsewhere in your agreement rather than in this general section.",correcta,wrong,"{""HS"": [10, 11]}",[false],
+**I'd recommend reviewing your specific Order Form or contacting HubSpot directly**, as the refund entitlement in a breach scenario may be detailed elsewhere in your agreement rather than in this general section.",correcta,wrong,"{""HS"": [10, 11]}",[false],incorrecta
 C4,1,SF,"Yes, prepaid fees for the rest of the term are refunded.","# Yes, you get prepaid fees back if you terminate for breach.
 
 According to **salesforce_msa.pdf, Page 8**, Section 11.4 states:
 
 > ""If this Agreement is terminated by Customer in accordance with the 'Termination' section above, SFDC will refund Customer any prepaid fees covering the remainder of the term of all Order Forms after the effective date of termination.""
 
-However, there's an important condition: You must follow the proper termination process outlined in Section 11.3, which requires you to give the provider **30 days written notice** of the material breach and allow them 30 days to cure it. Only if the breach remains uncured at the end of that 30-day period can you terminate and receive the refund of prepaid fees for the remainder of the term.",correcta,exact,"{""SF"": [8]}",[true],
+However, there's an important condition: You must follow the proper termination process outlined in Section 11.3, which requires you to give the provider **30 days written notice** of the material breach and allow them 30 days to cure it. Only if the breach remains uncured at the end of that 30-day period can you terminate and receive the refund of prepaid fees for the remainder of the term.",correcta,exact,"{""SF"": [8]}",[true],correcta
 C4,1,FW,"Its termination-for-cause clause promises no refund; refunds only in specific cases (warranty non-conformance, IP claims, force majeure).","Based on the Freshworks Terms of Service, **the document does not explicitly address refunds of prepaid fees in the case of provider breach/termination for cause**.
 
 Here's what the document does say about termination for cause:
@@ -187,26 +187,26 @@ Here's what the document does say about termination for cause:
 
 **General Payment Terms** (Section 5(a), Page 8): ""Payment obligations are non-cancelable, and non-refundable, except as expressly permitted in this Agreement, regardless of utilization by the Customer.""
 
-The document states that fees are generally non-refundable except where expressly permitted, but it doesn't specifically carve out an exception for termination due to Freshworks' breach. To get a definitive answer on whether you'd receive a refund of prepaid fees if Freshworks breaches the contract, you would need to contact Freshworks directly or consult with a legal professional, as this scenario isn't explicitly addressed in the provided terms.",incorrecta,wrong,"{""FW"": [8, 11]}","[true, false]",
+The document states that fees are generally non-refundable except where expressly permitted, but it doesn't specifically carve out an exception for termination due to Freshworks' breach. To get a definitive answer on whether you'd receive a refund of prepaid fees if Freshworks breaches the contract, you would need to contact Freshworks directly or consult with a legal professional, as this scenario isn't explicitly addressed in the provided terms.",incorrecta,wrong,"{""FW"": [8, 11]}","[true, false]",parcial
 C5,1,HS,30 days.,"According to the HubSpot Terms of Service (Page 11), **each party has thirty (30) days to cure a material breach**.
 
 Specifically, Section 4.3 (Termination for Cause) states: ""Either party may terminate this Agreement for cause...upon thirty (30) days' notice to the other party of a material breach if such breach remains uncured at the expiration of such period.""
 
-This means that if one party receives notice of a material breach, they have 30 days from that notice to fix (cure) the breach before the other party can proceed with termination.",correcta,exact,"{""HS"": [11]}",[true],
+This means that if one party receives notice of a material breach, they have 30 days from that notice to fix (cure) the breach before the other party can proceed with termination.",correcta,exact,"{""HS"": [11]}",[true],correcta
 C5,1,SF,30 days.,"Based on the Salesforce MSA, **each party has 30 days to cure a material breach**.
 
 According to Section 11.3 (Termination) on Page 8:
 
 > ""A party may terminate this Agreement for cause (i) upon 30 days written notice to the other party of a material breach if such breach remains uncured at the expiration of such period...""
 
-This means that upon receiving written notice of a material breach, the breaching party has 30 days to fix (cure) the breach before the other party can terminate the Agreement.",correcta,exact,"{""SF"": [8]}",[true],
+This means that upon receiving written notice of a material breach, the breaching party has 30 days to fix (cure) the breach before the other party can terminate the Agreement.",correcta,exact,"{""SF"": [8]}",[true],correcta
 C5,1,FW,30 days.,"Based on the document, **both parties have a thirty (30) day cure period for a material breach**.
 
 According to Section 6(e) (Termination for Cause) on Page 11 of the Freshworks Terms of Service:
 
 > ""Either party may terminate this Agreement by written notice to the other party in the event that: (i) such other party materially breaches this Agreement and does not cure such breach within thirty (30) days of such notice...""
 
-This thirty-day cure period applies equally to both Freshworks and Customer. However, the document also notes that termination can occur immediately in the case of bankruptcy or insolvency proceedings, which do not require a cure period.",correcta,adjacent,"{""FW"": [11]}",[true],
+This thirty-day cure period applies equally to both Freshworks and Customer. However, the document also notes that termination can occur immediately in the case of bankruptcy or insolvency proceedings, which do not require a cure period.",correcta,adjacent,"{""FW"": [11]}",[true],correcta
 C6,1,HS,No: you may not cancel before the end of the term and prepaid fees are not refunded.,"Based on the HubSpot Terms of Service, **no, you cannot cancel mid-term and get a refund**.
 
 According to Section 4.1 (Page 11):
@@ -217,7 +217,7 @@ Additionally, Section 3.5 (Page 10) states:
 
 > ""All payment obligations are non-cancelable and all amounts paid are non-refundable, except as specifically provided for in this Agreement.""
 
-You can only cancel at the end of your Current Term by turning off the auto-renewal setting in your Account & Billing section before your term ends.",correcta,exact,"{""HS"": [10, 11]}",[true],
+You can only cancel at the end of your Current Term by turning off the auto-renewal setting in your Account & Billing section before your term ends.",correcta,exact,"{""HS"": [10, 11]}",[true],correcta
 C6,1,SF,No: payment obligations are non-cancelable and fees paid are non-refundable.,"Based on the Salesforce MSA document, **you can cancel mid-term, but refunds are limited**:
 
 **Refund Policy (Section 11.4):**
@@ -234,7 +234,7 @@ Under the Data Act provisions (Page 16), if you submit a Deletion Request, you m
 
 In summary: Mid-term cancellation is possible, but you'll owe fees through the termination date. Refunds only apply to prepaid amounts for the period *after* your effective termination date.
 
-*Source: Salesforce MSA, October 15, 2026, Pages 8 and 16*",incorrecta,wrong,"{""SF"": [8, 16]}",[false],
+*Source: Salesforce MSA, October 15, 2026, Pages 8 and 16*",incorrecta,wrong,"{""SF"": [8, 16]}",[false],incorrecta
 C6,1,FW,No: payment obligations are non-cancelable and non-refundable.,"Based on the Freshworks Terms of Service, **you cannot cancel mid-term and get a refund**. 
 
 The document states clearly in Section 5(a) on Page 8:
@@ -243,7 +243,7 @@ The document states clearly in Section 5(a) on Page 8:
 
 Additionally, during the Subscription Term, you are not permitted to reduce your User or Asset Unit count or downgrade your Service Plan.
 
-The only ways to end your subscription are to provide written notice of non-renewal at least 30 days before the end of your current Subscription Term, or to terminate for cause under specific circumstances (like material breach).",correcta,exact,"{""FW"": [8]}",[true],
+The only ways to end your subscription are to provide written notice of non-renewal at least 30 days before the end of your current Subscription Term, or to terminate for cause under specific circumstances (like material breach).",correcta,exact,"{""FW"": [8]}",[true],correcta
 C7,1,HS,Suspension 10 days after notice of non-payment.,"Based on the HubSpot Terms of Service, here's what happens if you pay late:
 
 **Immediate consequences:**
@@ -257,7 +257,7 @@ If you don't provide a valid tax receipt within 90 days of your invoice date (wh
 - All invoiced amounts are due within 30 days from the invoice date (Page 9)
 - If your payment method fails to charge, HubSpot reserves the right to retry billing, and may suspend your access or terminate your account if they remain unable to successfully charge a valid payment method (Page 9)
 
-The document emphasizes that ""all payment obligations are non-cancelable and all amounts paid are non-refundable"" (Page 10), and HubSpot has collection and setoff rights to recover any outstanding fees owed.",correcta,adjacent,"{""HS"": [9, 10, 11]}",[false],
+The document emphasizes that ""all payment obligations are non-cancelable and all amounts paid are non-refundable"" (Page 10), and HubSpot has collection and setoff rights to recover any outstanding fees owed.",correcta,adjacent,"{""HS"": [9, 10, 11]}",[false],parcial
 C7,1,SF,Late interest of 1.5% per month.,"# Late Payment Consequences
 
 Based on the Salesforce MSA, if you pay late, the following can occur:
@@ -277,14 +277,14 @@ Based on the Salesforce MSA, if you pay late, the following can occur:
 **Exception:**
 - These remedies do not apply if you are disputing the charges reasonably and in good faith while cooperating diligently to resolve the dispute.
 
-*(Source: Salesforce MSA, Pages 5 and 14)*",correcta,exact,"{""SF"": [5, 14]}",[true],
+*(Source: Salesforce MSA, Pages 5 and 14)*",correcta,exact,"{""SF"": [5, 14]}",[true],correcta
 C7,1,FW,"Suspension if more than 30 days overdue, after written notice.","# Late Payment Consequences
 
 Based on the Freshworks Terms of Service (Page 8), if your undisputed fees are **more than 30 days overdue**, Freshworks may suspend your access to their technology, including your Account, following written notification from Freshworks.
 
 **However, there's an important exception:** If you are disputing the charges reasonably and in good faith while cooperating diligently to resolve the dispute, Freshworks will not exercise suspension rights. If the dispute cannot be resolved within 30 days, Freshworks retains the right to seek remedies under the Agreement.
 
-**Key point:** Any undisputed amounts must still be paid in full during the dispute resolution process.",correcta,adjacent,"{""FW"": [8]}",[true],
+**Key point:** Any undisputed amounts must still be paid in full during the dispute resolution process.",correcta,adjacent,"{""FW"": [8]}",[true],correcta
 C8,1,HS,Amounts paid or payable in the 12 months before the claim.,"# Liability Cap
 
 Based on the HubSpot Terms of Service (Page 19), liability is capped as follows:
@@ -302,7 +302,7 @@ The limitation of liability does NOT apply to:
 - HubSpot's IP Indemnification obligations
 - Your liability for violating HubSpot's intellectual property rights
 
-Additionally, HubSpot disclaims all liability for third-party products and services (Page 19).",correcta,exact,"{""HS"": [19]}",[true],
+Additionally, HubSpot disclaims all liability for third-party products and services (Page 19).",correcta,exact,"{""HS"": [19]}",[true],correcta
 C8,1,SF,Amounts paid in the 12 months before the incident.,"# Liability Cap
 
 According to the Salesforce MSA, each party's total liability is capped as follows:
@@ -315,7 +315,7 @@ This means each party's liability is limited to the total fees the customer paid
 **Exception for German Customers (Page 13):**
 Customers domiciled in Germany have different liability rules. For them, liability is capped at foreseeable, typical contract damages when cardinal duties are breached due to slight negligence. However, liability remains unlimited for willful misconduct, gross negligence, guaranteed obligations, and other specific circumstances outlined in the German provisions.
 
-**Citation:** Salesforce MSA, October 15, 2026, Pages 7 and 13",correcta,adjacent,"{""SF"": [7, 13]}",[true],
+**Citation:** Salesforce MSA, October 15, 2026, Pages 7 and 13",correcta,adjacent,"{""SF"": [7, 13]}",[true],correcta
 C8,1,FW,"Fees received or payable in the 12 months before the claim; excludes gross negligence, wilful misconduct, fraud and indemnities.","# Liability Cap
 
 Based on **freshworks_tos.pdf, Page 17**, each party's aggregate liability is capped as follows:
@@ -328,59 +328,59 @@ Based on **freshworks_tos.pdf, Page 17**, each party's aggregate liability is ca
 - Fraud
 - A party's indemnification obligations
 
-**Important note:** This monetary cap applies across the entire agreement and any separate agreements on an aggregated basis, without regard to whether individual customer affiliates have executed separate SOFs.",correcta,adjacent,"{""FW"": [17]}","[true, true]",
+**Important note:** This monetary cap applies across the entire agreement and any separate agreements on an aggregated basis, without regard to whether individual customer affiliates have executed separate SOFs.",correcta,adjacent,"{""FW"": [17]}","[true, true]",correcta
 T1,1,,Not stated (only HubSpot has an uptime commitment; answering 99.95% is cross-document contamination).,"Based on the Salesforce MSA document, **Salesforce does not specify a guaranteed uptime percentage**. 
 
 Instead, the document states that Salesforce ""will use commercially reasonable efforts to make the online Purchased Services available 24 hours a day, 7 days a week, except for: (i) planned downtime (of which SFDC shall give advance electronic notice), and (ii) any unavailability caused by circumstances beyond SFDC's reasonable control"" (Salesforce MSA, Page 2).
 
-This is different from HubSpot, which commits to a specific 99.95% Service Uptime guarantee in their terms of service.",incorrecta,n/a,"{""SF"": [2]}",[],
-T2,1,,Not stated.,"I couldn't find information about that in this document. The provided chunks from the Freshworks Terms of Service do not contain any uptime guarantees or service level agreement (SLA) information. To find details about Freshworks' uptime guarantees, you would need to check their Service Level Agreement (SLA) documentation or other service-specific terms.",correcta,n/a,{},[],
+This is different from HubSpot, which commits to a specific 99.95% Service Uptime guarantee in their terms of service.",incorrecta,n/a,"{""SF"": [2]}",[],correcta
+T2,1,,Not stated.,"I couldn't find information about that in this document. The provided chunks from the Freshworks Terms of Service do not contain any uptime guarantees or service level agreement (SLA) information. To find details about Freshworks' uptime guarantees, you would need to check their Service Level Agreement (SLA) documentation or other service-specific terms.",correcta,n/a,{},[],correcta
 T3,1,,Not stated (trial length is whatever the customer registered for).,"I couldn't find information about that in this document.
 
-The Salesforce MSA document discusses free trials in section 2.6, but it does not specify a particular number of days. It only states that SFDC will make applicable Services available ""until the earlier of (a) the end of the free trial period for which Customer registered to use the applicable Service(s)..."" The actual duration would be specified on the trial registration web page, which is not included in these document chunks.",correcta,n/a,{},[],
+The Salesforce MSA document discusses free trials in section 2.6, but it does not specify a particular number of days. It only states that SFDC will make applicable Services available ""until the earlier of (a) the end of the free trial period for which Customer registered to use the applicable Service(s)..."" The actual duration would be specified on the trial registration web page, which is not included in these document chunks.",correcta,n/a,{},[],correcta
 T4,1,,Not stated.,"I couldn't find information about that in this document. The provided chunks from the Freshworks Terms of Service do not contain specific pricing details for the Pro plan or any monthly per-seat pricing information. 
 
-The document indicates that fees are ""set forth in the applicable SOF, Services, and/or Website"" (Page 8), but the actual pricing details are not included in these terms and conditions excerpts.",correcta,n/a,"{""FW"": [8]}",[],
+The document indicates that fees are ""set forth in the applicable SOF, Services, and/or Website"" (Page 8), but the actual pricing details are not included in these terms and conditions excerpts.",correcta,n/a,"{""FW"": [8]}",[],correcta
 T5,1,,Not stated.,"I couldn't find information about that in this document. The provided HubSpot Terms of Service sections discuss data protection measures and HubSpot's obligations to maintain safeguards for Customer Data, but they do not specify any particular fines or penalties that HubSpot must pay in the event of a data leak.
 
-To find information about potential liability or penalties for data breaches, you would need to review other sections of the full Terms of Service (such as limitation of liability clauses) or consult with HubSpot directly.",correcta,n/a,{},[],
+To find information about potential liability or penalties for data breaches, you would need to review other sections of the full Terms of Service (such as limitation of liability clauses) or consult with HubSpot directly.",correcta,n/a,{},[],correcta
 T6,1,HS,"None offers 24/7 phone support; HubSpot phone support (Professional/Enterprise) runs 8pm Sunday – 8pm Friday EST, email/in-app questions accepted 24/7.","Based on the provided document, **HubSpot does not offer 24/7 phone support**.
 
 According to the HubSpot Terms of Service (Page 46), phone support for Professional or Enterprise tiers is available from **8pm Sunday to 8pm Friday EST (Eastern Standard Time)** only. The document also notes that these hours may be reduced during recognized holidays and HubSpot's company-wide designated week of rest.
 
-However, HubSpot does accept **email and in-app support questions 24 hours per day, 7 days per week**, though responses to these are provided during phone support hours only.",correcta,exact,"{""HS"": [46]}",[true],
+However, HubSpot does accept **email and in-app support questions 24 hours per day, 7 days per week**, though responses to these are provided during phone support hours only.",correcta,exact,"{""HS"": [46]}",[true],correcta
 E1,2,HS,At least 30 days; increase up to the then-current list price.,"According to the HubSpot Terms of Service (Page 9), HubSpot will notify you **at least thirty (30) days in advance of your renewal** before raising subscription fees at renewal.
 
 The document states: ""If this increase applies to you, we will notify you at least thirty (30) days in advance of your renewal and the increased fees will apply at the start of the next Renewal Term.""
 
-If you don't agree to the fee increase, you have the option to terminate your subscription at the end of your current term.",parcial,exact,"{""HS"": [9]}","[true, true]",
+If you don't agree to the fee increase, you have the option to terminate your subscription at the end of your current term.",parcial,exact,"{""HS"": [9]}","[true, true]",correcta
 E2,2,SF,"1.5% per month or the maximum legal rate, whichever is lower.","According to the Salesforce Master Service Agreement, Salesforce charges **late interest at the rate of 1.5% of the outstanding balance per month, or the maximum rate permitted by law, whichever is lower** on overdue invoiced amounts that are not received by the due date.
 
 This applies when any invoiced amount is not received by Salesforce by the due date. The company also reserves the right to condition future subscription renewals and Order Forms on payment terms shorter than those originally specified.
 
-(Source: salesforce_msa.pdf, Page 5, Section 5.3 ""Overdue Charges"")",correcta,exact,"{""SF"": [5]}","[true, true]",
+(Source: salesforce_msa.pdf, Page 5, Section 5.3 ""Overdue Charges"")",correcta,exact,"{""SF"": [5]}","[true, true]",correcta
 E3,2,FW,14 days; after that Freshworks may retain it up to 3 months before deletion.,"According to the Freshworks Terms of Service (Page 11-12), you have **fourteen (14) days** to export your data after closing your account.
 
 Specifically, Freshworks makes customer data available for export for fourteen days from the effective date of account closure due to either termination/expiration of the Agreement or termination/expiration of the applicable Service Order Form (SOF). This period is referred to as the ""Data Export Period.""
 
-After this 14-day period expires, Freshworks reserves the right to retain your customer data for up to three (3) months before deleting it, except where necessary to comply with legal obligations or maintain records. Once your data is deleted, it cannot be recovered.",correcta,adjacent,"{""FW"": [11, 12]}","[true, true]",
+After this 14-day period expires, Freshworks reserves the right to retain your customer data for up to three (3) months before deleting it, except where necessary to comply with legal obligations or maintain records. Once your data is deleted, it cannot be recovered.",correcta,adjacent,"{""FW"": [11, 12]}","[true, true]",correcta
 E4,2,HS,10 days after notice of non-payment; not while the charge is disputed in good faith.,"According to the HubSpot Terms of Service (Page 12), HubSpot can suspend your account for non-payment **ten (10) days after providing you with notice of non-payment**.
 
 However, there is an important exception: HubSpot will not suspend your Subscription Service while you are disputing the applicable charges reasonably and in good faith and are cooperating diligently to resolve the dispute.
 
-Additionally, if your Subscription Service is suspended for non-payment, HubSpot may charge a re-activation fee to reinstate the service.",correcta,exact,"{""HS"": [12]}","[true, true]",
+Additionally, if your Subscription Service is suspended for non-payment, HubSpot may charge a re-activation fee to reinstate the service.",correcta,exact,"{""HS"": [12]}","[true, true]",correcta
 E5,2,SF,"Additional one-year terms, unless written notice (email OK) at least 30 days before the end.","According to the Salesforce MSA document (Page 8), if you do nothing, your subscription will **automatically renew for additional one-year terms**.
 
 Specifically, the agreement states: ""Except as otherwise specified in an Order Form, subscriptions will automatically renew for additional one year terms, unless either party gives the other written notice (email acceptable) at least 30 days before the end of the relevant subscription term.""
 
-To prevent automatic renewal, you must provide written notice at least 30 days before the end of your subscription term.",correcta,exact,"{""SF"": [8]}","[true, true]",
+To prevent automatic renewal, you must provide written notice at least 30 days before the end of your subscription term.",correcta,exact,"{""SF"": [8]}","[true, true]",correcta
 E6,2,HS,Turn off the auto-renewal setting in Account & Billing before the end of the current term.,"Based on the HubSpot Terms of Service, to stop your subscription from auto-renewing, you must **turn off the auto-renewal setting in the Account & Billing section of your HubSpot account prior to the end of your Current Term**.
 
 According to the document (Page 11):
 
 > ""Unless otherwise speciﬁed in this Agreement or your Order, if you decide that you do not want your subscription to automatically renew, you must turn off the auto-renewal setting in the Account & Billing section of your HubSpot account prior to the end of your Current Term. If you do not turn off the auto-renewal setting in the Account & Billing section of your HubSpot account, your Subscription will renew automatically.""
 
-The document also notes that you can find more detailed steps by following the knowledge base article titled ""Cancel your subscription and delete your HubSpot account.""",correcta,exact,"{""HS"": [11]}",[true],
+The document also notes that you can find more detailed steps by following the knowledge base article titled ""Cancel your subscription and delete your HubSpot account.""",correcta,exact,"{""HS"": [11]}",[true],correcta
 E7,2,FW,It must be exported before the trial ends or it is permanently deleted.,"# Data Handling at End of Free Trial
 
 According to the Freshworks Terms of Service (Page 11), when your free trial expires:
@@ -391,7 +391,7 @@ According to the Freshworks Terms of Service (Page 11), when your free trial exp
 
 3. **No Recovery**: Customer Data cannot be recovered once it is deleted.
 
-**Key takeaway**: It's critical that you download and export all your data before your free trial ends to avoid permanent loss.",correcta,adjacent,"{""FW"": [11]}",[true],
+**Key takeaway**: It's critical that you download and export all your data before your free trial ends to avoid permanent loss.",correcta,adjacent,"{""FW"": [11]}",[true],correcta
 E8,2,HS,"99.95% per month (commercially reasonable efforts); credit if below for 2+ consecutive months, requested within 20 days of month end.","# HubSpot Service Uptime Commitment
 
 **Uptime Commitment:** HubSpot commits to 99.95% Service Uptime for their Subscription Service in a given calendar month. (HubSpot TOS, Page 45)
@@ -404,17 +404,17 @@ You are eligible for a credit only if Service Uptime falls below 99.95% for **tw
 2. **How Applied:** The credit is applied against an invoice or charge for your following renewal Subscription Term
 3. **Deadline:** You must request the credit within **20 days of the end of the relevant calendar month** in which HubSpot did not meet the 99.95% Service Uptime commitment
 
-**Important Note:** This Service Uptime Commitment does not apply to HubSpot's Free Services. (HubSpot TOS, Page 46)",correcta,exact,"{""HS"": [45, 46]}","[true, true, true]",
+**Important Note:** This Service Uptime Commitment does not apply to HubSpot's Free Services. (HubSpot TOS, Page 46)",correcta,exact,"{""HS"": [45, 46]}","[true, true, true]",correcta
 E9,2,SF,"US$1,000.","According to the Salesforce MSA, **Salesforce's maximum liability during a free trial is $1,000.00**.
 
 However, this liability cap only applies if the exclusion of liability is enforceable under applicable law. The document states:
 
 > ""NOTWITHSTANDING THE 'REPRESENTATIONS, WARRANTIES, EXCLUSIVE REMEDIES AND DISCLAIMERS' SECTION AND 'INDEMNIFICATION BY SFDC' SECTION BELOW, DURING THE FREE TRIAL THE SERVICES ARE PROVIDED 'AS-IS' WITHOUT ANY WARRANTY AND SFDC SHALL HAVE NO INDEMNIFICATION OBLIGATIONS NOR LIABILITY OF ANY TYPE WITH RESPECT TO THE SERVICES FOR THE FREE TRIAL PERIOD UNLESS SUCH EXCLUSION OF LIABILITY IS NOT ENFORCEABLE UNDER APPLICABLE LAW IN WHICH CASE SFDC'S LIABILITY WITH RESPECT TO THE SERVICES PROVIDED DURING THE FREE TRIAL SHALL NOT EXCEED $1,000.00.""
 
-[Source: *salesforce_msa.pdf*, Page 2]",correcta,adjacent,"{""SF"": [2]}",[true],
+[Source: *salesforce_msa.pdf*, Page 2]",correcta,adjacent,"{""SF"": [2]}",[true],correcta
 E10,2,HS,US$100.,"According to the HubSpot Terms of Service (Page 19), if you only use the Free Services and HubSpot is determined to have any liability to you or any third party arising from your use of the Free Services, **HubSpot's aggregate liability is limited to one hundred U.S. dollars ($100)**.
 
-This is a special provision that applies only to Free Services users, as the standard liability cap for paid Subscription Services is based on the total amounts paid in the preceding twelve-month period.",correcta,exact,"{""HS"": [19]}",[true],
+This is a special provision that applies only to Free Services users, as the standard liability cap for paid Subscription Services is based on the total amounts paid in the preceding twelve-month period.",correcta,exact,"{""HS"": [19]}",[true],correcta
 C1,2,HS,Switch off auto-renewal before the end of the term (no fixed notice period).,"Based on the HubSpot Terms of Service document, here's how to avoid auto-renewal with **HubSpot**:
 
 **To cancel auto-renewal:** You must turn off the auto-renewal setting in the **Account & Billing section** of your HubSpot account **prior to the end of your Current Term**. If you do not disable this setting, your subscription will renew automatically. (HubSpot TOS, Page 11)
@@ -425,7 +425,7 @@ The document also references a knowledge base article titled ""Cancel your subsc
 
 ---
 
-However, I should note that you asked about ""each provider,"" but I only have HubSpot's terms of service in the provided documents. I couldn't find information about other providers' auto-renewal policies in this document.",correcta,exact,"{""HS"": [11]}",[true],
+However, I should note that you asked about ""each provider,"" but I only have HubSpot's terms of service in the provided documents. I couldn't find information about other providers' auto-renewal policies in this document.",correcta,exact,"{""HS"": [11]}",[true],correcta
 C1,2,SF,Written notice at least 30 days before the end of the term.,"Based on the Salesforce MSA document provided, here's how to avoid auto-renewal:
 
 **To prevent automatic renewal, you must provide written notice (email is acceptable) at least 30 days before the end of the relevant subscription term.**
@@ -440,7 +440,7 @@ According to Section 11.2 (Term of Purchased Subscriptions) on Page 8:
 - Email is an acceptable form of notice
 - The notice must be sent at least 30 days before the subscription term ends
 
-If you don't provide this notice within the 30-day window, your subscription will automatically renew, and you'll be obligated to pay the renewal fees.",correcta,exact,"{""SF"": [8]}",[true],
+If you don't provide this notice within the 30-day window, your subscription will automatically renew, and you'll be obligated to pay the renewal fees.",correcta,exact,"{""SF"": [8]}",[true],correcta
 C1,2,FW,Written notice at least 30 days before the end of the term.,"I couldn't find information about that in this document.
 
 However, based on the Freshworks Terms of Service provided, I can tell you how to avoid auto-renewal **with Freshworks specifically**:
@@ -451,7 +451,7 @@ According to Page 9 of the Freshworks TOS, Section 6(b) - Renewal:
 
 So to avoid auto-renewal with Freshworks, you must **provide written notice of non-renewal at least 30 days before your Subscription Term expires**.
 
-For other providers, you would need to consult their respective terms of service, as this document only covers Freshworks' policies.",correcta,wrong,"{""FW"": [9]}",[true],
+For other providers, you would need to consult their respective terms of service, as this document only covers Freshworks' policies.",correcta,wrong,"{""FW"": [9]}",[true],correcta
 C2,2,HS,"Yes, up to list price, with at least 30 days' notice.","Based on the HubSpot Terms of Service (Page 8-9), yes, HubSpot can raise prices at renewal, but only with specific limitations:
 
 **Notice Requirement:** HubSpot must notify you at least **30 days in advance** of your renewal before any price increase takes effect.
@@ -460,7 +460,7 @@ C2,2,HS,"Yes, up to list price, with at least 30 days' notice.","Based on the Hu
 
 **Your Options:** If you don't agree to the price increase, you can terminate your subscription at the end of your Current Term by turning off the auto-renewal setting in your Account & Billing section.
 
-It's important to note that this document only addresses HubSpot's pricing policies. If you're asking about multiple providers, I would need information about other service providers' terms to answer that part of your question.",correcta,exact,"{""HS"": [8, 9]}","[true, true]",
+It's important to note that this document only addresses HubSpot's pricing policies. If you're asking about multiple providers, I would need information about other service providers' terms to answer that part of your question.",correcta,exact,"{""HS"": [8, 9]}","[true, true]",correcta
 C2,2,SF,Promotional pricing renews at list price and reduced volume is re-priced; no notice period stated.,"Based on the document provided, **Salesforce (SFDC) can raise prices at renewal, but the notice period depends on the subscription type:**
 
 **For standard subscriptions:**
@@ -472,14 +472,14 @@ C2,2,SF,Promotional pricing renews at list price and reduced volume is re-priced
 
 However, the document does not explicitly state whether SFDC must provide advance notice of price increases for renewals. It only requires 30 days' notice for the customer to prevent automatic renewal, not necessarily for the customer to be informed of price changes beforehand.
 
-**Source:** Salesforce MSA, Page 8, Section 11.2 (Term of Purchased Subscriptions)",correcta,exact,"{""SF"": [8]}","[true, true]",
+**Source:** Salesforce MSA, Page 8, Section 11.2 (Term of Purchased Subscriptions)",correcta,exact,"{""SF"": [8]}","[true, true]",correcta
 C2,2,FW,Adjusts fees with at least 30 days' notice; discounts lost if the plan is reduced.,"Based on the Freshworks Terms of Service, **yes, Freshworks can raise prices at renewal with 30 days' notice**.
 
 According to Section 6(c) on Page 11:
 
 > ""Upon renewal, Freshworks will adjust the Fees to reflect delivered innovation, general cost inflation, and other relevant factors. Freshworks will notify Customer of any fee adjustments at least thirty (30) days before its renewal date, and these adjusted fees will take effect at the beginning of the Renewal Term.""
 
-However, there is an important limitation: any discounts or price protections previously provided will not apply to renewal if the customer's overall number of Users, Service Plan (including add-ons), or contract terms are reduced or lowered from the prior subscription term.",correcta,exact,"{""FW"": [11]}","[true, true]",
+However, there is an important limitation: any discounts or price protections previously provided will not apply to renewal if the customer's overall number of Users, Service Plan (including add-ons), or contract terms are reduced or lowered from the prior subscription term.",correcta,exact,"{""FW"": [11]}","[true, true]",correcta
 C3,2,HS,Main terms defer to the DPA and Product Specific Terms; 30 days stated there for certain Marketing Hub plans.,"Based on the HubSpot Terms of Service, **you should retrieve your Customer Data prior to the end of your Subscription Term** (before termination occurs). 
 
 According to the document (Page 36):
@@ -488,7 +488,7 @@ According to the document (Page 36):
 
 This means that for most Hub services, **you will not have access to your data after your subscription terminates**. HubSpot will provide reasonable assistance to retrieve your data during your active subscription term, but at your cost.
 
-The document does not specify a grace period after termination to retrieve your data, so it's important to export your data before your subscription ends.",incorrecta,wrong,"{""HS"": [36]}","[false, false]",
+The document does not specify a grace period after termination to retrieve your data, so it's important to export your data before your subscription ends.",incorrecta,wrong,"{""HS"": [36]}","[false, false]",incorrecta
 C3,2,SF,"30 days, on request.","Based on the Salesforce MSA document, the timeframe for retrieving your data depends on the type of request:
 
 **For a Switching Request (migrating data to another provider):**
@@ -499,7 +499,7 @@ Salesforce will delete your data in accordance with their procedures, and the Or
 
 It's important to note that **Salesforce continues to provide Services until the Termination Date**, and you remain obligated to pay any outstanding subscription fees for the period prior to termination.
 
-*Source: Salesforce MSA, Page 16*",correcta,wrong,"{""SF"": [16]}",[false],
+*Source: Salesforce MSA, Page 16*",correcta,wrong,"{""SF"": [16]}",[false],parcial
 C3,2,FW,14 days.,"Based on the Freshworks Terms of Service, you have **14 days** to export your Customer Data after your account is closed.
 
 Here's how it works (from Page 12):
@@ -508,7 +508,7 @@ Here's how it works (from Page 12):
 - You can contact Freshworks at support@freshworks.com during this Data Export Period to request they export your data
 - After these 14 days expire, Freshworks reserves the right to delete all your Customer Data (though they may retain it for up to 3 months before deletion for legal compliance and other permitted reasons)
 
-**Important note:** Customer Data cannot be recovered once it is deleted, so it's essential to export your data within that 14-day window.",correcta,exact,"{""FW"": [12]}",[true],
+**Important note:** Customer Data cannot be recovered once it is deleted, so it's essential to export your data within that 14-day window.",correcta,exact,"{""FW"": [12]}",[true],correcta
 C4,2,HS,"Yes, prepaid unused fees are refunded.","Based on the HubSpot Terms of Service, **the document does not explicitly state whether you receive a refund of prepaid fees if the provider (HubSpot) breaches the contract.**
 
 What the document does say is:
@@ -517,14 +517,14 @@ What the document does say is:
 
 This clause addresses termination by the customer, but it includes the caveat ""except as specifically provided for in this Agreement,"" which suggests there may be specific exceptions. However, the provided chunks don't detail what those specific exceptions are or whether they would apply to a scenario where HubSpot materially breaches the contract.
 
-**To get a definitive answer on refunds for prepaid fees in case of provider breach, you would need to review the complete Terms of Service or contact HubSpot directly.**",correcta,wrong,"{""HS"": [11]}",[false],
+**To get a definitive answer on refunds for prepaid fees in case of provider breach, you would need to review the complete Terms of Service or contact HubSpot directly.**",correcta,wrong,"{""HS"": [11]}",[false],incorrecta
 C4,2,SF,"Yes, prepaid fees for the rest of the term are refunded.","# Yes, you get prepaid fees refunded.
 
 According to the Salesforce MSA (Page 8, Section 11.4 - ""Refund or Payment upon Termination""):
 
 > ""If this Agreement is terminated by Customer in accordance with the 'Termination' section above, SFDC will refund Customer any prepaid fees covering the remainder of the term of all Order Forms after the effective date of termination.""
 
-**Important note:** To qualify for this refund, you must follow the proper termination procedure outlined in Section 11.3, which requires you to provide 30 days written notice of the material breach and give the provider an opportunity to cure it within that 30-day period before the termination becomes effective.",correcta,exact,"{""SF"": [8]}",[true],
+**Important note:** To qualify for this refund, you must follow the proper termination procedure outlined in Section 11.3, which requires you to provide 30 days written notice of the material breach and give the provider an opportunity to cure it within that 30-day period before the termination becomes effective.",correcta,exact,"{""SF"": [8]}",[true],correcta
 C4,2,FW,"Its termination-for-cause clause promises no refund; refunds only in specific cases (warranty non-conformance, IP claims, force majeure).","Based on the Freshworks Terms of Service, **the document does not explicitly address refunds for prepaid fees in case of provider breach termination**.
 
 However, the relevant section states that ""Payment obligations are non-cancelable, and non-refundable, except as expressly permitted in this Agreement, regardless of utilization by the Customer."" (Page 8)
@@ -535,14 +535,14 @@ The only specific refund scenarios mentioned in the document are:
 
 Since the terms state fees are non-refundable except as expressly permitted, and no express permission for refunds upon provider breach is detailed in these chunks, you would need to review the complete Agreement or contact Freshworks directly to determine if any refund rights apply to your specific termination scenario.
 
-**Source:** Freshworks ToS, Pages 8-9",incorrecta,wrong,"{""FW"": [8, 9]}","[true, false]",
+**Source:** Freshworks ToS, Pages 8-9",incorrecta,wrong,"{""FW"": [8, 9]}","[true, false]",parcial
 C5,2,HS,30 days.,"Based on the HubSpot Terms of Service, **each party has 30 days to cure a material breach**.
 
 According to Section 4.3 (Termination for Cause) on Page 11:
 
 > ""Either party may terminate this Agreement for cause...upon thirty (30) days' notice to the other party of a material breach if such breach remains uncured at the expiration of such period""
 
-This means that if one party breaches the agreement materially, the other party must provide 30 days' notice, and if the breach is not fixed within that 30-day period, the non-breaching party can then terminate the agreement.",correcta,exact,"{""HS"": [11]}",[true],
+This means that if one party breaches the agreement materially, the other party must provide 30 days' notice, and if the breach is not fixed within that 30-day period, the non-breaching party can then terminate the agreement.",correcta,exact,"{""HS"": [11]}",[true],correcta
 C5,2,SF,30 days.,"# Cure Period for Material Breach
 
 According to the Salesforce MSA, **each party has 30 days to cure a material breach**.
@@ -551,7 +551,7 @@ Specifically, Section 11.3 (Termination) states that ""A party may terminate thi
 
 This means that upon receiving written notice of a material breach, the breaching party has 30 days to fix the issue before the other party can proceed with termination.
 
-**Source:** salesforce_msa.pdf, Page 8",correcta,exact,"{""SF"": [8]}",[true],
+**Source:** salesforce_msa.pdf, Page 8",correcta,exact,"{""SF"": [8]}",[true],correcta
 C5,2,FW,30 days.,"# Cure Period for Material Breach
 
 According to the Freshworks Terms of Service, **each party has thirty (30) days to cure a material breach** of the Agreement.
@@ -560,7 +560,7 @@ Specifically, Section 6(e) (Termination for Cause) states:
 
 > ""Either party may terminate this Agreement by written notice to the other party in the event that: (i) such other party materially breaches this Agreement and does not cure such breach within thirty (30) days of such notice...""
 
-**Source:** freshworks_tos.pdf, Page 11",correcta,adjacent,"{""FW"": [11]}",[true],
+**Source:** freshworks_tos.pdf, Page 11",correcta,adjacent,"{""FW"": [11]}",[true],correcta
 C6,2,HS,No: you may not cancel before the end of the term and prepaid fees are not refunded.,"Based on the HubSpot Terms of Service, **no, you cannot cancel mid-term and get a refund**.
 
 According to the document (Page 11):
@@ -571,7 +571,7 @@ Additionally, the document states (Page 10):
 
 > ""All payment obligations are non-cancelable and all amounts paid are non-refundable, except as speciﬁcally provided for in this Agreement.""
 
-You can only cancel your subscription at the end of your Current Term by turning off the auto-renewal setting in the Account & Billing section of your HubSpot account before the term ends.",correcta,exact,"{""HS"": [10, 11]}",[true],
+You can only cancel your subscription at the end of your Current Term by turning off the auto-renewal setting in the Account & Billing section of your HubSpot account before the term ends.",correcta,exact,"{""HS"": [10, 11]}",[true],correcta
 C6,2,SF,No: payment obligations are non-cancelable and fees paid are non-refundable.,"Based on the Salesforce MSA document, here's what happens if you cancel mid-term:
 
 **Refund Policy:**
@@ -584,7 +584,7 @@ If you request early termination through a Deletion Request, you must pay any ou
 
 **Bottom Line:** You can cancel for cause and get a refund of prepaid fees for the unused portion, but you cannot avoid paying for the time you've already used the service.
 
-*Source: Salesforce MSA, Pages 8 and 16*",correcta,wrong,"{""SF"": [8, 16]}",[false],
+*Source: Salesforce MSA, Pages 8 and 16*",correcta,wrong,"{""SF"": [8, 16]}",[false],incorrecta
 C6,2,FW,No: payment obligations are non-cancelable and non-refundable.,"Based on the Freshworks Terms of Service, **no, you cannot cancel mid-term and get a refund**.
 
 According to Section 5(a) on Page 8:
@@ -593,7 +593,7 @@ According to Section 5(a) on Page 8:
 
 Additionally, Section 5(a) states that **during the Subscription Term, you are not permitted to reduce your User or Asset Unit count, or downgrade your Service Plan**.
 
-The only way to exit your subscription without penalty is to provide written notice of non-renewal at least 30 days prior to the expiration of your Subscription Term (Section 6(b), Page 9). This allows you to end the service when your current term expires, rather than canceling mid-term.",correcta,exact,"{""FW"": [8, 9]}",[true],
+The only way to exit your subscription without penalty is to provide written notice of non-renewal at least 30 days prior to the expiration of your Subscription Term (Section 6(b), Page 9). This allows you to end the service when your current term expires, rather than canceling mid-term.",correcta,exact,"{""FW"": [8, 9]}",[true],correcta
 C7,2,HS,Suspension 10 days after notice of non-payment.,"Based on the HubSpot Terms of Service document, here's what happens if you pay late:
 
 **Immediate consequences:**
@@ -604,7 +604,7 @@ C7,2,HS,Suspension 10 days after notice of non-payment.,"Based on the HubSpot Te
 
 More generally, the document states that HubSpot ""may suspend your access in accordance with the 'Suspension' section or terminate your account in accordance with the 'Termination for Cause' section if we remain unable to successfully charge a valid Authorized Payment Method"" (Page 9).
 
-The key point is that payment is due within **30 days from the invoice date** unless otherwise specified in your Order Form (Page 10), and non-payment can lead to suspension or termination of your account.",correcta,adjacent,"{""HS"": [9, 10, 11]}",[false],
+The key point is that payment is due within **30 days from the invoice date** unless otherwise specified in your Order Form (Page 10), and non-payment can lead to suspension or termination of your account.",correcta,adjacent,"{""HS"": [9, 10, 11]}",[false],parcial
 C7,2,SF,Late interest of 1.5% per month.,"# Late Payment Consequences
 
 If you pay late, the following can happen:
@@ -623,10 +623,10 @@ If you pay late, the following can happen:
 
 **Exception:** If you're disputing charges reasonably and in good faith while cooperating diligently to resolve the dispute, Salesforce won't exercise these rights.
 
-(Source: salesforce_msa.pdf, Pages 5 and 14)",correcta,exact,"{""SF"": [5, 14]}",[true],
+(Source: salesforce_msa.pdf, Pages 5 and 14)",correcta,exact,"{""SF"": [5, 14]}",[true],correcta
 C7,2,FW,"Suspension if more than 30 days overdue, after written notice.","According to the Freshworks Terms of Service (Page 8), if your undisputed Fees are more than thirty (30) days overdue, Freshworks may suspend your access to the Freshworks Technology, including your Account, until the unpaid Fees are paid in full. This suspension occurs following written notification from Freshworks.
 
-However, there is an exception: Freshworks will not exercise this suspension right if you are disputing the charges reasonably and in good faith and are cooperating diligently to resolve the dispute. If the dispute cannot be resolved within thirty (30) days, Freshworks can then seek remedies available under the Agreement or at law.",correcta,adjacent,"{""FW"": [8]}",[true],
+However, there is an exception: Freshworks will not exercise this suspension right if you are disputing the charges reasonably and in good faith and are cooperating diligently to resolve the dispute. If the dispute cannot be resolved within thirty (30) days, Freshworks can then seek remedies available under the Agreement or at law.",correcta,adjacent,"{""FW"": [8]}",[true],correcta
 C8,2,HS,Amounts paid or payable in the 12 months before the claim.,"# Liability Cap
 
 Based on the HubSpot Terms of Service (Page 19), liability is capped as follows:
@@ -643,7 +643,7 @@ HubSpot's aggregate liability is capped at **$100 USD**.
 - HubSpot's liability for IP indemnification obligations
 - Your liability for violating HubSpot's intellectual property rights
 
-The document also notes (Page 19) that ""absent your agreement to this limitation of liability, we would not provide the subscription service to you.""",correcta,exact,"{""HS"": [19]}",[true],
+The document also notes (Page 19) that ""absent your agreement to this limitation of liability, we would not provide the subscription service to you.""",correcta,exact,"{""HS"": [19]}",[true],correcta
 C8,2,SF,Amounts paid in the 12 months before the incident.,"# Liability Cap
 
 Based on the Salesforce MSA, each party's total liability is capped as follows:
@@ -661,7 +661,7 @@ For customers domiciled in Germany, there are specific exceptions where liabilit
 - Injury to life, body, or health
 - Claims under German Product Liability Law
 
-For German customers with slight negligence claims, liability is limited to ""foreseeable damage typical for the contract"" rather than the 12-month payment cap.",correcta,adjacent,"{""SF"": [7, 13]}",[true],
+For German customers with slight negligence claims, liability is limited to ""foreseeable damage typical for the contract"" rather than the 12-month payment cap.",correcta,adjacent,"{""SF"": [7, 13]}",[true],correcta
 C8,2,FW,"Fees received or payable in the 12 months before the claim; excludes gross negligence, wilful misconduct, fraud and indemnities.","Based on the Freshworks Terms of Service (Page 17), each party's total liability is capped as follows:
 
 **Except for cases involving gross negligence, willful misconduct, fraud, or indemnification obligations, each party's aggregate liability (including that of its affiliates, officers, employees, agents, suppliers, and licensors) will not exceed the fees received by or payable to Freshworks in the applicable Statement of Fees (SOF) in the twelve months preceding the claim.**
@@ -673,63 +673,63 @@ Key points about this cap:
 - It applies even if any limited remedy in the agreement fails of its essential purpose
 - The parties acknowledge this limitation is intended to distribute risks and account for the cost of fees
 
-**Exceptions to the cap:** The limitation does not apply to claims based on gross negligence, willful misconduct, fraud, or a party's indemnification obligations.",correcta,adjacent,"{""FW"": [17]}","[true, true]",
+**Exceptions to the cap:** The limitation does not apply to claims based on gross negligence, willful misconduct, fraud, or a party's indemnification obligations.",correcta,adjacent,"{""FW"": [17]}","[true, true]",correcta
 T1,2,,Not stated (only HubSpot has an uptime commitment; answering 99.95% is cross-document contamination).,"I couldn't find information about Salesforce's uptime guarantee in this document.
 
 The Salesforce MSA (Document: salesforce_msa.pdf | Page: 2) states that SFDC will ""use commercially reasonable efforts to make the online Purchased Services available 24 hours a day, 7 days a week, except for: (i) planned downtime (of which SFDC shall give advance electronic notice), and (ii) any unavailability caused by circumstances beyond SFDC's reasonable control.""
 
-However, this describes a ""best efforts"" commitment rather than a specific uptime percentage guarantee like a Service Level Agreement (SLA). The document does not specify a guaranteed uptime percentage (such as 99.9% or 99.95%).",incorrecta,n/a,"{""SF"": [2]}",[],
-T2,2,,Not stated.,"I couldn't find information about that in this document. The provided chunks from the Freshworks Terms of Service do not contain any uptime guarantees or service level agreement (SLA) details. To find information about uptime guarantees, you would need to check Freshworks' Service Level Agreement (SLA) document or their website, as this information is not included in the Terms of Service excerpts provided.",correcta,n/a,{},[],
+However, this describes a ""best efforts"" commitment rather than a specific uptime percentage guarantee like a Service Level Agreement (SLA). The document does not specify a guaranteed uptime percentage (such as 99.9% or 99.95%).",incorrecta,n/a,"{""SF"": [2]}",[],correcta
+T2,2,,Not stated.,"I couldn't find information about that in this document. The provided chunks from the Freshworks Terms of Service do not contain any uptime guarantees or service level agreement (SLA) details. To find information about uptime guarantees, you would need to check Freshworks' Service Level Agreement (SLA) document or their website, as this information is not included in the Terms of Service excerpts provided.",correcta,n/a,{},[],correcta
 T3,2,,Not stated (trial length is whatever the customer registered for).,"I couldn't find information about that in this document.
 
-The document (salesforce_msa.pdf, Page 2) mentions that Salesforce may make a free trial available and that it lasts ""until the earlier of (a) the end of the free trial period for which Customer registered to use the applicable Service(s),"" but it does not specify the actual number of days for the free trial period. The specific duration would be found in the trial registration web page or additional terms referenced in the agreement.",correcta,n/a,"{""SF"": [2]}",[],
+The document (salesforce_msa.pdf, Page 2) mentions that Salesforce may make a free trial available and that it lasts ""until the earlier of (a) the end of the free trial period for which Customer registered to use the applicable Service(s),"" but it does not specify the actual number of days for the free trial period. The specific duration would be found in the trial registration web page or additional terms referenced in the agreement.",correcta,n/a,"{""SF"": [2]}",[],correcta
 T4,2,,Not stated.,"I couldn't find information about that in this document.
 
-The provided document chunks from the Freshworks Terms of Service contain general terms, conditions, and definitions, but they do not include specific pricing information for the Pro plan or any monthly per-seat pricing details. Pricing information would typically be found in a separate pricing page or Service Order Form (SOF), which are not included in these document excerpts.",correcta,n/a,{},[],
+The provided document chunks from the Freshworks Terms of Service contain general terms, conditions, and definitions, but they do not include specific pricing information for the Pro plan or any monthly per-seat pricing details. Pricing information would typically be found in a separate pricing page or Service Order Form (SOF), which are not included in these document excerpts.",correcta,n/a,{},[],correcta
 T5,2,,Not stated.,"I couldn't find information about that in this document.
 
 The provided sections of HubSpot's Terms of Service discuss data protection measures, customer data ownership, and security safeguards, but they do not specify any fines or penalties that HubSpot would pay in the event of a data breach or leak. 
 
-For information about liability limitations or breach penalties, you would need to review other sections of the ToS (such as limitation of liability clauses) or consult HubSpot's Data Processing Agreement (DPA), which is referenced but not fully provided in these document chunks.",correcta,n/a,{},[],
+For information about liability limitations or breach penalties, you would need to review other sections of the ToS (such as limitation of liability clauses) or consult HubSpot's Data Processing Agreement (DPA), which is referenced but not fully provided in these document chunks.",correcta,n/a,{},[],correcta
 T6,2,HS,"None offers 24/7 phone support; HubSpot phone support (Professional/Enterprise) runs 8pm Sunday – 8pm Friday EST, email/in-app questions accepted 24/7.","Based on the provided document, **HubSpot does not offer 24/7 phone support**.
 
 According to the HubSpot Terms of Service (Page 46), phone support for Professional or Enterprise tiers is available from **8pm Sunday to 8pm Friday EST (Eastern Standard Time)** only. The document also notes that these hours may be reduced during recognized holidays and HubSpot's company-wide designated week of rest.
 
-However, HubSpot does accept **email and in-app support questions 24 hours per day, 7 days per week**, though responses to these are provided during phone support hours only, with an attempted response time of one business day.",correcta,exact,"{""HS"": [46]}",[true],
+However, HubSpot does accept **email and in-app support questions 24 hours per day, 7 days per week**, though responses to these are provided during phone support hours only, with an attempted response time of one business day.",correcta,exact,"{""HS"": [46]}",[true],correcta
 E1,3,HS,At least 30 days; increase up to the then-current list price.,"According to the HubSpot Terms of Service, **HubSpot will notify you at least thirty (30) days in advance of your renewal** before raising your subscription fees.
 
 If you do not agree to the fee increase, you have the option to terminate your subscription at the end of your Current Term by providing notice as outlined in the ""Notice of Non-Renewal"" section.
 
-(Source: hubspot_tos.pdf, Page 9)",parcial,exact,"{""HS"": [9]}","[true, true]",
+(Source: hubspot_tos.pdf, Page 9)",parcial,exact,"{""HS"": [9]}","[true, true]",correcta
 E2,3,SF,"1.5% per month or the maximum legal rate, whichever is lower.","Based on the Salesforce MSA document, Salesforce charges **1.5% of the outstanding balance per month** in late interest on overdue invoices, or the maximum rate permitted by law, whichever is lower.
 
-This applies if any invoiced amount is not received by Salesforce by the due date. (Source: salesforce_msa.pdf, Page 5)",correcta,exact,"{""SF"": [5]}","[true, true]",
+This applies if any invoiced amount is not received by Salesforce by the due date. (Source: salesforce_msa.pdf, Page 5)",correcta,exact,"{""SF"": [5]}","[true, true]",correcta
 E3,3,FW,14 days; after that Freshworks may retain it up to 3 months before deletion.,"According to the Freshworks Terms of Service, you have **14 days** to export your data after closing your account.
 
 Specifically, Freshworks will make your Customer Data available for export for fourteen (14) days from the effective date of the closure of your Account (the ""Data Export Period""). This applies whether the account closure is due to termination or expiration of the Agreement or the applicable Service Order Form (SOF).
 
 After this 14-day period, Freshworks reserves the right to retain your Customer Data for up to three (3) months before deleting it, except as necessary to comply with legal obligations or other specified purposes. Once deleted, your Customer Data cannot be recovered.
 
-**Source:** Freshworks Terms of Service, Page 11-12",correcta,adjacent,"{""FW"": [11, 12]}","[true, true]",
+**Source:** Freshworks Terms of Service, Page 11-12",correcta,adjacent,"{""FW"": [11, 12]}","[true, true]",correcta
 E4,3,HS,10 days after notice of non-payment; not while the charge is disputed in good faith.,"According to the HubSpot Terms of Service (Page 12), HubSpot can suspend your access to Subscription Services **ten (10) days after providing you notice of non-payment**.
 
 However, there's an important exception: HubSpot will not suspend your service while you are disputing the applicable charges reasonably and in good faith and are cooperating diligently to resolve the dispute.
 
-Additionally, if your Subscription Service is suspended for non-payment, HubSpot may charge a re-activation fee to reinstate the service.",correcta,exact,"{""HS"": [12]}","[true, true]",
+Additionally, if your Subscription Service is suspended for non-payment, HubSpot may charge a re-activation fee to reinstate the service.",correcta,exact,"{""HS"": [12]}","[true, true]",correcta
 E5,3,SF,"Additional one-year terms, unless written notice (email OK) at least 30 days before the end.","Based on the Salesforce MSA document, if you do nothing, your subscription will **automatically renew for additional one-year terms**.
 
 According to Section 11.2 (Term of Purchased Subscriptions) on page 8 of the salesforce_msa.pdf:
 
 > ""Except as otherwise specified in an Order Form, subscriptions will automatically renew for additional one year terms, unless either party gives the other written notice (email acceptable) at least 30 days before the end of the relevant subscription term.""
 
-So by default, subscriptions auto-renew annually unless you provide 30 days' written notice before the end of your current term to prevent the renewal.",correcta,exact,"{""SF"": [8]}","[true, true]",
+So by default, subscriptions auto-renew annually unless you provide 30 days' written notice before the end of your current term to prevent the renewal.",correcta,exact,"{""SF"": [8]}","[true, true]",correcta
 E6,3,HS,Turn off the auto-renewal setting in Account & Billing before the end of the current term.,"Based on the HubSpot Terms of Service, here's how to stop auto-renewal:
 
 **You must turn off the auto-renewal setting in the Account & Billing section of your HubSpot account prior to the end of your Current Term.** If you do not disable this setting, your subscription will automatically renew.
 
 The document notes that if you don't turn off auto-renewal before your Current Term ends, your subscription will renew automatically. Additionally, the terms mention that you can learn more about the specific steps for canceling your subscription and turning off auto-renew by consulting HubSpot's knowledge base article titled ""Cancel your subscription and delete your HubSpot account.""
 
-(Source: HubSpot Terms of Service, Page 11)",correcta,exact,"{""HS"": [11]}",[true],
+(Source: HubSpot Terms of Service, Page 11)",correcta,exact,"{""HS"": [11]}",[true],correcta
 E7,3,FW,It must be exported before the trial ends or it is permanently deleted.,"# Data Handling at End of Free Trial
 
 According to the Freshworks Terms of Service (Page 11), when your free trial ends:
@@ -740,7 +740,7 @@ According to the Freshworks Terms of Service (Page 11), when your free trial end
 
 3. **No Recovery**: Customer Data cannot be recovered once it is deleted.
 
-**Key takeaway**: It's critical to export all your data before your free trial expires if you want to retain it.",correcta,adjacent,"{""FW"": [11]}",[true],
+**Key takeaway**: It's critical to export all your data before your free trial expires if you want to retain it.",correcta,adjacent,"{""FW"": [11]}",[true],correcta
 E8,3,HS,"99.95% per month (commercially reasonable efforts); credit if below for 2+ consecutive months, requested within 20 days of month end.","# HubSpot Service Uptime Commitment
 
 **Uptime Commitment:**
@@ -755,15 +755,15 @@ You are entitled to a credit if Service Uptime falls below 99.95% for **two (2) 
 
 3. **Request Deadline:** You must request the credit **within twenty (20) days of the end of the relevant calendar month** in which HubSpot did not meet the 99.95% Service Uptime.
 
-**Important Note:** This Service Uptime Commitment does not apply to Free Services. (HubSpot TOS, Page 46)",correcta,exact,"{""HS"": [45, 46]}","[true, true, true]",
+**Important Note:** This Service Uptime Commitment does not apply to Free Services. (HubSpot TOS, Page 46)",correcta,exact,"{""HS"": [45, 46]}","[true, true, true]",correcta
 E9,3,SF,"US$1,000.","According to the Salesforce MSA document, Salesforce's maximum liability during a free trial is **$1,000.00**.
 
 However, this cap only applies if the exclusion of liability is enforceable under applicable law. The document states: ""SFDC'S LIABILITY WITH RESPECT TO THE SERVICES PROVIDED DURING THE FREE TRIAL SHALL NOT EXCEED $1,000.00"" (Page 2-3).
 
-It's important to note that during the free trial, the services are provided ""AS-IS"" without any warranty, and Salesforce has no indemnification obligations or liability of any type with respect to the services, unless such exclusion is not enforceable under the customer's applicable law.",correcta,exact,"{""SF"": [2, 3]}",[true],
+It's important to note that during the free trial, the services are provided ""AS-IS"" without any warranty, and Salesforce has no indemnification obligations or liability of any type with respect to the services, unless such exclusion is not enforceable under the customer's applicable law.",correcta,exact,"{""SF"": [2, 3]}",[true],correcta
 E10,3,HS,US$100.,"According to the HubSpot Terms of Service (Page 19), if you only use the Free Services, HubSpot's aggregate liability is limited to **one hundred U.S. dollars ($100)**.
 
-This applies if HubSpot is determined to have any liability to you or any third party arising from your use of the Free Services.",correcta,exact,"{""HS"": [19]}",[true],
+This applies if HubSpot is determined to have any liability to you or any third party arising from your use of the Free Services.",correcta,exact,"{""HS"": [19]}",[true],correcta
 C1,3,HS,Switch off auto-renewal before the end of the term (no fixed notice period).,"Based on the HubSpot Terms of Service provided, here's how to avoid auto-renewal with **HubSpot**:
 
 **To cancel auto-renewal:** You must turn off the auto-renewal setting in the **Account & Billing section** of your HubSpot account **prior to the end of your Current Term**. If you don't turn off this setting, your subscription will renew automatically. (HubSpot TOS, Page 11)
@@ -774,7 +774,7 @@ The document also notes there's a knowledge base article titled ""Cancel your su
 
 ---
 
-However, I should note that **this document only covers HubSpot's policies**. I couldn't find information about other providers in the provided context. If you have questions about auto-renewal policies for other companies, please provide their terms of service documents.",correcta,exact,"{""HS"": [11]}",[true],
+However, I should note that **this document only covers HubSpot's policies**. I couldn't find information about other providers in the provided context. If you have questions about auto-renewal policies for other companies, please provide their terms of service documents.",correcta,exact,"{""HS"": [11]}",[true],correcta
 C1,3,SF,Written notice at least 30 days before the end of the term.,"Based on the Salesforce MSA document provided, here's how to avoid auto-renewal:
 
 **To prevent automatic renewal, you must provide written notice at least 30 days before the end of the relevant subscription term.**
@@ -788,14 +788,14 @@ According to Section 11.2 (Term of Purchased Subscriptions) on Page 8:
 - The notice must be given at least 30 days before the subscription term ends
 - Without this notice, your subscription will automatically renew
 
-If you have subscriptions with other providers, you would need to check their specific agreements for their auto-renewal policies, as this information only covers the Salesforce MSA.",correcta,exact,"{""SF"": [8]}",[true],
+If you have subscriptions with other providers, you would need to check their specific agreements for their auto-renewal policies, as this information only covers the Salesforce MSA.",correcta,exact,"{""SF"": [8]}",[true],correcta
 C1,3,FW,Written notice at least 30 days before the end of the term.,"Based on the Freshworks Terms of Service provided, here's how to avoid auto-renewal:
 
 **For Freshworks:** You must give **written notice of non-renewal at least 30 days prior to the expiration of your Subscription Term**. (Freshworks TOS, Page 9, Section 6(b))
 
 The document states: ""Unless a party gives written notice of non-renewal or downgrade at least thirty (30) days prior to expiration of the relevant Subscription Term, Service Plans will automatically renew at the same number of Users and at the same Service Plan (including any add-ons), for a period equal to the previous Subscription Term.""
 
-**Important note:** The document only covers Freshworks' auto-renewal policy. I couldn't find information about other providers' auto-renewal procedures in the provided document. If you need guidance on avoiding auto-renewal with other service providers, you would need to review their specific terms of service.",correcta,wrong,"{""FW"": [9]}",[true],
+**Important note:** The document only covers Freshworks' auto-renewal policy. I couldn't find information about other providers' auto-renewal procedures in the provided document. If you need guidance on avoiding auto-renewal with other service providers, you would need to review their specific terms of service.",correcta,wrong,"{""FW"": [9]}",[true],correcta
 C2,3,HS,"Yes, up to list price, with at least 30 days' notice.","Based on the HubSpot Terms of Service document, **yes, HubSpot can raise prices at renewal with 30 days' notice**.
 
 According to Page 9:
@@ -804,7 +804,7 @@ According to Page 9:
 
 **Important**: If you don't agree to the price increase, you have the option to terminate your subscription at the end of your Current Term by providing notice in the ""Notice of Non-Renewal"" section.
 
-However, this document only covers HubSpot's policies. If you're asking about multiple providers, I would need information from their respective terms of service to answer that part of your question.",correcta,exact,"{""HS"": [9]}","[true, true]",
+However, this document only covers HubSpot's policies. If you're asking about multiple providers, I would need information from their respective terms of service to answer that part of your question.",correcta,exact,"{""HS"": [9]}","[true, true]",correcta
 C2,3,SF,Promotional pricing renews at list price and reduced volume is re-priced; no notice period stated.,"Based on the document, I couldn't find information about general price increase notice requirements at renewal.
 
 However, the document does address renewal pricing in specific scenarios (from **salesforce_msa.pdf, Page 8**):
@@ -813,14 +813,14 @@ However, the document does address renewal pricing in specific scenarios (from *
 
 2. **Decreased subscription volume or length**: ""Any renewal in which subscription volume or subscription length for any Services has decreased from the prior term will result in re-pricing at renewal without regard to the prior term's per-unit pricing.""
 
-The document requires **30 days' written notice (email acceptable)** before the end of the subscription term to prevent automatic renewal, but this is about opting out of renewal, not about price increase notifications specifically. The agreement doesn't explicitly state whether advance notice is required for price increases at renewal beyond what's mentioned for these specific scenarios.",correcta,exact,"{""SF"": [8]}","[true, true]",
+The document requires **30 days' written notice (email acceptable)** before the end of the subscription term to prevent automatic renewal, but this is about opting out of renewal, not about price increase notifications specifically. The agreement doesn't explicitly state whether advance notice is required for price increases at renewal beyond what's mentioned for these specific scenarios.",correcta,exact,"{""SF"": [8]}","[true, true]",correcta
 C2,3,FW,Adjusts fees with at least 30 days' notice; discounts lost if the plan is reduced.,"Yes, Freshworks can raise prices at renewal. According to the Terms of Service (freshworks_tos.pdf, Page 11):
 
 **Notice Required:** Freshworks will notify customers of any fee adjustments **at least thirty (30) days before the renewal date**, and these adjusted fees will take effect at the beginning of the Renewal Term.
 
 **Basis for Adjustment:** Freshworks will adjust fees to reflect ""delivered innovation, general cost inflation, and other relevant factors.""
 
-**Important Limitation:** Any discounts or price protections previously provided will not apply to renewal if the customer's overall number of Users, Service Plan (including add-ons), or contract terms are reduced or lowered from the prior Subscription Term.",correcta,exact,"{""FW"": [11]}","[true, true]",
+**Important Limitation:** Any discounts or price protections previously provided will not apply to renewal if the customer's overall number of Users, Service Plan (including add-ons), or contract terms are reduced or lowered from the prior Subscription Term.",correcta,exact,"{""FW"": [11]}","[true, true]",correcta
 C3,3,HS,Main terms defer to the DPA and Product Specific Terms; 30 days stated there for certain Marketing Hub plans.,"Based on the HubSpot Terms of Service, **you should retrieve your Customer Data prior to the end of your Subscription Term**, as HubSpot will not provide access to Customer Data after termination or expiration.
 
 Specifically, the document states:
@@ -831,7 +831,7 @@ However, the document does mention that HubSpot will provide ""reasonable assist
 
 So while there's no specific grace period mentioned after termination, you have until the end of your Current Term to retrieve your data. After that point, HubSpot will not provide access.
 
-(Source: hubspot_tos.pdf, Page 36)",incorrecta,wrong,"{""HS"": [36]}","[false, false]",
+(Source: hubspot_tos.pdf, Page 36)",incorrecta,wrong,"{""HS"": [36]}","[false, false]",incorrecta
 C3,3,SF,"30 days, on request.","Based on the Salesforce MSA document, the timeframe for exporting your data depends on the type of request:
 
 **For a Switching Request (migrating data to another provider):**
@@ -843,7 +843,7 @@ C3,3,SF,"30 days, on request.","Based on the Salesforce MSA document, the timefr
 
 **Important note:** These timeframes apply specifically to customers domiciled in EU/EEA member states under the EU Data Act requirements. The document also specifies that Salesforce will continue providing Services until the Termination Date, and you remain responsible for paying any outstanding fees for the period prior to termination.
 
-*Source: Salesforce MSA, Page 16*",correcta,wrong,"{""SF"": [16]}",[false],
+*Source: Salesforce MSA, Page 16*",correcta,wrong,"{""SF"": [16]}",[false],parcial
 C3,3,FW,14 days.,"Based on the Freshworks Terms of Service, **you have 14 days to export your data after your account is closed** (the ""Data Export Period"").
 
 Here are the specific details from Page 12:
@@ -853,14 +853,14 @@ Here are the specific details from Page 12:
 - **After the 14-day Data Export Period expires, Freshworks reserves the right to delete all your Customer Data**, though they may retain it for up to three (3) months before deletion in their normal course of operation (except where required by law).
 - **Once deleted, your Customer Data cannot be recovered.**
 
-The document strongly recommends that you export all your data before closing your Account to ensure you don't lose access to it.",correcta,exact,"{""FW"": [12]}",[true],
+The document strongly recommends that you export all your data before closing your Account to ensure you don't lose access to it.",correcta,exact,"{""FW"": [12]}",[true],correcta
 C4,3,HS,"Yes, prepaid unused fees are refunded.","Based on the HubSpot Terms of Service, **the document does not explicitly address refunds for prepaid fees in cases of provider breach**.
 
 However, the general refund policy states: ""Except as speciﬁcally provided for in this Agreement, you may not cancel your subscription prior to the end of your Current Term, and **we will not provide any refunds of prepaid fees or unused Subscription Fees through the end of your Current Term**."" (Page 11)
 
 Additionally, the document notes: ""**All payment obligations are non-cancelable and all amounts paid are non-refundable, except as speciﬁcally provided for in this Agreement.**"" (Page 10)
 
-The terms do allow either party to terminate for cause due to a material breach with 30 days' notice (Page 11, Section 4.3), but they don't specify whether prepaid fees would be refunded in such circumstances. You would need to review the specific ""exceptions"" mentioned in the Agreement or contact HubSpot directly to determine if breach termination qualifies for a refund of prepaid fees.",correcta,wrong,"{""HS"": [10, 11]}",[false],
+The terms do allow either party to terminate for cause due to a material breach with 30 days' notice (Page 11, Section 4.3), but they don't specify whether prepaid fees would be refunded in such circumstances. You would need to review the specific ""exceptions"" mentioned in the Agreement or contact HubSpot directly to determine if breach termination qualifies for a refund of prepaid fees.",correcta,wrong,"{""HS"": [10, 11]}",[false],incorrecta
 C4,3,SF,"Yes, prepaid fees for the rest of the term are refunded.","Yes, if you terminate because the provider breached the contract, you get prepaid fees back. 
 
 According to Section 11.4 ""Refund or Payment upon Termination"" in the Salesforce MSA (Page 8):
@@ -869,7 +869,7 @@ According to Section 11.4 ""Refund or Payment upon Termination"" in the Salesfor
 
 To qualify for this refund, the termination must follow the process in Section 11.3, which allows termination for cause upon 30 days written notice of a material breach if the breach remains uncured after that 30-day period.
 
-**Important note:** The document also states that termination does not relieve you of your obligation to pay any fees for the period prior to the effective date of termination—you only get refunds for prepaid fees covering the *remainder* of the term after termination.",correcta,exact,"{""SF"": [8]}",[true],
+**Important note:** The document also states that termination does not relieve you of your obligation to pay any fees for the period prior to the effective date of termination—you only get refunds for prepaid fees covering the *remainder* of the term after termination.",correcta,exact,"{""SF"": [8]}",[true],correcta
 C4,3,FW,"Its termination-for-cause clause promises no refund; refunds only in specific cases (warranty non-conformance, IP claims, force majeure).","Based on the Freshworks Terms of Service, **the document does not explicitly state whether you receive a refund of prepaid fees if Freshworks breaches the contract**.
 
 What the document does say is:
@@ -880,26 +880,26 @@ What the document does say is:
 
 The agreement allows termination for material breach, but it doesn't specify what happens to prepaid fees in that scenario. The broad non-refundable language suggests fees may not be refundable, but the exception clause ""except as expressly permitted in this Agreement"" leaves room for other provisions that might apply.
 
-You would need to review other sections of the full agreement or contact Freshworks directly to clarify the refund policy specifically for breach-related terminations.",incorrecta,wrong,"{""FW"": [8, 11]}","[true, false]",
+You would need to review other sections of the full agreement or contact Freshworks directly to clarify the refund policy specifically for breach-related terminations.",incorrecta,wrong,"{""FW"": [8, 11]}","[true, false]",parcial
 C5,3,HS,30 days.,"According to the HubSpot Terms of Service (Page 11), **each party has thirty (30) days to cure a material breach**.
 
 Specifically, Section 4.3 (Termination for Cause) states that either party may terminate the Agreement for cause ""upon thirty (30) days' notice to the other party of a material breach if such breach remains uncured at the expiration of such period.""
 
-This means that upon receiving notice of a material breach, the breaching party has 30 days to fix (cure) the breach before the other party can proceed with termination.",correcta,exact,"{""HS"": [11]}",[true],
+This means that upon receiving notice of a material breach, the breaching party has 30 days to fix (cure) the breach before the other party can proceed with termination.",correcta,exact,"{""HS"": [11]}",[true],correcta
 C5,3,SF,30 days.,"According to the Salesforce MSA, **each party has 30 days to cure a material breach**.
 
 Specifically, Section 11.3 (Termination) states that ""A party may terminate this Agreement for cause upon 30 days written notice to the other party of a material breach if such breach remains uncured at the expiration of such period.""
 
 This means that upon receiving written notice of a material breach, the breaching party has 30 days to fix the breach before the other party can proceed with termination.
 
-[Source: salesforce_msa.pdf, Page 8]",correcta,exact,"{""SF"": [8]}",[true],
+[Source: salesforce_msa.pdf, Page 8]",correcta,exact,"{""SF"": [8]}",[true],correcta
 C5,3,FW,30 days.,"Based on the Freshworks Terms of Service, **each party has thirty (30) days to cure a material breach** of the Agreement.
 
 According to Section 6(e) (Termination for Cause) on Page 11:
 
 > ""Either party may terminate this Agreement by written notice to the other party in the event that: (i) such other party materially breaches this Agreement and does not cure such breach within thirty (30) days of such notice...""
 
-This thirty-day cure period applies equally to both Freshworks and Customer. If the breaching party does not cure the material breach within this 30-day period after receiving notice, the other party may terminate the Agreement.",correcta,adjacent,"{""FW"": [11]}",[true],
+This thirty-day cure period applies equally to both Freshworks and Customer. If the breaching party does not cure the material breach within this 30-day period after receiving notice, the other party may terminate the Agreement.",correcta,adjacent,"{""FW"": [11]}",[true],correcta
 C6,3,HS,No: you may not cancel before the end of the term and prepaid fees are not refunded.,"Based on the HubSpot Terms of Service, **no, you cannot cancel mid-term and get a refund**.
 
 Here's what the document states:
@@ -910,7 +910,7 @@ Additionally, the document specifies that ""All payment obligations are non-canc
 
 You can only cancel your subscription at the end of your Current Term by turning off the auto-renewal setting in the Account & Billing section of your HubSpot account before the term ends.
 
-*(Source: HubSpot Terms of Service, Pages 9-10)*",correcta,adjacent,"{""HS"": [9, 10]}",[true],
+*(Source: HubSpot Terms of Service, Pages 9-10)*",correcta,adjacent,"{""HS"": [9, 10]}",[true],correcta
 C6,3,SF,No: payment obligations are non-cancelable and fees paid are non-refundable.,"Based on the Salesforce MSA document, **you can cancel mid-term, but refunds depend on who initiates the termination:**
 
 **If Customer terminates:**
@@ -923,7 +923,7 @@ C6,3,SF,No: payment obligations are non-cancelable and fees paid are non-refunda
 
 Additionally, if you request data deletion or switching under data protection provisions, you would need to pay ""any outstanding subscription fees covering the remainder of the term of the relevant Order Form(s) as an early termination fee"" (Page 16, Section Termination).
 
-In summary: Mid-term cancellation is possible, but you'll generally owe fees for the remainder of your subscription term unless SFDC has breached the agreement.",incorrecta,wrong,"{""SF"": [8, 16]}",[false],
+In summary: Mid-term cancellation is possible, but you'll generally owe fees for the remainder of your subscription term unless SFDC has breached the agreement.",incorrecta,wrong,"{""SF"": [8, 16]}",[false],incorrecta
 C6,3,FW,No: payment obligations are non-cancelable and non-refundable.,"Based on the Freshworks Terms of Service, **no, you cannot cancel mid-term and get a refund**. 
 
 According to Section 5(a) on Page 8:
@@ -932,7 +932,7 @@ According to Section 5(a) on Page 8:
 
 Additionally, Section 5(a) states that ""During the Subscription Term, the Customer shall not be permitted: (i) reduce their User or Asset Unit count, or (ii) downgrade their Service Plan.""
 
-The only way to end your subscription would be through termination for cause under Section 6(e), which requires either a material breach by Freshworks (with a 30-day cure period) or bankruptcy/insolvency proceedings. Regular mid-term cancellations are not permitted, and refunds are explicitly excluded except where expressly allowed elsewhere in the agreement.",correcta,exact,"{""FW"": [8]}",[true],
+The only way to end your subscription would be through termination for cause under Section 6(e), which requires either a material breach by Freshworks (with a 30-day cure period) or bankruptcy/insolvency proceedings. Regular mid-term cancellations are not permitted, and refunds are explicitly excluded except where expressly allowed elsewhere in the agreement.",correcta,exact,"{""FW"": [8]}",[true],correcta
 C7,3,HS,Suspension 10 days after notice of non-payment.,"Based on the HubSpot Terms of Service, here's what happens if you pay late:
 
 **Immediate Consequences:**
@@ -947,7 +947,7 @@ C7,3,HS,Suspension 10 days after notice of non-payment.,"Based on the HubSpot Te
 
 3. **Invoice payment terms**: All invoiced amounts are due within 30 days from the invoice date, unless otherwise specified in your Order Form (Page 9).
 
-**Key point**: The document states that ""all payment obligations are non-cancelable and all amounts paid are non-refundable"" (Page 10), so there's no flexibility on payment requirements.",correcta,adjacent,"{""HS"": [9, 10, 11]}",[false],
+**Key point**: The document states that ""all payment obligations are non-cancelable and all amounts paid are non-refundable"" (Page 10), so there's no flexibility on payment requirements.",correcta,adjacent,"{""HS"": [9, 10, 11]}",[false],parcial
 C7,3,SF,Late interest of 1.5% per month.,"# Late Payment Consequences
 
 Based on the Salesforce MSA, if you pay late, the following can happen:
@@ -965,12 +965,12 @@ However, SFDC will give you at least 10 days' prior notice before suspending ser
 **Exception for Disputes:**
 SFDC will not exercise these late payment remedies if you are reasonably disputing the charges in good faith and cooperating diligently to resolve the dispute.
 
-*Source: Salesforce MSA, Pages 5 and 14*",correcta,exact,"{""SF"": [5, 14]}",[true],
+*Source: Salesforce MSA, Pages 5 and 14*",correcta,exact,"{""SF"": [5, 14]}",[true],correcta
 C7,3,FW,"Suspension if more than 30 days overdue, after written notice.","# Late Payment Consequences
 
 According to the Freshworks Terms of Service (Page 8), if your undisputed Fees are more than thirty (30) days overdue, Freshworks may **suspend your access to the Freshworks Technology, including your Account**, following written notification from them.
 
-However, there's an important exception: Freshworks will not exercise this suspension right if you are disputing the charges reasonably and in good faith and are cooperating diligently to resolve the dispute. If the dispute cannot be resolved within 30 days, Freshworks retains the right to seek remedies available under the Agreement.",correcta,adjacent,"{""FW"": [8]}",[true],
+However, there's an important exception: Freshworks will not exercise this suspension right if you are disputing the charges reasonably and in good faith and are cooperating diligently to resolve the dispute. If the dispute cannot be resolved within 30 days, Freshworks retains the right to seek remedies available under the Agreement.",correcta,adjacent,"{""FW"": [8]}",[true],correcta
 C8,3,HS,Amounts paid or payable in the 12 months before the claim.,"# Liability Cap for HubSpot
 
 According to the HubSpot Terms of Service (Page 19), liability is capped as follows:
@@ -988,7 +988,7 @@ The liability limitation does not apply to:
 - HubSpot's liability for IP indemnification obligations
 - Your liability for violation of HubSpot's intellectual property rights
 
-Additionally, HubSpot disclaims all liability with respect to third-party products, and HubSpot's licensors have no liability under the agreement (Page 19).",correcta,exact,"{""HS"": [19]}",[true],
+Additionally, HubSpot disclaims all liability with respect to third-party products, and HubSpot's licensors have no liability under the agreement (Page 19).",correcta,exact,"{""HS"": [19]}",[true],correcta
 C8,3,SF,Amounts paid in the 12 months before the incident.,"# Liability Cap
 
 Based on the Salesforce MSA, each provider's total liability is capped as follows:
@@ -1004,7 +1004,7 @@ Customers domiciled in Germany have different rules under Section 10 ""Limitatio
 - For breaches of ""cardinal duties"" due to slight negligence, liability is limited to foreseeable, contract-typical damages
 - Other slight negligence claims are excluded entirely
 
-The document also notes (Page 7) that this liability limitation does not apply to the Customer's payment obligations under the ""Fees and Payment"" section.",correcta,adjacent,"{""SF"": [7, 13]}",[true],
+The document also notes (Page 7) that this liability limitation does not apply to the Customer's payment obligations under the ""Fees and Payment"" section.",correcta,adjacent,"{""SF"": [7, 13]}",[true],correcta
 C8,3,FW,"Fees received or payable in the 12 months before the claim; excludes gross negligence, wilful misconduct, fraud and indemnities.","# Liability Cap Structure
 
 According to **freshworks_tos.pdf, Page 17 (Section 11.b)**, each party's aggregate liability is capped as follows:
@@ -1016,26 +1016,26 @@ Additionally, **Section 11.c** specifies that this monetary cap applies:
 - Regardless of whether individual customer affiliates have executed separate SOFs
 - Regardless of the form of action (contract, tort, negligence, strict liability, etc.)
 
-The document also notes (Section 11.d) that this limitation is intentionally designed to distribute risks between both parties, taking into account the cost of fees. It explains that if Freshworks were to assume liability beyond what is specified, the fees would have been substantially higher.",correcta,adjacent,"{""FW"": [17]}","[true, true]",
+The document also notes (Section 11.d) that this limitation is intentionally designed to distribute risks between both parties, taking into account the cost of fees. It explains that if Freshworks were to assume liability beyond what is specified, the fees would have been substantially higher.",correcta,adjacent,"{""FW"": [17]}","[true, true]",correcta
 T1,3,,Not stated (only HubSpot has an uptime commitment; answering 99.95% is cross-document contamination).,"I couldn't find information about a specific uptime guarantee from Salesforce in this document.
 
 While the Salesforce MSA (Document: salesforce_msa.pdf | Page: 2) states that SFDC will ""use commercially reasonable efforts to make the online Purchased Services available 24 hours a day, 7 days a week,"" it does not specify a guaranteed uptime percentage like the 99.95% commitment that HubSpot provides.
 
-The document does note exceptions for planned downtime and circumstances beyond SFDC's reasonable control, but no specific uptime SLA percentage is mentioned in the provided chunks.",incorrecta,n/a,"{""SF"": [2]}",[],
-T2,3,,Not stated.,"I couldn't find information about that in this document. The provided chunks from the Freshworks Terms of Service do not contain any uptime guarantee or service level agreement (SLA) information. To find details about Freshworks' uptime guarantees, you would need to check their Service Level Agreement (SLA) document or other service documentation not included in these excerpts.",correcta,n/a,{},[],
+The document does note exceptions for planned downtime and circumstances beyond SFDC's reasonable control, but no specific uptime SLA percentage is mentioned in the provided chunks.",incorrecta,n/a,"{""SF"": [2]}",[],correcta
+T2,3,,Not stated.,"I couldn't find information about that in this document. The provided chunks from the Freshworks Terms of Service do not contain any uptime guarantee or service level agreement (SLA) information. To find details about Freshworks' uptime guarantees, you would need to check their Service Level Agreement (SLA) document or other service documentation not included in these excerpts.",correcta,n/a,{},[],correcta
 T3,3,,Not stated (trial length is whatever the customer registered for).,"I couldn't find information about that in this document.
 
-The Salesforce MSA document discusses free trials in section 2.6, but it does not specify a particular number of days. It only states that the trial lasts until ""the earlier of (a) the end of the free trial period for which Customer registered to use the applicable Service(s),"" without defining what that period is. The document notes that additional trial terms and conditions may appear on the trial registration web page.",correcta,n/a,{},[],
+The Salesforce MSA document discusses free trials in section 2.6, but it does not specify a particular number of days. It only states that the trial lasts until ""the earlier of (a) the end of the free trial period for which Customer registered to use the applicable Service(s),"" without defining what that period is. The document notes that additional trial terms and conditions may appear on the trial registration web page.",correcta,n/a,{},[],correcta
 T4,3,,Not stated.,"I couldn't find information about that in this document. The provided chunks from the Freshworks Terms of Service do not contain specific pricing information for the Pro plan or any monthly per-seat prices. 
 
-The document explains that fees are set forth in the applicable Service Order Form (SOF) or on the Website (as mentioned on Page 8), but the actual pricing details are not included in these terms and conditions excerpts.",correcta,n/a,"{""FW"": [8]}",[],
+The document explains that fees are set forth in the applicable Service Order Form (SOF) or on the Website (as mentioned on Page 8), but the actual pricing details are not included in these terms and conditions excerpts.",correcta,n/a,"{""FW"": [8]}",[],correcta
 T5,3,,Not stated.,"I couldn't find information about that in this document.
 
 The provided sections of HubSpot's Terms of Service discuss data protection measures and HubSpot's obligations regarding customer data security (including references to a Data Processing Agreement with security measures), but they do not specify any fines or financial penalties that HubSpot would pay in the event of a data leak or breach.
 
-To find information about potential liability for data breaches, you would need to review other sections of the full Terms of Service, the Data Processing Agreement (DPA), or consult with HubSpot directly about their liability limitations and insurance coverage.",correcta,n/a,{},[],
+To find information about potential liability for data breaches, you would need to review other sections of the full Terms of Service, the Data Processing Agreement (DPA), or consult with HubSpot directly about their liability limitations and insurance coverage.",correcta,n/a,{},[],correcta
 T6,3,HS,"None offers 24/7 phone support; HubSpot phone support (Professional/Enterprise) runs 8pm Sunday – 8pm Friday EST, email/in-app questions accepted 24/7.","Based on the provided document, **HubSpot does not offer 24/7 phone support**.
 
 According to the HubSpot Terms of Service (Page 46), phone support for Professional or Enterprise tiers is only available from **8pm Sunday to 8pm Friday EST (Eastern Standard Time)**. The document also notes that these hours may be reduced during recognized holidays and HubSpot's company-wide designated week of rest.
 
-However, HubSpot does accept email and in-app support questions **24 hours per day, 7 days per week**, though responses to these are provided during phone support hours only.",correcta,exact,"{""HS"": [46]}",[true],
+However, HubSpot does accept email and in-app support questions **24 hours per day, 7 days per week**, though responses to these are provided during phone support hours only.",correcta,exact,"{""HS"": [46]}",[true],correcta
