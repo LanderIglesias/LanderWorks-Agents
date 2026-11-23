@@ -1,0 +1,722 @@
+[
+ {
+  "id": "E1",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E2",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E3",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "E4",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E5",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E6",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E7",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "E8",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E9",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E10",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C3",
+  "run": 1,
+  "doc": "HS",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C3",
+  "run": 1,
+  "doc": "SF",
+  "grade": "parcial"
+ },
+ {
+  "id": "C3",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C4",
+  "run": 1,
+  "doc": "HS",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C4",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C4",
+  "run": 1,
+  "doc": "FW",
+  "grade": "parcial"
+ },
+ {
+  "id": "C5",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C5",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C5",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C6",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C6",
+  "run": 1,
+  "doc": "SF",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C6",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C7",
+  "run": 1,
+  "doc": "HS",
+  "grade": "parcial"
+ },
+ {
+  "id": "C7",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C7",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 1,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 1,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "T1",
+  "run": 1,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T2",
+  "run": 1,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T3",
+  "run": 1,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T4",
+  "run": 1,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T5",
+  "run": 1,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T6",
+  "run": 1,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E1",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E2",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E3",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "E4",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E5",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E6",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E7",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "E8",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E9",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E10",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C3",
+  "run": 2,
+  "doc": "HS",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C3",
+  "run": 2,
+  "doc": "SF",
+  "grade": "parcial"
+ },
+ {
+  "id": "C3",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C4",
+  "run": 2,
+  "doc": "HS",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C4",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C4",
+  "run": 2,
+  "doc": "FW",
+  "grade": "parcial"
+ },
+ {
+  "id": "C5",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C5",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C5",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C6",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C6",
+  "run": 2,
+  "doc": "SF",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C6",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C7",
+  "run": 2,
+  "doc": "HS",
+  "grade": "parcial"
+ },
+ {
+  "id": "C7",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C7",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 2,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 2,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "T1",
+  "run": 2,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T2",
+  "run": 2,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T3",
+  "run": 2,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T4",
+  "run": 2,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T5",
+  "run": 2,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T6",
+  "run": 2,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E1",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E2",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E3",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "E4",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E5",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E6",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E7",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "E8",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "E9",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "E10",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C1",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C2",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C3",
+  "run": 3,
+  "doc": "HS",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C3",
+  "run": 3,
+  "doc": "SF",
+  "grade": "parcial"
+ },
+ {
+  "id": "C3",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C4",
+  "run": 3,
+  "doc": "HS",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C4",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C4",
+  "run": 3,
+  "doc": "FW",
+  "grade": "parcial"
+ },
+ {
+  "id": "C5",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C5",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C5",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C6",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C6",
+  "run": 3,
+  "doc": "SF",
+  "grade": "incorrecta"
+ },
+ {
+  "id": "C6",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C7",
+  "run": 3,
+  "doc": "HS",
+  "grade": "parcial"
+ },
+ {
+  "id": "C7",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C7",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 3,
+  "doc": "SF",
+  "grade": "correcta"
+ },
+ {
+  "id": "C8",
+  "run": 3,
+  "doc": "FW",
+  "grade": "correcta"
+ },
+ {
+  "id": "T1",
+  "run": 3,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T2",
+  "run": 3,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T3",
+  "run": 3,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T4",
+  "run": 3,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T5",
+  "run": 3,
+  "doc": null,
+  "grade": "correcta"
+ },
+ {
+  "id": "T6",
+  "run": 3,
+  "doc": "HS",
+  "grade": "correcta"
+ }
+]
