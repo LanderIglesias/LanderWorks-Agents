@@ -204,7 +204,9 @@ repository's own tests.
 ## Pending
 
 - **Phase 3: PR mode in the web demo.** Not implemented. Today the web service only
-  reports; fixes are applied locally by the `senior-cleanup` skill.
+  reports; fixes are applied locally by the `senior-cleanup` skill. It would be an
+  endpoint that receives the repository URL, runs the skill in an isolated sandbox on
+  the server, and opens a PR on GitHub through its API.
 
 Out of scope for the web service: fixing code or opening PRs (fixing is done locally by
 the `senior-cleanup` skill), private repositories, a visual redesign of the demo.
