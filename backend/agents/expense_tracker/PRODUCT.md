@@ -32,7 +32,7 @@ correction.
 
 Not a general-purpose budgeting SaaS. A single-user automation tightly
 coupled to Lander's actual bank (Laboral Kutxa) and card, deployed on his
-own EC2. What a generic budgeting app couldn't truthfully copy: dual-channel
+own EC2 until the AWS free tier ended (October 2026); it now runs locally only. What a generic budgeting app couldn't truthfully copy: dual-channel
 confirmation for the same Apple Pay purchase (Wallet trigger + bank email
 notification, deduplicated into one row instead of double-counting) and a
 manual-entry floor that exists specifically because Apple's own Shortcuts
@@ -49,7 +49,8 @@ iPhone home screen (installed via Safari "Add to Home Screen") for
 reviewing totals, clearing the needs-review queue, and manual entry — a
 human is always present for that half. Backend is FastAPI + PostgreSQL
 behind Cloudflare, deployed as its own lightweight Docker image on the same
-EC2 as other unrelated portfolio agents (see Capabilities). Claude Haiku
+EC2 as other unrelated portfolio agents (see Capabilities) until that EC2 was
+taken down. Claude Haiku
 categorizes each expense once at ingest time, not on every read.
 
 ## Capabilities and Constraints

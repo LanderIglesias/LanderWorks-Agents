@@ -17,7 +17,7 @@ no solo en la conversación que las decidió):
    de agentes locales del hub), en la máquina de un único usuario. No
    se expone a ninguna red que no sea `127.0.0.1`. Añadir un token aquí
    protegería contra una amenaza que no existe en este despliegue (a
-   diferencia de Lead Capture Agent, que SÍ está en un EC2 público, o
+   diferencia de Lead Capture Agent, que SÍ estuvo en un EC2 público, o
    de los endpoints `/admin/*` de ese mismo agente, que sí necesitan
    `X-Admin-Token`). Si este wrapper alguna vez se expusiera más allá
    de `127.0.0.1`, esta decisión debe revisarse -- no es la conclusión

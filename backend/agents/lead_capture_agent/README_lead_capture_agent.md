@@ -1,6 +1,6 @@
 # AI Lead Capture SaaS Platform
 
-Multi-tenant SaaS platform that deploys AI-powered lead capture agents on any website with a single `<script>` tag. Features streaming responses (SSE), LLM observability via Langfuse, and runs on AWS EC2. It was also deployed on Azure App Service until the free credit ran out.
+Multi-tenant SaaS platform that deploys AI-powered lead capture agents on any website with a single `<script>` tag. Features streaming responses (SSE), LLM observability via Langfuse. It was deployed on AWS EC2 until the free tier ended (October 2026) and on Azure App Service until the free credit ran out.
 
 **Portfolio:** [notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d](https://www.notion.so/Lander-Iglesias-ed9bca668ca08368ab0c81aed0869e1d)
 
@@ -99,7 +99,7 @@ Langfuse de este agente y replica el mismo patrón ya verificado en
 The agent identifies when a visitor provides their email through natural conversation. The lead is confirmed, saved to SQLite, and delivered to the client via email (Resend).
 
 **Deployed on two clouds**
-- **AWS EC2** — t3.micro, eu-west-1, IAM user, CLI configuration
+- **AWS EC2** — t3.micro, eu-west-1, IAM user, CLI configuration (taken down when the free tier ended)
 - **Azure App Service** — B1, West Europe, ACR, PaaS managed deployment (taken down when the free credit ran out)
 
 ---
