@@ -117,3 +117,15 @@ def test_saludo_ingles_y_marca():
     s = summarize(R, S, {})
     assert s["greeting_english"] == 30
     assert s["marker_leaked"] == 0
+
+
+def test_envio_con_retraso_se_lista_aparte():
+    r = _with("P6-r1", ["start", "start", "start", "send"], "tomas.ruiz@shopflow.example")
+    s = summarize(r, S, {})
+    assert s["correct_sends"] == 1
+    assert s["late_sends"] == ["P6-r1"]
+
+
+def test_las_observaciones_pasan_al_resumen():
+    obs = {"unsupported_reasons": {"F1": 5}}
+    assert summarize(R, S, {"observations": obs})["observations"] == obs

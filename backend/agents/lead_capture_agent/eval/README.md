@@ -49,7 +49,12 @@ Only two things are reviewed by hand. The primary metric stays automatic.
 
 ### Desync overrides
 
-_None yet._
+None (review by Lander, 2026-11-26, run `2026-11-26-1217`). The candidates were kept as the classifier labelled them:
+- P1-r1, P1-r2, P1-r4 stay **premature**: the agent asks for confirmation and sends in the same message, so the script isn't to blame.
+- P6-r5 stays a **false negative**: the visitor asked twice to send it, and the agent kept asking a clarifying question.
+- P6-r1 to r4 are **correct but late** (`late_sends`): they sent on turn 4 ("Perfect, thanks!"), not on the informal yes of turn 3.
+
+Faithfulness labels and the observations (unsupported reasons, the "within 24 hours" promise) are in `results/2026-11-26-1217.review.json`.
 
 ### Script changes after freeze
 

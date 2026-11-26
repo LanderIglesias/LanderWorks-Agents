@@ -18,7 +18,14 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from .classify import classify, count_deliveries, first_email_request, looks_english, marker_leaked
+from .classify import (
+    classify,
+    count_deliveries,
+    first_email_request,
+    first_send_turn,
+    looks_english,
+    marker_leaked,
+)
 
 CATEGORIES = ("correct", "premature", "false_negative", "false_positive")
 FAITH_LABELS = ("admits", "hedged", "invents")
@@ -64,6 +71,13 @@ def summarize(results: dict, scripts: list[dict], review: dict) -> dict:
         "by_category": {k: by_category[k] for k in CATEGORIES},
         "by_profile": {p: {k: n[k] for k in CATEGORIES} for p, n in sorted(by_profile.items())},
         "correct_sends": sum(1 for c in sends if category[c["id"]] == "correct"),
+        # Correctos que enviaron después del turno de confirmación (acierto con retraso).
+        "late_sends": [
+            c["id"]
+            for c in sends
+            if category[c["id"]] == "correct"
+            and first_send_turn(c["turns"]) > by_id[c["profile"]]["confirm_turn"]
+        ],
         "premature": by_category["premature"],
         "false_negatives": by_category["false_negative"],
         "false_positives": by_category["false_positive"],
@@ -84,6 +98,9 @@ def summarize(results: dict, scripts: list[dict], review: dict) -> dict:
             "flagged": [f["id"] for f in faith if f["flags"]],
         },
     }
+
+    if review.get("observations"):
+        summary["observations"] = review["observations"]
 
     overrides = review.get("overrides", {})
     if overrides:
