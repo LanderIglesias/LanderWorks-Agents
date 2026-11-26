@@ -218,7 +218,7 @@ def test_scaffold_chat_endpoint_uses_runtime(monkeypatch):
             )
 
     class DummyRuntime:
-        def process_chat(self, *, tenant, client_ip, session_id, message, mailer):
+        def process_chat(self, *, tenant, client_ip, session_id, message, mailer, lang=None):
             assert tenant.tenant_id == "tenant-a"
             assert tenant.agent_type == "scaffold_web_agent"
             assert session_id == "sess-1"
@@ -343,7 +343,7 @@ def test_scaffold_chat_endpoint_uses_runtime_from_tenant_agent_type(monkeypatch)
             )
 
     class DummyRuntime:
-        def process_chat(self, *, tenant, client_ip, session_id, message, mailer):
+        def process_chat(self, *, tenant, client_ip, session_id, message, mailer, lang=None):
             assert tenant.agent_type == "special-agent"
             assert session_id == "sess-1"
             assert message == "hola"

@@ -15,6 +15,7 @@ class DummyChatService:
         session_id: str,
         message: str,
         mailer,
+        lang=None,
     ):
         self.called_with = {
             "tenant": tenant,

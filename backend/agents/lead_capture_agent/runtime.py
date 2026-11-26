@@ -25,4 +25,5 @@ class AgentRuntime(Protocol):
         session_id: str,
         message: str,
         mailer: Mailer,
+        lang: str | None = None,
     ) -> RuntimeResult: ...

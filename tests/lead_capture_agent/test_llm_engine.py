@@ -550,7 +550,7 @@ class TestChatServiceLlmRouting:
 
         llm_called = []
 
-        def fake_llm(state, message, knowledge_text=""):
+        def fake_llm(state, message, knowledge_text="", lang=None):
             llm_called.append({"message": message, "knowledge": knowledge_text})
             new_state = SessionState()
             new_state.step = Step.COLLECT_CONTACT
