@@ -176,3 +176,28 @@ def test_nombres():
     assert results_name("2026-11-26-1200", pilot=False) == "2026-11-26-1200.json"
     assert results_name("2026-11-26-1200", pilot=True) == "pilot-2026-11-26-1200.json"
     assert run_eval.MODEL == "claude-haiku-4-5-20251001"
+
+
+def test_carga_el_env_y_despues_apaga_langfuse(tmp_path, monkeypatch, restore_engine):
+    env = tmp_path / ".env"
+    env.write_text(
+        "ANTHROPIC_API_KEY=clave-de-prueba\nLANGFUSE_PUBLIC_KEY=pk\nLANGFUSE_SECRET_KEY=sk\n",
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setattr(run_eval, "ENV_FILE", env)
+    fake = FakeAnthropic([])
+    main(["--pilot"], results_dir=tmp_path, client_factory=fake.factory, stamp="2026-01-01-0000")
+    import os
+
+    assert os.environ["ANTHROPIC_API_KEY"] == "clave-de-prueba"
+    assert not langfuse_utils._habilitado()
+
+
+def test_meta_registra_la_version_del_sdk(tmp_path, restore_engine):
+    import anthropic
+
+    fake = FakeAnthropic([])
+    main(["--pilot"], results_dir=tmp_path, client_factory=fake.factory, stamp="2026-01-01-0000")
+    data = json.loads((tmp_path / "pilot-2026-01-01-0000.json").read_text(encoding="utf-8"))
+    assert data["meta"]["anthropic_version"] == anthropic.__version__

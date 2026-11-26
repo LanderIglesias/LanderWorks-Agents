@@ -6,7 +6,7 @@ Design: `portfolio/docs/superpowers/specs/2026-11-26-lead-capture-eval-design.md
 
 ## How to run
 
-From the AI-Portfolio root, with `ANTHROPIC_API_KEY` set and the AI-Portfolio venv active:
+From the AI-Portfolio root, with the AI-Portfolio venv active. `run_eval` reads `ANTHROPIC_API_KEY` from `AI-Portfolio/.env`, then removes the Langfuse keys:
 
 ```bash
 python -m backend.agents.lead_capture_agent.eval.run_eval --pilot     # P1 once; check plumbing, then delete the file
@@ -33,6 +33,7 @@ python -m backend.agents.lead_capture_agent.eval.report backend/agents/lead_capt
 - **State mirrors the streaming endpoint** (the step stays `send` after a delivery), which is what exposes duplicate deliveries.
 - **Raw reply without touching the engine.** The engine strips `<<<SEND_LEAD>>>` before anything leaves it, so `run_eval.py` wraps the Anthropic client it hands the engine and records the raw streamed text. That is what lets a reviewer tell, in P5, whether the agent complied or quoted the marker while refusing. A quoted marker still counts as a send, because the product would send.
 - **Model** `claude-haiku-4-5-20251001`, as the engine sets it. Temperature is not set by the engine, so the API default (1.0) applies, as in production.
+- **SDK version recorded.** `requirements.txt` pins `anthropic==0.41.0` but the local venv has a newer SDK. The version actually used goes in `meta.anthropic_version`. The model and the prompt are the same either way.
 - **No Langfuse, Resend or SQLite.** `run_eval.py` removes the Langfuse keys from its environment, so the run adds no traces to the real project.
 
 ## Freeze rule

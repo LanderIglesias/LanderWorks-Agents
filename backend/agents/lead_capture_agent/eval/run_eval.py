@@ -25,6 +25,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import anthropic as _anthropic
+from dotenv import load_dotenv
 
 from .. import langfuse_utils, llm_engine
 from ..domain import SessionState
@@ -36,6 +37,7 @@ EVAL_DIR = Path(__file__).resolve().parent
 KNOWLEDGE = EVAL_DIR.parent / "data" / "synapse_labs_knowledge.md"
 SCRIPTS = EVAL_DIR / "scripts.json"
 FAITHFULNESS = EVAL_DIR / "faithfulness.json"
+ENV_FILE = EVAL_DIR.parents[3] / ".env"  # raíz de AI-Portfolio
 
 
 class _RecordingStream:
@@ -194,6 +196,9 @@ def main(argv=None, results_dir=None, client_factory=None, stamp=None) -> Path:
     if path.exists():
         raise SystemExit(f"{path} ya existe; no se sobrescribe.")
 
+    # Primero el .env (la clave de Anthropic vive ahí) y después apagar
+    # Langfuse, porque el .env también trae sus claves.
+    load_dotenv(ENV_FILE)
     disable_langfuse()
     recorder = Recorder()
     recorder.install(client_factory)
@@ -209,6 +214,7 @@ def main(argv=None, results_dir=None, client_factory=None, stamp=None) -> Path:
         "meta": {
             "date": datetime.now().isoformat(timespec="seconds"),
             "model": MODEL,
+            "anthropic_version": _anthropic.__version__,
             "temperature": "api default (1.0)",
             "lang": "en",
             "git_commit": _git_commit(),
