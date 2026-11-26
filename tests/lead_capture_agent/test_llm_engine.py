@@ -176,6 +176,29 @@ class TestLlmEngine:
         assert new_state.step != Step.SEND
 
 
+class TestSaludoIdioma:
+    """El saludo se pide antes de que el visitante escriba: su idioma solo
+    puede venir del navegador (`lang`). Sin `lang`, el saludo sigue en
+    español (compatibilidad con los widgets ya embebidos)."""
+
+    def _prompt_del_saludo(self, **kwargs) -> str:
+        from backend.agents.lead_capture_agent.llm_engine import handle_user_message_llm
+
+        with patch("backend.agents.lead_capture_agent.llm_engine.anthropic.Anthropic") as mock_cls:
+            create = mock_cls.return_value.messages.create
+            create.return_value = make_fake_anthropic_response("Hi!")
+            handle_user_message_llm(SessionState(), "__greeting__", "kb", **kwargs)
+        return create.call_args.kwargs["messages"][0]["content"]
+
+    def test_con_lang_la_instruccion_nombra_el_idioma(self):
+        prompt = self._prompt_del_saludo(lang="en-GB")
+        assert "en-GB" in prompt
+        assert "en español" not in prompt
+
+    def test_sin_lang_se_mantiene_el_espanol(self):
+        assert "en español" in self._prompt_del_saludo()
+
+
 class TestRedaccionTranscripcionParaLangfuse:
     """Decisión de producto confirmada explícitamente por el usuario tras
     la auditoría de PII (ver README_lead_capture_agent.md): antes de
