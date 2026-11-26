@@ -8,6 +8,11 @@ import pytest
 os.environ.setdefault("TWILIO_VALIDATE_SIGNATURE", "0")
 # (opcional) asegúrate de no cargar token por accidente
 os.environ.setdefault("TWILIO_AUTH_TOKEN", "")
+# Un hook de git (pre-commit desde un worktree) exporta GIT_DIR y GIT_INDEX_FILE. Los
+# tests que hacen `git init` en tmp_path los heredaban y escribían core.bare=true en el
+# repo real. Se limpian aquí para todo subproceso de git de los tests, no solo uno.
+for _var in [v for v in os.environ if v.startswith("GIT_")]:
+    del os.environ[_var]
 
 ROOT = Path(__file__).resolve().parents[1]  # dental-agent/
 if str(ROOT) not in sys.path:
