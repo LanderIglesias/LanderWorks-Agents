@@ -255,6 +255,14 @@ def widget_js() -> str:
     }
   }
 
+  // Idioma del navegador: el saludo se pide antes de que el visitante escriba.
+  var BROWSER_LANG = navigator.language || "";
+  function fallbackGreeting() {
+    return BROWSER_LANG.toLowerCase().indexOf("es") === 0
+      ? "¡Hola! ¿En qué puedo ayudarte?"
+      : "Hi! How can I help you?";
+  }
+
   // Pide el saludo al servidor la primera vez que se abre el widget.
   async function fetchGreeting() {
     var sid = getSessionId();
@@ -268,17 +276,17 @@ def widget_js() -> str:
       var res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Widget-Token": TOKEN },
-        body: JSON.stringify({ session_id: sid, message: "__greeting__" })
+        body: JSON.stringify({ session_id: sid, message: "__greeting__", lang: BROWSER_LANG })
       });
 
       if (res.ok) {
         var data = await res.json();
-        loadingNode.textContent = data.reply || "¡Hola! ¿En qué puedo ayudarte?";
+        loadingNode.textContent = data.reply || fallbackGreeting();
       } else {
-        loadingNode.textContent = "¡Hola! ¿En qué puedo ayudarte?";
+        loadingNode.textContent = fallbackGreeting();
       }
     } catch (e) {
-      loadingNode.textContent = "¡Hola! ¿En qué puedo ayudarte?";
+      loadingNode.textContent = fallbackGreeting();
     } finally {
       send.disabled = false;
       input.disabled = false;

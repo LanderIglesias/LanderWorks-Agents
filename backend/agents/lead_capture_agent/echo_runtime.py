@@ -16,6 +16,7 @@ class EchoAgentRuntime:
         session_id: str,
         message: str,
         mailer: Mailer,
+        lang: str | None = None,  # noqa: ARG002 -- el eco no saluda
     ) -> RuntimeResult:
         return RuntimeResult(
             reply=f"[echo:{tenant.tenant_id}] {message}",

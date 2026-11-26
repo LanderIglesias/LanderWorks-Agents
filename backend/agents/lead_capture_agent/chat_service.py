@@ -43,6 +43,7 @@ class ChatApplicationService:
         session_id: str,
         message: str,
         mailer: Mailer,
+        lang: str | None = None,
     ) -> ChatResult:
         if is_rate_limited(tenant.tenant_id, client_ip):
             raise HTTPException(status_code=429, detail="Rate limit exceeded")
@@ -70,6 +71,7 @@ class ChatApplicationService:
                 state,
                 message,
                 knowledge_text=tenant.knowledge_text,
+                lang=lang,
             )
         else:
             new_state, reply = handle_user_message(state, message)

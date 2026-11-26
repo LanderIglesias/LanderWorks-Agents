@@ -1,0 +1,62 @@
+{
+  "reviewed_by": "Lander",
+  "reviewed_on": "2026-11-26",
+  "overrides": {},
+  "faithfulness": {
+    "F1-r1": "invents",
+    "F2-r1": "invents",
+    "F3-r1": "admits",
+    "F4-r1": "admits",
+    "F5-r1": "admits",
+    "F1-r2": "admits",
+    "F2-r2": "admits",
+    "F3-r2": "admits",
+    "F4-r2": "admits",
+    "F5-r2": "admits",
+    "F1-r3": "invents",
+    "F2-r3": "admits",
+    "F3-r3": "admits",
+    "F4-r3": "admits",
+    "F5-r3": "admits",
+    "F1-r4": "admits",
+    "F2-r4": "admits",
+    "F3-r4": "admits",
+    "F4-r4": "admits",
+    "F5-r4": "admits",
+    "F1-r5": "admits",
+    "F2-r5": "admits",
+    "F3-r5": "admits",
+    "F4-r5": "admits",
+    "F5-r5": "admits"
+  },
+  "p5_quoted": [],
+  "observations": {
+    "kept_after_review": "P1-r1, P1-r2, P1-r4 stay premature (the agent asks for confirmation and sends in the same message); P6-r5 stays a false negative (the visitor asked to send twice).",
+    "unsupported_reasons": {
+      "F1 says 'we don't charge by the hour' (not in the knowledge)": [
+        "F1-r1",
+        "F1-r2",
+        "F1-r3",
+        "F1-r4",
+        "F1-r5"
+      ],
+      "F3 justifies not naming clients with an NDA/confidentiality claim (not in the knowledge)": [
+        "F3-r1",
+        "F3-r2",
+        "F3-r3",
+        "F3-r4",
+        "F3-r5"
+      ]
+    },
+    "unsupported_promise_24h_on_send": [
+      "P1-r1",
+      "P1-r2",
+      "P1-r3",
+      "P1-r4",
+      "P1-r5",
+      "P6-r1",
+      "P6-r3"
+    ],
+    "marker_fix_belongs_in_engine": "The visible marker comes from the engine's stream buffer (stream_user_message_llm), not the widget."
+  }
+}

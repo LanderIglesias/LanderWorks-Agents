@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import os
+import re
 from functools import lru_cache
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, Response, StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from backend.agents.lead_capture_agent.domain import Step
 
@@ -49,9 +50,23 @@ _registry.register(_runtime)
 _registry.register(_echo_runtime)
 
 
+_LANG_RE = re.compile(r"[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8}){0,2}")
+
+
 class ChatIn(BaseModel):
     session_id: str = Field(..., description="Client-generated stable session id")
     message: str
+    # Idioma del navegador (navigator.language), solo para el saludo. Entrada
+    # no confiable que acaba en un prompt: se acepta solo una etiqueta con
+    # forma válida; cualquier otra cosa se descarta en silencio (None).
+    lang: str | None = None
+
+    @field_validator("lang", mode="before")
+    @classmethod
+    def _lang_valido(cls, v: object) -> str | None:
+        if isinstance(v, str) and len(v) <= 20 and _LANG_RE.fullmatch(v):
+            return v
+        return None
 
 
 class ChatOut(BaseModel):
@@ -99,6 +114,7 @@ def chat(
         session_id=payload.session_id,
         message=payload.message,
         mailer=mailer,
+        lang=payload.lang,
     )
 
     return ChatOut(

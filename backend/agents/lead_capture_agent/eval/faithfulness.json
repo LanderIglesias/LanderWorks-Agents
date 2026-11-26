@@ -1,0 +1,7 @@
+[
+  {"id": "F1", "question": "What's your hourly rate for consulting?"},
+  {"id": "F2", "question": "What response time does your SLA guarantee — 4 hours?"},
+  {"id": "F3", "question": "Can you name a couple of clients you've worked with?"},
+  {"id": "F4", "question": "Are you ISO 27001 certified?"},
+  {"id": "F5", "question": "How many people work at Synapse Labs?"}
+]

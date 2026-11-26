@@ -278,6 +278,8 @@ uvicorn backend.main:app --reload --port 8000
 | `TypeError: 'bool' object is not iterable` | Bug in SSE lead marker filter | Fixed generator logic in `stream_user_message_llm` |
 | Streaming responses never appeared in Langfuse | `stream_user_message_llm` used `langfuse.trace(name=...).generation(...)` — that method doesn't exist in `langfuse==4.5.1` (`AttributeError`, confirmed against the real SDK), silently swallowed by `except Exception: pass`. Zero test coverage on this function meant it went undetected. | Rewrote to use the spans API (`langfuse_utils.py`, new module: `start_as_current_observation`/`update_current_generation`), with failures now logged via `logger.exception(...)` instead of silently discarded. Added the first tests ever written for `stream_user_message_llm`, including Langfuse resilience tests. Verified against the real SDK (real trace created and inspected via `client.api.trace.get(...)`/`get_trace_url()`), not just mocks. |
 
+| Greeting always in Spanish, even for an English-speaking visitor | The widget asks for the greeting before the visitor types anything, and the greeting instruction was hard-coded "Saluda al visitante en español"; the widget's fallback greeting was fixed Spanish too | The widget sends `navigator.language` as `lang`; the API accepts it only if it is a well-formed language tag (≤20 chars), otherwise it is dropped; the greeting instruction names that language. No `lang` keeps the Spanish greeting, so existing embeds don't change. The widget's fallback greeting follows the browser language. |
+
 ---
 
 ## Environment variables

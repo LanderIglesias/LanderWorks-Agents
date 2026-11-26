@@ -20,6 +20,7 @@ class ScaffoldAgentRuntime:
         session_id: str,
         message: str,
         mailer: Mailer,
+        lang: str | None = None,
     ) -> RuntimeResult:
         result = self._chat_service.process_chat(
             tenant=tenant,
@@ -27,6 +28,7 @@ class ScaffoldAgentRuntime:
             session_id=session_id,
             message=message,
             mailer=mailer,
+            lang=lang,
         )
 
         return RuntimeResult(

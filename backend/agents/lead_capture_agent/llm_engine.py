@@ -113,8 +113,13 @@ def handle_user_message_llm(
     state: SessionState,
     user_text: str,
     knowledge_text: str = "",
+    lang: str | None = None,
 ) -> tuple[SessionState, str]:
     """
+    `lang`: etiqueta de idioma del navegador, ya validada en la API. Solo la
+    usa el saludo, que se pide antes de que el visitante escriba; sin ella
+    el saludo sigue en español (widgets ya embebidos).
+
     Motor LLM principal, con observabilidad Langfuse vía
     `langfuse_utils.registrar_evento()` (API `create_event`, ver ese
     módulo) -- registra input/output/tokens/metadata de cada turno.
@@ -130,6 +135,7 @@ def handle_user_message_llm(
 
     # ── Caso especial: saludo inicial ─────────────────────────────────────
     if user_text == _GREETING_TRIGGER:
+        idioma = f"en el idioma de la etiqueta de idioma '{lang}'" if lang else "en español"
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=200,
@@ -137,7 +143,7 @@ def handle_user_message_llm(
             messages=[
                 {
                     "role": "user",
-                    "content": "Saluda al visitante en español e indícale brevemente en qué puedes ayudarle. Máximo 2 frases.",
+                    "content": f"Saluda al visitante {idioma} e indícale brevemente en qué puedes ayudarle. Máximo 2 frases.",
                 }
             ],
         )
@@ -152,6 +158,7 @@ def handle_user_message_llm(
                 "tokens_input": response.usage.input_tokens,
                 "tokens_output": response.usage.output_tokens,
                 "model": "claude-haiku-4-5-20251001",
+                "lang": lang,
             },
         )
 
