@@ -59,7 +59,7 @@ via Resend
 ## Key features
 
 **Streaming responses (SSE)**
-Words appear progressively as Claude generates them — same UX as ChatGPT. Implemented via `StreamingResponse` with `media_type="text/event-stream"` and `X-Accel-Buffering: no` to disable proxy buffering. The lead marker `<<<SEND_LEAD>>>` is detected in the accumulated buffer without ever being shown to the user.
+Words appear progressively as Claude generates them — same UX as ChatGPT. Implemented via `StreamingResponse` with `media_type="text/event-stream"` and `X-Accel-Buffering: no` to disable proxy buffering. The engine holds back streamed text while it could be the start of the lead marker `<<<SEND_LEAD>>>` and strips the marker from the saved reply. It does not yet keep the marker off the visitor's screen in every case: see Known issues.
 
 **Multi-tenant isolation**
 Each client has their own token, knowledge base, allowed origins, and conversation sessions. One platform, unlimited clients. Tenants are managed via an admin panel — no code changes needed to onboard a new client.
@@ -222,6 +222,15 @@ real, no contra mocks. Test de regresión:
 - **No conversation memory across sessions.** Each new page load starts fresh.
 - **Langfuse latency.** Adds ~50ms per trace. Acceptable for conversational agents.
 - **Historical test pollution (found, not fully undoable).** Before this fix, `llm_engine.py` constructed a real `Langfuse()` client eagerly at import time (`langfuse = Langfuse()`), with no test-time gate. Any test calling `handle_user_message_llm()` (most of `test_llm_engine.py` did, mocking only `anthropic.Anthropic`) sent a real `create_event` to the live Langfuse project on every test run. This means some fraction of the historical `lead-capture-chat`/`lead-capture-greeting` traces in the Langfuse dashboard are test noise, not real visitor conversations — there's no reliable way to tell them apart after the fact from the trace name alone. Fixed going forward: `tests/lead_capture_agent/conftest.py` now has an autouse `langfuse_desactivado` fixture (same pattern as `taller_mecanico`'s) that disables Langfuse for the whole test suite by default.
+
+## Known issues
+
+Found by the evaluation in `eval/` (run `2026-11-26-1217`: 6 scripted visitors × 5 runs, Claude Haiku 4.5; summary in `eval/results/2026-11-26-1217.summary.json`). Not fixed yet.
+
+- **The visitor can see the send marker.** In `stream_user_message_llm` (`llm_engine.py`) the buffer is held back only while the whole buffer is a prefix of `<<<SEND_LEAD>>>`. When the marker's first characters arrive in the same chunk as ordinary text, the buffer is flushed and the rest of the marker follows it to the stream. It reached the screen in 9 of 9 conversations that sent (12 of 12 turns that carried it). The saved reply is clean; the existing streaming test checks the saved reply and the step, not what was streamed. Fix: hold back any buffer tail that could start the marker, and test the marker split across chunks.
+- **The streaming endpoint can deliver the same lead twice.** `chat_stream` (`api.py`) delivers on every turn that ends with the conversation at `SEND` and never moves it to `DONE` (the non-streaming path does), so any later turn delivers again. Seen in 3 of 30 conversations. Fix: move the conversation to `DONE` after delivery, as the other path does.
+- **The model sometimes sends before the visitor confirms.** In 3 of 10 conversations that should send, it asked for confirmation and wrote the marker in the same reply. The prompt alone does not prevent it. Fix: make sending a separate action the engine accepts only after a visitor turn that answers the summary.
+- **Unsupported promise.** In 7 of 9 conversations that sent, the agent promised the team would reply within 24 hours; the tenant knowledge sets no deadline.
 
 ---
 
